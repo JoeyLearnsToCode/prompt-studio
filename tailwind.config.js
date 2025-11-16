@@ -8,28 +8,29 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#cfe783',
+          DEFAULT: '#a8c548', // 更深的黄绿色，提高对比度
           container: '#d9f799',
-          onPrimary: '#2b3a00',
-          onContainer: '#3d5200',
+          onPrimary: '#1a2400', // 更深的文字色
+          onContainer: '#2b3a00',
         },
         secondary: {
-          DEFAULT: '#9ec891',
+          DEFAULT: '#76a866', // 更深的绿色
           container: '#b8e3a9',
-          onSecondary: '#1a3a0f',
-          onContainer: '#2a4a1f',
+          onSecondary: '#0f2400',
+          onContainer: '#1a3a0f',
         },
         tertiary: {
-          DEFAULT: '#8cbcd9',
+          DEFAULT: '#5a9bc4', // 更深的蓝色
           container: '#a3d1f0',
-          onTertiary: '#0f2e42',
-          onContainer: '#1f3e52',
+          onTertiary: '#072231',
+          onContainer: '#0f2e42',
         },
         surface: {
           DEFAULT: '#fdfcf5',
           variant: '#e4e3d6',
+          containerHighest: '#d4d3c6', // 更深的容器色
           onSurface: '#1b1c18',
-          onVariant: '#46483f',
+          onVariant: '#2a2b24', // 更深的变体文字色，提高对比度
         },
         error: {
           DEFAULT: '#ba1a1a',

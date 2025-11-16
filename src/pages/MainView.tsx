@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useProjectStore } from '@/store/projectStore';
 import { useVersionStore } from '@/store/versionStore';
+import { attachmentManager } from '@/services/attachmentManager';
+import type { Attachment } from '@/models/Attachment';
 import Sidebar from '@/components/layout/Sidebar';
 import PromptEditor from '@/components/editor/PromptEditor';
 import EditorToolbar from '@/components/editor/EditorToolbar';
 import VersionCanvas from '@/components/canvas/VersionCanvas';
+import { AttachmentGallery } from '@/components/version/AttachmentGallery';
 
 const MainView: React.FC = () => {
   const { currentProjectId } = useProjectStore();
@@ -19,6 +22,7 @@ const MainView: React.FC = () => {
 
   const [editorContent, setEditorContent] = useState('');
   const [canSaveInPlace, setCanSaveInPlace] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   // 加载项目的版本
   useEffect(() => {
@@ -27,7 +31,20 @@ const MainView: React.FC = () => {
     }
   }, [currentProjectId, loadVersions]);
 
-  // 更新编辑器内容
+  // 更新编辑器内容和附件，自动选择根版本
+  useEffect(() => {
+    if (currentProjectId && versions.length > 0) {
+      // 如果没有选中版本，自动选择根版本（parentId === null）
+      if (!currentVersionId) {
+        const rootVersion = versions.find((v) => v.parentId === null && v.projectId === currentProjectId);
+        if (rootVersion) {
+          setCurrentVersion(rootVersion.id);
+        }
+      }
+    }
+  }, [currentProjectId, versions, currentVersionId, setCurrentVersion]);
+
+  // 加载当前版本内容
   useEffect(() => {
     if (currentVersionId) {
       const version = versions.find((v) => v.id === currentVersionId);
@@ -37,9 +54,24 @@ const MainView: React.FC = () => {
         // 检查是否可以原地保存（叶子节点）
         const children = versions.filter((v) => v.parentId === currentVersionId);
         setCanSaveInPlace(children.length === 0);
+
+        // 加载附件
+        loadAttachments(currentVersionId);
       }
+    } else {
+      setEditorContent('');
+      setAttachments([]);
     }
   }, [currentVersionId, versions]);
+
+  const loadAttachments = async (versionId: string) => {
+    try {
+      const att = await attachmentManager.getAttachmentsByVersion(versionId);
+      setAttachments(att);
+    } catch (error) {
+      console.error('加载附件失败:', error);
+    }
+  };
 
   const handleSave = async () => {
     if (!currentProjectId) {
@@ -99,14 +131,31 @@ const MainView: React.FC = () => {
             canSaveInPlace={canSaveInPlace}
           />
 
-          <div className="flex-1 p-4">
+          <div className="flex-1 flex flex-col overflow-hidden">
             {currentProjectId ? (
-              <PromptEditor
-                value={editorContent}
-                onChange={setEditorContent}
-                onSave={handleSave}
-                onSaveInPlace={handleSaveInPlace}
-              />
+              <>
+                <div className="flex-1 p-4 overflow-y-auto">
+                  <PromptEditor
+                    value={editorContent}
+                    onChange={setEditorContent}
+                    onSave={handleSave}
+                    onSaveInPlace={handleSaveInPlace}
+                  />
+                </div>
+                
+                {/* 附件区域 */}
+                {currentVersionId && (
+                  <div className="border-t border-surface-onVariant/20 p-4 max-h-[300px] overflow-y-auto">
+                    <h3 className="text-sm font-semibold mb-3">📎 附件</h3>
+                    <AttachmentGallery
+                      versionId={currentVersionId}
+                      attachments={attachments}
+                      onAttachmentsChange={() => loadAttachments(currentVersionId)}
+                      readonly={false}
+                    />
+                  </div>
+                )}
+              </>
             ) : (
               <div className="h-full flex items-center justify-center text-surface-onVariant">
                 <div className="text-center">

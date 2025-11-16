@@ -50,11 +50,6 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
       )}
 
       <div className="flex-1" />
-
-      <div className="text-sm text-surface-onVariant">
-        <kbd className="px-2 py-1 bg-surface rounded">Ctrl+Enter</kbd> 保存新版本 |{' '}
-        <kbd className="px-2 py-1 bg-surface rounded">Ctrl+Shift+Enter</kbd> 原地保存
-      </div>
     </div>
   );
 };

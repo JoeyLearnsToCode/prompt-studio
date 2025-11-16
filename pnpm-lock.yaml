@@ -14,6 +14,9 @@ dependencies:
   '@codemirror/search':
     specifier: ^6.5.5
     version: 6.5.11
+  '@codemirror/state':
+    specifier: ^6.5.2
+    version: 6.5.2
   '@headlessui/react':
     specifier: ^1.7.17
     version: 1.7.19(react-dom@18.3.1)(react@18.3.1)

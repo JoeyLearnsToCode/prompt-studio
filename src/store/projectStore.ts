@@ -19,6 +19,7 @@ interface ProjectState {
   renameProject: (id: string, newName: string) => Promise<void>;
   updateProjectTags: (id: string, tags: Project['tags']) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
+  selectProject: (id: string) => void;
   setCurrentProject: (id: string | null) => void;
 }
 
@@ -91,7 +92,23 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       updatedAt: Date.now(),
     };
 
-    await db.projects.add(project);
+    await db.transaction('rw', db.projects, db.versions, async () => {
+      await db.projects.add(project);
+      
+      // 创建初始根版本
+      const rootVersion = {
+        id: crypto.randomUUID(),
+        projectId: project.id,
+        parentId: null,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        content: '',
+        normalizedContent: '',
+        contentHash: '',
+      };
+      await db.versions.add(rootVersion);
+    });
+
     set((state) => ({ projects: [...state.projects, project] }));
     return project.id;
   },
@@ -128,6 +145,10 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       projects: state.projects.filter((p) => p.id !== id),
       currentProjectId: state.currentProjectId === id ? null : state.currentProjectId,
     }));
+  },
+
+  selectProject: (id) => {
+    set({ currentProjectId: id });
   },
 
   setCurrentProject: (id) => {

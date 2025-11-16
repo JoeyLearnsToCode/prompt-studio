@@ -18,10 +18,10 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantClasses = {
     filled:
-      'bg-primary text-onPrimary hover:bg-primary-container hover:shadow-m3-1 active:shadow-none',
+      'bg-primary text-onPrimary hover:bg-primary/90 hover:shadow-m3-1 active:shadow-none font-semibold',
     outlined:
-      'border-2 border-primary text-primary hover:bg-primary-container hover:border-primary-container',
-    text: 'text-primary hover:bg-primary-container',
+      'border-2 border-primary text-primary hover:bg-primary-container hover:border-primary font-semibold',
+    text: 'text-primary hover:bg-primary-container font-semibold',
   };
 
   const sizeClasses = {

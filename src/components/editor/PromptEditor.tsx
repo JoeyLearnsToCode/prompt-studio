@@ -1,7 +1,8 @@
 import React from 'react';
 import CodeMirror, { EditorView, keymap } from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
-import { search, searchKeymap } from '@codemirror/search';
+import { search } from '@codemirror/search';
+import { Prec } from '@codemirror/state';
 import { useSettingsStore } from '@/store/settingsStore';
 
 interface PromptEditorProps {
@@ -21,7 +22,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
 }) => {
   const { editorFontSize, editorLineHeight } = useSettingsStore();
 
-  // M3 主题
+  // M3 主题 - 提高对比度
   const theme = EditorView.theme({
     '&': {
       color: '#1b1c18',
@@ -30,11 +31,11 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
       lineHeight: editorLineHeight.toString(),
     },
     '.cm-content': {
-      caretColor: '#cfe783',
+      caretColor: '#a8c548',
       padding: '1rem',
     },
     '.cm-cursor': {
-      borderLeftColor: '#cfe783',
+      borderLeftColor: '#a8c548',
     },
     '.cm-selectionBackground, ::selection': {
       backgroundColor: '#d9f799 !important',
@@ -44,29 +45,34 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
     },
     '.cm-gutters': {
       backgroundColor: '#e4e3d6',
-      color: '#46483f',
+      color: '#2a2b24',
       border: 'none',
     },
   });
 
-  // 自定义键盘快捷键
-  const customKeymap = keymap.of([
-    ...searchKeymap,
+  // 自定义键盘快捷键 - 使用高优先级
+  const customKeymap = Prec.highest(keymap.of([
     {
       key: 'Ctrl-Enter',
       run: () => {
-        if (onSave) onSave();
-        return true;
+        if (onSave) {
+          onSave();
+          return true;
+        }
+        return false;
       },
     },
     {
       key: 'Ctrl-Shift-Enter',
       run: () => {
-        if (onSaveInPlace) onSaveInPlace();
-        return true;
+        if (onSaveInPlace) {
+          onSaveInPlace();
+          return true;
+        }
+        return false;
       },
     },
-  ]);
+  ]));
 
   return (
     <div className="h-full flex flex-col border border-surface-variant rounded-m3-medium overflow-hidden">

@@ -2,24 +2,38 @@ import React, { useEffect } from 'react';
 import { useProjectStore } from '@/store/projectStore';
 import { useUiStore } from '@/store/uiStore';
 import { Button } from '@/components/common/Button';
-import ProjectList from './ProjectList';
+import { FolderTree } from './FolderTree';
 
 const Sidebar: React.FC = () => {
   const { sidebarCollapsed, toggleSidebar } = useUiStore();
-  const { loadFolders, loadProjects, createFolder, createProject } = useProjectStore();
+  const { loadFolders, loadProjects, createFolder, createProject, selectProject } = useProjectStore();
 
   useEffect(() => {
     loadFolders();
     loadProjects();
   }, [loadFolders, loadProjects]);
 
+  const handleCreateFolder = async () => {
+    const folderName = prompt('请输入文件夹名称:');
+    if (folderName && folderName.trim()) {
+      await createFolder(folderName.trim(), null);
+      await loadFolders();
+    }
+  };
+
   const handleCreateProject = async () => {
-    // 创建默认根文件夹（如果不存在）
-    const rootFolderId = await createFolder('我的项目', null);
     const projectName = prompt('请输入项目名称:');
-    if (projectName) {
-      await createProject(projectName, rootFolderId);
+    if (projectName && projectName.trim()) {
+      // 查找或创建默认根文件夹
+      let rootFolderId = 'root';
+      const folders = await loadFolders();
+      
+      // 创建项目和初始根版本
+      const projectId = await createProject(projectName.trim(), rootFolderId);
       await loadProjects();
+      
+      // 自动选择新创建的项目
+      selectProject(projectId);
     }
   };
 
@@ -50,14 +64,17 @@ const Sidebar: React.FC = () => {
         </button>
       </div>
 
-      <div className="p-4">
-        <Button onClick={handleCreateProject} className="w-full">
-          创建项目
+      <div className="p-4 flex gap-2">
+        <Button onClick={handleCreateFolder} className="flex-1 text-sm">
+          📁 新建文件夹
+        </Button>
+        <Button onClick={handleCreateProject} className="flex-1 text-sm">
+          📄 新建项目
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <ProjectList />
+      <div className="flex-1 overflow-hidden">
+        <FolderTree />
       </div>
     </div>
   );

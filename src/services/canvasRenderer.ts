@@ -29,16 +29,16 @@ export class CanvasRenderer {
   private nodes: CanvasNode[] = [];
   private selectedNodeId: string | null = null;
 
-  // M3 颜色主题
+  // M3 颜色主题 - 提高对比度
   private colors = {
-    primary: '#cfe783',
+    primary: '#a8c548',
     primaryContainer: '#d9f799',
-    onPrimary: '#2b3a00',
+    onPrimary: '#1a2400',
     surface: '#fdfcf5',
     surfaceVariant: '#e4e3d6',
     onSurface: '#1b1c18',
-    onSurfaceVariant: '#46483f',
-    outline: '#767970',
+    onSurfaceVariant: '#2a2b24',
+    outline: '#5a5c52',
   };
 
   constructor(canvas: HTMLCanvasElement) {
@@ -54,15 +54,26 @@ export class CanvasRenderer {
    * 调整画布大小以匹配容器
    */
   resizeCanvas() {
-    const dpr = window.devicePixelRatio || 1;
     const rect = this.canvas.getBoundingClientRect();
 
-    this.canvas.width = rect.width * dpr;
-    this.canvas.height = rect.height * dpr;
+    // 直接使用逻辑像素,不考虑DPR
+    // Canvas会自动处理高分屏的像素缩放
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
 
-    this.ctx.scale(dpr, dpr);
+    // 设置显示尺寸
     this.canvas.style.width = `${rect.width}px`;
     this.canvas.style.height = `${rect.height}px`;
+
+    // 重新获取context以重置所有变换
+    const ctx = this.canvas.getContext('2d');
+    if (ctx) {
+      this.ctx = ctx;
+      // 不再应用DPR缩放,让浏览器自动处理
+    }
+
+    // 重新绘制
+    this.draw();
   }
 
   /**
@@ -116,7 +127,7 @@ export class CanvasRenderer {
     const { ctx, canvas } = this;
     const { x, y, scale } = this.transform;
 
-    // 清空画布
+    // 清空画布 - canvas.width/height就是逻辑像素
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // 应用变换

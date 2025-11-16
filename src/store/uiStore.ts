@@ -5,6 +5,12 @@ interface UiState {
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
 
+  // Folder Tree
+  expandedFolders: string[];
+  toggleFolder: (folderId: string) => void;
+  expandFolder: (folderId: string) => void;
+  collapseFolder: (folderId: string) => void;
+
   // Canvas
   canvasScale: number;
   canvasPosition: { x: number; y: number };
@@ -28,6 +34,24 @@ interface UiState {
 export const useUiStore = create<UiState>((set) => ({
   sidebarCollapsed: false,
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+  expandedFolders: [],
+  toggleFolder: (folderId) =>
+    set((state) => ({
+      expandedFolders: state.expandedFolders.includes(folderId)
+        ? state.expandedFolders.filter((id) => id !== folderId)
+        : [...state.expandedFolders, folderId],
+    })),
+  expandFolder: (folderId) =>
+    set((state) => ({
+      expandedFolders: state.expandedFolders.includes(folderId)
+        ? state.expandedFolders
+        : [...state.expandedFolders, folderId],
+    })),
+  collapseFolder: (folderId) =>
+    set((state) => ({
+      expandedFolders: state.expandedFolders.filter((id) => id !== folderId),
+    })),
 
   canvasScale: 1,
   canvasPosition: { x: 0, y: 0 },

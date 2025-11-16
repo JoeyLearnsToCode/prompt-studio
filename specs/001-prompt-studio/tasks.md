@@ -129,25 +129,25 @@
 
 ### 测试任务 (US2)
 
-- [ ] T043 [P] [US2] 单元测试: tree 工具函数 (tests/unit/tree.test.ts)
-- [ ] T044 [P] [US2] 组件测试: VersionCard 组件 (tests/component/VersionCard.test.tsx)
-- [ ] T045 [P] [US2] 组件测试: VersionCanvas 组件 (tests/component/VersionCanvas.test.tsx)
+- [x] T043 [P] [US2] 单元测试: tree 工具函数 (tests/unit/tree.test.ts)
+- [x] T044 [P] [US2] 组件测试: VersionCard 组件 (tests/component/VersionCard.test.tsx)
+- [x] T045 [P] [US2] 组件测试: VersionCanvas 组件 (tests/component/VersionCanvas.test.tsx)
 - [ ] T046 [US2] 浏览器 E2E 测试: 画布交互和导航 (tests/e2e/canvas-interaction.e2e.ts)
 
 ### 实现任务 (US2)
 
-- [ ] T047 [P] [US2] 实现树形布局算法 (src/utils/treeLayout.ts - Reingold-Tilford 或 Dagre)
-- [ ] T048 [P] [US2] 实现 VersionCard 组件 (src/components/version/VersionCard.tsx - 版本节点卡片)
-- [ ] T049 [US2] 实现 VersionCanvas 组件 (src/components/canvas/VersionCanvas.tsx - react-zoom-pan-pinch 集成)
-- [ ] T050 [P] [US2] 实现 ZoomControls 组件 (src/components/canvas/ZoomControls.tsx - 缩放控制按钮)
-- [ ] T051 [US2] 实现 SVG 树形渲染逻辑 (VersionCanvas 内,节点和连线)
-- [ ] T052 [US2] 实现画布自动定位到最新版本 (打开项目时)
-- [ ] T053 [US2] 实现节点点击事件 (高亮节点,加载内容到编辑器)
-- [ ] T054 [US2] 实现画布平移和缩放 (鼠标拖拽,Ctrl+滚轮)
-- [ ] T055 [US2] 实现重置视图功能 (恢复默认缩放和位置)
-- [ ] T056 [US2] 性能优化: 虚拟滚动或 Canvas 降级 (>200 节点时)
+- [x] T047 [P] [US2] 实现树形布局算法 (src/utils/treeLayout.ts - Reingold-Tilford 或 Dagre)
+- [x] T048 [P] [US2] 实现 VersionCard 组件 (src/components/version/VersionCard.tsx - 版本节点卡片)
+- [x] T049 [US2] 实现 VersionCanvas 组件 (src/components/canvas/VersionCanvas.tsx - react-zoom-pan-pinch 集成)
+- [x] T050 [P] [US2] 实现 ZoomControls 组件 (src/components/canvas/ZoomControls.tsx - 缩放控制按钮)
+- [x] T051 [US2] 实现 SVG 树形渲染逻辑 (VersionCanvas 内,节点和连线)
+- [x] T052 [US2] 实现画布自动定位到最新版本 (打开项目时)
+- [x] T053 [US2] 实现节点点击事件 (高亮节点,加载内容到编辑器)
+- [x] T054 [US2] 实现画布平移和缩放 (鼠标拖拽,Ctrl+滚轮)
+- [x] T055 [US2] 实现重置视图功能 (恢复默认缩放和位置)
+- [x] T056 [US2] 性能优化: 虚拟滚动或 Canvas 降级 (>200 节点时)
 
-**Checkpoint**: 版本可视化完成 - 用户可通过画布查看和导航版本树
+**Checkpoint**: 版本可视化完成 - 用户可通过画布查看和导航版本树 ✅
 
 ---
 
@@ -163,18 +163,18 @@
 
 ### 测试任务 (US3)
 
-- [ ] T057 [P] [US3] 组件测试: DiffModal 组件 (tests/component/DiffModal.test.tsx)
+- [x] T057 [P] [US3] 组件测试: DiffModal 组件 (tests/component/DiffModal.test.tsx)
 - [ ] T058 [US3] 浏览器 E2E 测试: 版本对比流程 (tests/e2e/version-diff.e2e.ts)
 
 ### 实现任务 (US3)
 
-- [ ] T059 [P] [US3] 实现 DiffModal 组件 (src/components/editor/DiffModal.tsx - 全屏模态框)
-- [ ] T060 [US3] 集成 CodeMirror merge 视图 (@codemirror/merge)
-- [ ] T061 [US3] 实现版本选择器 (EditorToolbar 中的对比按钮和版本选择 UI)
-- [ ] T062 [US3] 实现 Diff 视图高亮样式 (绿色增加,红色删除,M3 色彩)
-- [ ] T063 [US3] 实现键盘快捷键 (Esc 关闭 Diff 视图)
+- [x] T059 [P] [US3] 实现 DiffModal 组件 (src/components/editor/DiffModal.tsx - 全屏模态框)
+- [x] T060 [US3] 集成 CodeMirror merge 视图 (@codemirror/merge)
+- [x] T061 [US3] 实现版本选择器 (EditorToolbar 中的对比按钮和版本选择 UI)
+- [x] T062 [US3] 实现 Diff 视图高亮样式 (绿色增加,红色删除,M3 色彩)
+- [x] T063 [US3] 实现键盘快捷键 (Esc 关闭 Diff 视图)
 
-**Checkpoint**: 版本对比功能完成 - 用户可对比任意两个版本
+**Checkpoint**: 版本对比功能完成 - 用户可对比任意两个版本 ✅
 
 ---
 
@@ -196,15 +196,15 @@
 
 ### 实现任务 (US4)
 
-- [ ] T067 [US4] 实现 folderManager 服务 (src/services/folderManager.ts - 文件夹 CRUD 逻辑)
-- [ ] T068 [P] [US4] 实现 FolderTree 组件 (src/components/layout/FolderTree.tsx - 树形文件夹展示)
-- [ ] T069 [P] [US4] 实现 ContextMenu 组件 (src/components/common/ContextMenu.tsx - 右键菜单)
-- [ ] T070 [US4] 实现文件夹创建/重命名/删除逻辑
+- [x] T067 [US4] 实现 folderManager 服务 (src/services/folderManager.ts - 文件夹 CRUD 逻辑)
+- [x] T068 [P] [US4] 实现 FolderTree 组件 (src/components/layout/FolderTree.tsx - 树形文件夹展示)
+- [x] T069 [P] [US4] 实现 ContextMenu 组件 (src/components/common/ContextMenu.tsx - 右键菜单)
+- [x] T070 [US4] 实现文件夹创建/重命名/删除逻辑
 - [ ] T071 [US4] 实现项目拖拽功能 (react-dnd 或原生 HTML5 drag API)
-- [ ] T072 [US4] 实现文件夹展开/折叠状态管理 (uiStore 中存储)
-- [ ] T073 [US4] 实现级联删除逻辑 (删除文件夹时移动子项)
+- [x] T072 [US4] 实现文件夹展开/折叠状态管理 (uiStore 中存储)
+- [x] T073 [US4] 实现级联删除逻辑 (删除文件夹时移动子项)
 
-**Checkpoint**: 项目组织功能完成 - 用户可通过文件夹管理项目
+**Checkpoint**: 项目组织功能完成 - 用户可通过文件夹管理项目 ✅ (拖拽功能待完成)
 
 ---
 
@@ -256,16 +256,16 @@
 
 ### 实现任务 (US6)
 
-- [ ] T086 [US6] 实现 exportService 服务 (src/services/exportService.ts - JSON/ZIP 导出)
-- [ ] T087 [US6] 实现导入逻辑 (解析 ZIP/JSON,验证并写入 IndexedDB)
-- [ ] T088 [US6] 实现 webdavService 服务 (src/services/webdavService.ts - WebDAV 客户端)
-- [ ] T089 [P] [US6] 实现 Settings 页面 (src/pages/Settings.tsx - 导入导出和 WebDAV 配置)
-- [ ] T090 [US6] 实现导出为 JSON 功能 (项目数据序列化)
-- [ ] T091 [US6] 实现导出为 ZIP 功能 (包含附件,使用 JSZip)
-- [ ] T092 [US6] 实现 WebDAV 配置表单 (URL, 用户名, 密码)
-- [ ] T093 [US6] 实现 WebDAV 备份功能 (上传数据到远程)
-- [ ] T094 [US6] 实现 WebDAV 还原功能 (从远程下载并恢复)
-- [ ] T095 [US6] 实现错误处理和用户提示 (CORS 配置错误,网络失败等)
+- [x] T086 [US6] 实现 exportService 服务 (src/services/exportService.ts - JSON/ZIP 导出)
+- [x] T087 [US6] 实现导入逻辑 (解析 ZIP/JSON,验证并写入 IndexedDB)
+- [x] T088 [US6] 实现 webdavService 服务 (src/services/webdavService.ts - WebDAV 客户端)
+- [x] T089 [P] [US6] 实现 Settings 页面 (src/pages/Settings.tsx - 导入导出和 WebDAV 配置)
+- [x] T090 [US6] 实现导出为 JSON 功能 (项目数据序列化)
+- [x] T091 [US6] 实现导出为 ZIP 功能 (包含附件,使用 JSZip)
+- [x] T092 [US6] 实现 WebDAV 配置表单 (URL, 用户名, 密码)
+- [x] T093 [US6] 实现 WebDAV 备份功能 (上传数据到远程)
+- [x] T094 [US6] 实现 WebDAV 还原功能 (从远程下载并恢复)
+- [x] T095 [US6] 实现错误处理和用户提示 (CORS 配置错误,网络失败等)
 
 **Checkpoint**: 数据备份功能完成 - 用户可导入导出和远程备份
 
@@ -290,16 +290,16 @@
 
 ### 实现任务 (US7)
 
-- [ ] T099 [US7] 实现 attachmentManager 服务 (src/services/attachmentManager.ts - 附件上传/删除)
-- [ ] T100 [P] [US7] 实现 AttachmentGallery 组件 (src/components/version/AttachmentGallery.tsx - 附件缩略图展示)
-- [ ] T101 [P] [US7] 实现 ImagePreview 组件 (src/components/common/ImagePreview.tsx - 大图预览模态框)
-- [ ] T102 [US7] 实现文件上传功能 (拖拽或点击上传,支持多文件)
-- [ ] T103 [US7] 实现附件验证 (文件类型,大小限制 50MB)
-- [ ] T104 [US7] 实现缩略图生成 (Canvas API 或 createObjectURL)
-- [ ] T105 [US7] 实现附件预览功能 (图片大图,视频播放)
-- [ ] T106 [US7] 实现附件删除功能 (从 IndexedDB 移除 Blob)
+- [x] T099 [US7] 实现 attachmentManager 服务 (src/services/attachmentManager.ts - 附件上传/删除)
+- [x] T100 [P] [US7] 实现 AttachmentGallery 组件 (src/components/version/AttachmentGallery.tsx - 附件缩略图展示)
+- [x] T101 [P] [US7] 实现 ImagePreview 组件 (src/components/common/ImagePreview.tsx - 大图预览模态框)
+- [x] T102 [US7] 实现文件上传功能 (拖拽或点击上传,支持多文件)
+- [x] T103 [US7] 实现附件验证 (文件类型,大小限制 50MB)
+- [x] T104 [US7] 实现缩略图生成 (Canvas API 或 createObjectURL)
+- [x] T105 [US7] 实现附件预览功能 (图片大图,视频播放)
+- [x] T106 [US7] 实现附件删除功能 (从 IndexedDB 移除 Blob)
 
-**Checkpoint**: 附件功能完成 - 用户可为版本添加多媒体附件
+**Checkpoint**: 附件功能完成 - 用户可为版本添加多媒体附件 ✅ (测试待补充)
 
 ---
 
