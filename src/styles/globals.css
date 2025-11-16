@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: theme('colors.surface.DEFAULT');
+  color: theme('colors.surface.onSurface');
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* CodeMirror M3 主题 */
+.cm-editor {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cm-content {
+  caret-color: theme('colors.primary.DEFAULT');
+}
+
+.cm-cursor {
+  border-left-color: theme('colors.primary.DEFAULT');
+}
+
+.cm-selectionBackground {
+  background-color: theme('colors.primary.container') !important;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme('colors.surface.variant');
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.surface.onVariant');
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.primary.DEFAULT');
+}

@@ -1,0 +1,21 @@
+# Build outputs
+node_modules/
+dist/
+build/
+coverage/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated files
+*.min.js
+*.bundle.js
+
+# Test outputs
+test-results/
+playwright-report/
+
+# Public assets
+public/
