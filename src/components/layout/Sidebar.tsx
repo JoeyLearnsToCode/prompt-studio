@@ -25,8 +25,8 @@ const Sidebar: React.FC = () => {
     const projectName = prompt('请输入项目名称:');
     if (projectName && projectName.trim()) {
       // 查找或创建默认根文件夹
-      let rootFolderId = 'root';
-      const folders = await loadFolders();
+      const rootFolderId = 'root';
+      await loadFolders();
       
       // 创建项目和初始根版本
       const projectId = await createProject(projectName.trim(), rootFolderId);

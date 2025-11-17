@@ -61,7 +61,7 @@ test.describe('画布交互和导航', () => {
     expect(canvas).toBeVisible();
   });
 
-  test('应该支持点击节点切换版本', async ({ page }) => {
+  test('应该支持点击节点切换版本', async ({ page: _page }) => {
     // 此测试需要手动验证，因为Canvas点击事件无法通过Playwright直接模拟
     // 建议使用chrome-devtools-mcp进行更深度的集成测试
     test.skip();

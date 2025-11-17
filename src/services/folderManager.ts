@@ -95,7 +95,7 @@ export class FolderManager {
    * 获取根文件夹
    */
   async getRootFolders(): Promise<Folder[]> {
-    return await db.folders.where('parentId').equals(null as any).toArray();
+    return await db.folders.where('parentId').equals(null as unknown as string).toArray();
   }
 
   /**

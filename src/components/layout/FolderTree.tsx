@@ -181,7 +181,7 @@ const ProjectItemConnected: React.FC<{ project: Project; level: number }> = ({
   );
 };
 
-export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect }) => {
+export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect: _onProjectSelect }) => {
   const {
     folders,
     projects,

@@ -34,8 +34,6 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     handlePrev,
     handleClear,
     getCurrentMatchId,
-    isVersionMatched,
-    isCurrentMatch,
   } = useVersionSearch();
 
   // 初始化 Canvas - 在canvas元素实际渲染后执行

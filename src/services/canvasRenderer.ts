@@ -4,7 +4,7 @@
  */
 
 import type { Version } from '@/models/Version';
-import { buildVersionTree, calculateTreeLayout } from '@/utils/tree';
+import { buildVersionTree, calculateTreeLayout, type VersionTreeNode } from '@/utils/tree';
 
 export interface CanvasNode {
   id: string;
@@ -98,7 +98,7 @@ export class CanvasRenderer {
    * 转换为画布节点
    */
   private convertToCanvasNode(
-    treeNode: any,
+    treeNode: VersionTreeNode,
     offsetX: number = 0
   ): CanvasNode {
     const node: CanvasNode = {
@@ -112,7 +112,7 @@ export class CanvasRenderer {
     };
 
     if (treeNode.children) {
-      node.children = treeNode.children.map((child: any) =>
+      node.children = treeNode.children.map((child: VersionTreeNode) =>
         this.convertToCanvasNode(child, offsetX)
       );
     }

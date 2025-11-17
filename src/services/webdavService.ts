@@ -113,7 +113,7 @@ export class WebDAVService {
       // 确保目录存在
       try {
         await this.client.createDirectory('/prompt-studio-backups');
-      } catch (error) {
+      } catch {
         // 目录可能已存在，忽略错误
       }
 
@@ -145,7 +145,7 @@ export class WebDAVService {
 
       const contents = await this.client.getDirectoryContents(dirPath);
 
-      return (contents as any[])
+      return (contents as Array<{ type: string; basename: string; filename: string; size: number; lastmod: string }>)
         .filter((item) => item.type === 'file' && item.basename.endsWith('.zip'))
         .map((item) => ({
           name: item.basename,
@@ -223,7 +223,7 @@ export class WebDAVService {
 
         if (attachmentsFolder) {
           const attachments = await Promise.all(
-            attachmentMetadata.map(async (meta: any) => {
+            attachmentMetadata.map(async (meta: { id: string; [key: string]: unknown }) => {
               const blobFile = attachmentsFolder.file(meta.id);
               if (blobFile) {
                 const blob = await blobFile.async('blob');
@@ -237,7 +237,7 @@ export class WebDAVService {
           );
 
           const validAttachments = attachments.filter((att) => att !== null);
-          await db.attachments.bulkPut(validAttachments as any[]);
+          await db.attachments.bulkPut(validAttachments as Array<{ id: string; blob: Blob; [key: string]: unknown }>);
         }
       }
 

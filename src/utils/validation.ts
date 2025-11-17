@@ -110,7 +110,7 @@ export function isValidFileName(name: string): boolean {
     return false;
   }
   // 禁止的字符: / \ : * ? " < > |
-  const invalidChars = /[\/\\:*?"<>|]/;
+  const invalidChars = /[/\\:*?"<>|]/;
   return !invalidChars.test(name);
 }
 

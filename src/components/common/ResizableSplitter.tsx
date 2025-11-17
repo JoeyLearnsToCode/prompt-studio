@@ -28,7 +28,7 @@ interface ResizableSplitterProps {
  * 用于调整主画布和右侧面板的宽度比例
  */
 export const ResizableSplitter: React.FC<ResizableSplitterProps> = ({
-  ratio,
+  ratio: _ratio,
   onRatioChange,
   onDragStart,
   onDragEnd,
