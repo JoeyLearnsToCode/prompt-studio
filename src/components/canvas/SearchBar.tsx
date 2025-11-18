@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 
 interface SearchBarProps {
   /** 搜索关键词 */
@@ -22,6 +22,9 @@ interface SearchBarProps {
   /** 清空搜索 */
   onClear: () => void;
   
+  /** 关闭搜索框 */
+  onClose: () => void;
+  
   /** 可选:占位文本 */
   placeholder?: string;
 }
@@ -30,17 +33,21 @@ interface SearchBarProps {
  * 版本树搜索栏组件
  * 支持防抖输入、结果导航和键盘快捷键
  */
-export const SearchBar: React.FC<SearchBarProps> = ({
-  query,
-  currentIndex,
-  total,
-  onQueryChange,
-  onNext,
-  onPrev,
-  onClear,
-  placeholder = '搜索版本内容...',
-}) => {
+export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, ref) => {
+  const {
+    query,
+    currentIndex,
+    total,
+    onQueryChange,
+    onNext,
+    onPrev,
+    onClear,
+    onClose,
+    placeholder = '搜索版本内容...',
+  } = props;
+  
   const [localQuery, setLocalQuery] = useState(query);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // 防抖处理(300ms)
   useEffect(() => {
@@ -58,6 +65,23 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     setLocalQuery(query);
   }, [query]);
 
+  // 聚焦输入框的方法
+  const focusInput = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      // 选中所有文本，方便用户直接输入新的搜索内容
+      inputRef.current.select();
+    }
+  }, []);
+
+  // 暴露focus方法给父组件
+  useImperativeHandle(ref, () => inputRef.current!, []);
+
+  // 当组件挂载时聚焦输入框
+  useEffect(() => {
+    focusInput();
+  }, [focusInput]);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -68,9 +92,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       }
     } else if (e.key === 'Escape') {
       e.preventDefault();
-      onClear();
+      onClose(); // ESC键现在关闭搜索框
     }
-  }, [onNext, onPrev, onClear]);
+  }, [onNext, onPrev, onClose]);
 
   const hasResults = total > 0;
   const canNavigate = total > 1;
@@ -95,6 +119,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* 输入框 */}
       <input
+        ref={inputRef}
         type="text"
         value={localQuery}
         onChange={(e) => setLocalQuery(e.target.value)}
@@ -152,8 +177,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <button
           onClick={onClear}
           className="p-1.5 rounded-full hover:bg-surface transition-colors"
-          aria-label="清空搜索 (ESC)"
-          title="清空搜索 (ESC)"
+          aria-label="清空搜索"
+          title="清空搜索"
         >
           <svg
             className="w-4 h-4 text-surface-onVariant"
@@ -165,6 +190,25 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           </svg>
         </button>
       )}
+
+      {/* 关闭搜索框按钮 */}
+      <button
+        onClick={onClose}
+        className="p-1.5 rounded-full hover:bg-surface transition-colors"
+        aria-label="关闭搜索 (ESC)"
+        title="关闭搜索 (ESC)"
+      >
+        <svg
+          className="w-4 h-4 text-surface-onVariant"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </button>
     </div>
   );
-};
+});
+
+SearchBar.displayName = 'SearchBar';

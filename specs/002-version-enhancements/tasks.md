@@ -70,7 +70,7 @@
 
 ### 浏览器E2E测试 (chrome-devtools-mcp)
 
-- [ ] T016 [US1] E2E测试: 完整对比流程(打开对比→选择版本→查看Diff→关闭) in tests/e2e/version-compare.e2e.ts
+- [X] T016 [US1] E2E测试: 完整对比流程(打开对比→选择版本→查看Diff→关闭) in tests/e2e/version-compare.e2e.ts
 
 **Checkpoint**: User Story 1完成 - 版本对比功能可独立使用
 
@@ -91,7 +91,7 @@
 
 ### 浏览器E2E测试 (chrome-devtools-mcp)
 
-- [ ] T021 [US2] E2E测试: 重复提醒流程(创建版本→重复内容→弹出对话框→取消/仍然创建) in tests/e2e/duplicate-warning.e2e.ts
+- [X] T021 [US2] E2E测试: 重复提醒流程(创建版本→重复内容→弹出对话框→取消/仍然创建) in tests/e2e/duplicate-warning.e2e.ts
 
 **Checkpoint**: User Story 2完成 - 重复提醒功能独立工作
 
@@ -105,15 +105,15 @@
 
 ### 实现任务
 
-- [ ] T022 [P] [US3] 创建useResizable hook: 封装拖动逻辑 in src/hooks/useResizable.ts
-- [ ] T023 [P] [US3] 实现layoutManager: localStorage读写 in src/services/layoutManager.ts
-- [ ] T024 [US3] 创建ResizableSplitter组件(按照contract规范) in src/components/common/ResizableSplitter.tsx
-- [ ] T025 [US3] 扩展uiStore: 实现setCanvasRatio, startDragging, stopDragging, loadLayoutPreference, saveLayoutPreference in src/store/uiStore.ts
-- [ ] T026 [US3] 重构MainView: 集成ResizableSplitter和响应式布局 in src/pages/MainView.tsx
+- [X] T022 [P] [US3] 创建useResizable hook: 封装拖动逻辑 in src/hooks/useResizable.ts
+- [X] T023 [P] [US3] 实现layoutManager: localStorage读写 in src/services/layoutManager.ts
+- [X] T024 [US3] 创建ResizableSplitter组件(按照contract规范) in src/components/common/ResizableSplitter.tsx
+- [X] T025 [US3] 扩展uiStore: 实现setCanvasRatio, startDragging, stopDragging, loadLayoutPreference, saveLayoutPreference in src/store/uiStore.ts
+- [X] T026 [US3] 重构MainView: 集成ResizableSplitter和响应式布局 in src/pages/MainView.tsx
 
 ### 浏览器E2E测试 (chrome-devtools-mcp)
 
-- [ ] T027 [US3] E2E测试: 面板拖动和持久化(拖动分隔符→调整宽度→刷新页面→验证宽度保持) in tests/e2e/panel-resize.e2e.ts
+- [X] T027 [US3] E2E测试: 面板拖动和持久化(拖动分隔符→调整宽度→刷新页面→验证宽度保持) in tests/e2e/panel-resize.e2e.ts
 
 **Checkpoint**: User Story 3完成 - 面板拖动功能独立工作
 
@@ -137,7 +137,7 @@
 
 ### 浏览器E2E测试 (chrome-devtools-mcp)
 
-- [ ] T033 [US5] E2E测试: 搜索和导航流程(输入关键词→高亮匹配→跳转上一个/下一个→清空搜索) in tests/e2e/version-search.e2e.ts
+- [X] T033 [US5] E2E测试: 搜索和导航流程(输入关键词→高亮匹配→跳转上一个/下一个→清空搜索) in tests/e2e/version-search.e2e.ts
 
 **Checkpoint**: User Story 5完成 - 版本搜索功能独立工作
 
@@ -156,7 +156,7 @@
 
 ### 浏览器E2E测试 (chrome-devtools-mcp)
 
-- [ ] T036 [US4] E2E测试: 非叶子版本原地保存流程(创建父子版本→修改父版本→原地保存→验证版本树未增加节点) in tests/e2e/non-leaf-save.e2e.ts
+- [X] T036 [US4] E2E测试: 非叶子版本原地保存流程(创建父子版本→修改父版本→原地保存→验证版本树未增加节点) in tests/e2e/non-leaf-save.e2e.ts
 
 **Checkpoint**: User Story 4完成 - 非叶子版本保存功能工作
 
@@ -176,7 +176,7 @@
 
 ### 浏览器E2E测试 (chrome-devtools-mcp)
 
-- [ ] T040 [US6] E2E测试: 画布控制按钮功能(点击放大→缩小→重置,验证画布缩放和位置变化) in tests/e2e/canvas-controls.e2e.ts
+- [X] T040 [US6] E2E测试: 画布控制按钮功能(点击放大→缩小→重置,验证画布缩放和位置变化) in tests/e2e/canvas-controls.e2e.ts
 
 **Checkpoint**: User Story 6完成 - UI优化完成
 
@@ -186,13 +186,13 @@
 
 **目的**: 影响多个用户故事的改进和整体优化
 
-- [ ] T041 [P] 代码重构: 提取公共组件和工具函数
-- [ ] T042 [P] 性能优化: 搜索防抖(300ms), 面板拖动使用requestAnimationFrame
-- [ ] T043 [P] 可访问性增强: 确保所有按钮有aria-label, 支持键盘导航
-- [ ] T044 完整回归测试: 运行所有E2E测试套件 in tests/e2e/
-- [ ] T045 [P] 文档更新: 更新README和开发指南(如需要)
-- [ ] T046 代码审查: 确保符合Constitution Check所有要求
-- [ ] T047 性能验证: 确认所有性能指标达标(见spec.md成功标准)
+- [X] T041 [P] 代码重构: 提取公共组件和工具函数
+- [X] T042 [P] 性能优化: 搜索防抖(300ms), 面板拖动使用requestAnimationFrame
+- [X] T043 [P] 可访问性增强: 确保所有按钮有aria-label, 支持键盘导航
+- [X] T044 完整回归测试: 运行所有E2E测试套件 in tests/e2e/
+- [X] T045 [P] 文档更新: 更新README和开发指南(如需要)
+- [X] T046 代码审查: 确保符合Constitution Check所有要求
+- [X] T047 性能验证: 确认所有性能指标达标(见spec.md成功标准)
 
 ---
 

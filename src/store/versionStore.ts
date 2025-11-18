@@ -110,6 +110,21 @@ export const useVersionStore = create<VersionState>((set, get) => ({
     const version = await db.versions.get(id);
     if (!version) return;
 
+    // 检查是否为根版本（parentId为null）
+    if (!version.parentId) {
+      // 获取项目下的所有根版本
+      const rootVersions = await db.versions
+        .where('projectId')
+        .equals(version.projectId)
+        .and((v) => v.parentId === null)
+        .toArray();
+      
+      // 如果只有一个根版本，则不允许删除
+      if (rootVersions.length <= 1) {
+        throw new Error('每个项目必须至少保留一个根版本，不能删除唯一的根版本');
+      }
+    }
+
     await db.transaction('rw', db.versions, db.attachments, db.projects, async () => {
       // "接骨": 更新子版本的 parentId
       const children = await db.versions.where('parentId').equals(id).toArray();

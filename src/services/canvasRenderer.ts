@@ -39,6 +39,8 @@ export class CanvasRenderer {
     onSurface: '#1b1c18',
     onSurfaceVariant: '#2a2b24',
     outline: '#5a5c52',
+    // 选中版本节点使用绿色 #76a866
+    selectedNode: '#76a866',
   };
 
   constructor(canvas: HTMLCanvasElement) {
@@ -172,14 +174,20 @@ export class CanvasRenderer {
 
     // 背景
     ctx.fillStyle = isSelected
-      ? this.colors.primaryContainer
+      ? this.colors.selectedNode
       : this.colors.surface;
-    ctx.strokeStyle = isSelected ? this.colors.primary : this.colors.outline;
-    ctx.lineWidth = isSelected ? 3 : 1;
+    // 选中节点不显示边框，看起来无边框
+    if (!isSelected) {
+      ctx.strokeStyle = this.colors.outline;
+      ctx.lineWidth = 1;
+    }
 
     this.roundRect(ctx, node.x, node.y, node.width, node.height, 12);
     ctx.fill();
-    ctx.stroke();
+    // 只有未选中的节点才绘制边框
+    if (!isSelected) {
+      ctx.stroke();
+    }
 
     // 文本内容（截断）
     ctx.fillStyle = this.colors.onSurface;
@@ -359,6 +367,25 @@ export class CanvasRenderer {
 
     this.transform.x = centerX - (node.x + node.width / 2) * this.transform.scale;
     this.transform.y = centerY - (node.y + node.height / 2) * this.transform.scale;
+
+    this.draw();
+  }
+
+  /**
+   * 将节点定位到指定比例位置
+   * @param nodeId 节点ID
+   * @param xRatio 水平位置比例 (0-1)，0.5表示居中
+   * @param yRatio 垂直位置比例 (0-1)，0.5表示居中
+   */
+  centerNodeAtPosition(nodeId: string, xRatio: number = 0.5, yRatio: number = 0.5) {
+    const node = this.flattenNodes().find((n) => n.id === nodeId);
+    if (!node) return;
+
+    const targetX = this.canvas.width * xRatio;
+    const targetY = this.canvas.height * yRatio;
+
+    this.transform.x = targetX - (node.x + node.width / 2) * this.transform.scale;
+    this.transform.y = targetY - (node.y + node.height / 2) * this.transform.scale;
 
     this.draw();
   }

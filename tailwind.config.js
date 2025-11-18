@@ -8,8 +8,8 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#a8c548', // 更深的黄绿色，提高对比度
-          container: '#d9f799',
+          DEFAULT: '#76a866',
+          container: '#76a866',
           onPrimary: '#1a2400', // 更深的文字色
           onContainer: '#2b3a00',
         },

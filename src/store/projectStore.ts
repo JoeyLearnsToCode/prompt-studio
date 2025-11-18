@@ -21,6 +21,7 @@ interface ProjectState {
   deleteProject: (id: string) => Promise<void>;
   selectProject: (id: string) => void;
   setCurrentProject: (id: string | null) => void;
+  moveProject: (projectId: string, folderId: string) => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
@@ -153,5 +154,16 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   setCurrentProject: (id) => {
     set({ currentProjectId: id });
+  },
+
+  moveProject: async (projectId, folderId) => {
+    // 如果folderId是'root'，转换为null
+    const dbFolderId = folderId === 'root' ? null : folderId;
+    await db.projects.update(projectId, { folderId: dbFolderId, updatedAt: Date.now() });
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === projectId ? { ...p, folderId: dbFolderId, updatedAt: Date.now() } : p
+      ),
+    }));
   },
 }));

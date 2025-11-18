@@ -15,6 +15,7 @@ interface TreeItemProps {
   onContextMenu: (e: React.MouseEvent, folder: Folder) => void;
   onToggle: (folderId: string) => void;
   expanded: Set<string>;
+  onProjectDrop: (projectId: string, folderId: string) => void;
 }
 
 interface ProjectItemProps {
@@ -39,9 +40,15 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         transition-colors duration-150
         ${isSelected ? 'bg-primary-container' : 'hover:bg-surface-containerHighest'}
       `}
-      style={{ paddingLeft: `${(level + 1) * 16 + 16}px` }}
+      style={{ paddingLeft: `${level * 16 + 16}px` }}
       onClick={() => onSelect(project.id)}
       onContextMenu={(e) => onContextMenu(e, project)}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', `project:${project.id}`);
+        e.dataTransfer.setData('projectName', project.name);
+      }}
     >
       <span className="text-sm">📄</span>
       <span className="text-sm truncate flex-1">{project.name}</span>
@@ -64,6 +71,7 @@ const FolderItem: React.FC<TreeItemProps> = ({
   onContextMenu,
   onToggle,
   expanded,
+  onProjectDrop,
 }) => {
   const { folders, projects } = useProjectStore();
   const isExpanded = expanded.has(folder.id);
@@ -78,13 +86,26 @@ const FolderItem: React.FC<TreeItemProps> = ({
         style={{ paddingLeft: `${level * 16 + 16}px` }}
         onClick={() => onToggle(folder.id)}
         onContextMenu={(e) => onContextMenu(e, folder)}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const data = e.dataTransfer.getData('text/plain');
+          if (data.startsWith('project:')) {
+            const projectId = data.split(':')[1];
+            onProjectDrop(projectId, folder.id);
+          }
+        }}
       >
         <span className="text-sm select-none">
           {isExpanded ? '📂' : '📁'}
         </span>
         <span className="text-sm flex-1 truncate">{folder.name}</span>
         <span className="text-xs text-surface-onVariant">
-          {childFolders.length + childProjects.length}
+          {childProjects.length}
         </span>
       </div>
       
@@ -98,6 +119,7 @@ const FolderItem: React.FC<TreeItemProps> = ({
               onContextMenu={onContextMenu}
               onToggle={onToggle}
               expanded={expanded}
+              onProjectDrop={onProjectDrop}
             />
           ))}
           {childProjects.map((project) => (
@@ -190,6 +212,9 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect }) => {
     createFolder,
     deleteFolder,
     renameFolder,
+    createProject,
+    selectProject,
+    moveProject,
   } = useProjectStore();
   
   const { expandedFolders, toggleFolder, expandFolder } = useUiStore();
@@ -259,7 +284,31 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect }) => {
     }
   }, [contextMenu.folder, deleteFolder, loadFolders, loadProjects]);
 
+  const moveProjectToFolder = useCallback(async (projectId: string, folderId: string) => {
+    try {
+      await moveProject(projectId, folderId);
+    } catch (error) {
+      console.error('移动项目失败:', error);
+      alert('移动项目失败');
+    }
+  }, [moveProject]);
+
   const folderMenuItems: ContextMenuItem[] = [
+    {
+      label: '新建项目',
+      icon: '📄',
+      onClick: async () => {
+        if (contextMenu.folder) {
+          const projectName = prompt('请输入项目名称:');
+          if (projectName && projectName.trim()) {
+            const projectId = await createProject(projectName.trim(), contextMenu.folder.id);
+            await loadProjects();
+            selectProject(projectId);
+            expandFolder(contextMenu.folder.id);
+          }
+        }
+      },
+    },
     {
       label: '新建子文件夹',
       icon: '📁',
@@ -279,10 +328,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect }) => {
   ];
 
   const rootFolders = folders.filter((f) => f.parentId === null);
-  const rootProjects = projects.filter((p) => {
-    const folder = folders.find((f) => f.id === p.folderId);
-    return !folder || folder.parentId === null;
-  });
+  const rootProjects = projects.filter((p) => p.folderId === null || p.folderId === 'root');
 
   return (
     <div className="flex flex-col h-full">
@@ -291,7 +337,22 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect }) => {
           暂无项目，点击上方按钮创建
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto">
+        <div 
+          className="flex-1 overflow-y-auto"
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const data = e.dataTransfer.getData('text/plain');
+          if (data.startsWith('project:')) {
+            const projectId = data.split(':')[1];
+            moveProjectToFolder(projectId, 'root');
+          }
+        }}
+        >
           {rootFolders.map((folder) => (
             <FolderItem
               key={folder.id}
@@ -300,6 +361,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect }) => {
               onContextMenu={handleContextMenu}
               onToggle={handleToggle}
               expanded={expanded}
+              onProjectDrop={moveProjectToFolder}
             />
           ))}
           {rootProjects.map((project) => (

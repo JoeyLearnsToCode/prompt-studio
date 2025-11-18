@@ -57,7 +57,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.1 }}
-          className="fixed z-50 min-w-[180px] bg-surface-container rounded-m3-medium shadow-elevation-2 py-2"
+          className="fixed z-50 w-auto bg-surface-container/90 backdrop-blur-md rounded-m3-medium shadow-elevation-2 py-2"
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
@@ -74,14 +74,14 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               }}
               disabled={item.disabled}
               className={`
-                w-full px-4 py-2 text-left text-sm flex items-center gap-3
+                w-full px-3 py-1.5 text-left text-sm flex items-center gap-2 whitespace-nowrap text-surface-onVariant
                 transition-colors duration-150
                 ${
                   item.disabled
                     ? 'opacity-50 cursor-not-allowed'
                     : item.danger
-                    ? 'hover:bg-error-container text-error'
-                    : 'hover:bg-primary-container'
+                    ? 'hover:bg-error-container [&]:text-error'
+                    : 'hover:bg-primary-container text-primary'
                 }
               `}
               aria-label={item.label}

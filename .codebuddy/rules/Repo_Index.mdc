@@ -1,0 +1,16 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-11-18T08:39:01.377Z
+provider: 
+---
+
+## 索引
+
+文件 @docs/general_index.md 列出了代码库中的所有包、文件，并简要说明了它们的作用。
+
+## 更新索引
+
+- 在新建、删除文件后，请更新索引。
+- 在修改文件内容后，检查索引中对应的说明是否仍然准确。如果不准确，请更新索引。

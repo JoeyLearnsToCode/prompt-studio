@@ -73,14 +73,16 @@ const MainView: React.FC = () => {
     }
   }, [currentProjectId, loadVersions]);
 
-  // 更新编辑器内容和附件，自动选择根版本
+  // 更新编辑器内容和附件，自动选择最近更新的版本
   useEffect(() => {
     if (currentProjectId && versions.length > 0) {
-      // 如果没有选中版本，自动选择根版本（parentId === null）
+      // 如果没有选中版本，自动选择最近更新的版本
       if (!currentVersionId) {
-        const rootVersion = versions.find((v) => v.parentId === null && v.projectId === currentProjectId);
-        if (rootVersion) {
-          setCurrentVersion(rootVersion.id);
+        const projectVersions = versions.filter(v => v.projectId === currentProjectId);
+        // 按updatedAt降序排序，获取最近更新的版本
+        const sortedVersions = [...projectVersions].sort((a, b) => b.updatedAt - a.updatedAt);
+        if (sortedVersions.length > 0) {
+          setCurrentVersion(sortedVersions[0].id);
         }
       }
     }
@@ -186,16 +188,7 @@ const MainView: React.FC = () => {
       return;
     }
 
-    // User Story 4: 允许所有版本原地保存
-    // 对于非叶子节点，提示用户(可选)
-    const children = versions.filter((v) => v.parentId === currentVersionId);
-    if (children.length > 0) {
-      const confirmed = confirm(
-        `此版本有 ${children.length} 个子版本。原地保存将修改历史版本内容。是否继续？`
-      );
-      if (!confirmed) return;
-    }
-
+    // User Story 4: 允许所有版本原地保存，不需要任何提示
     try {
       await updateVersionInPlace(currentVersionId, editorContent);
       await loadVersions(currentProjectId!);

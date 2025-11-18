@@ -20,11 +20,11 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
     <div className="flex items-center gap-2 p-3 bg-surface-variant border-b border-surface-onVariant/20">
       <Button
         onClick={onSave}
-        variant="filled"
+        variant="outlined"
         size="small"
         title="创建新版本 (Ctrl+Enter)"
       >
-        💾 保存新版本
+        保存新版本
       </Button>
 
       <Button
@@ -34,18 +34,18 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         disabled={!canSaveInPlace}
         title="原地更新当前版本 (Ctrl+Shift+Enter)"
       >
-        ✏️ 原地保存
+        原地保存
       </Button>
 
       {onCompare && (
-        <Button onClick={onCompare} variant="text" size="small" title="对比版本">
-          🔍 对比
+        <Button onClick={onCompare} variant="outlined" size="small" title="对比版本">
+          对比
         </Button>
       )}
 
       {onSnippets && (
-        <Button onClick={onSnippets} variant="text" size="small" title="片段库">
-          📚 片段
+        <Button onClick={onSnippets} variant="outlined" size="small" title="片段库">
+          片段
         </Button>
       )}
 

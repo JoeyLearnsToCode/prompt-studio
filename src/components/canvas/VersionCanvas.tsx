@@ -22,6 +22,8 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
 
   const { versions, currentVersionId, deleteVersion, createVersion } = useVersionStore();
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
+  const [searchVisible, setSearchVisible] = useState(false); // 控制搜索框的显示状态
+  const searchInputRef = useRef<HTMLInputElement>(null); // 搜索框引用，用于聚焦
 
   // 版本搜索
   const {
@@ -37,6 +39,40 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     isVersionMatched,
     isCurrentMatch,
   } = useVersionSearch();
+
+  // Canvas焦点状态跟踪
+  const [canvasFocused, setCanvasFocused] = useState(false);
+
+  // 键盘事件监听 - 捕获Ctrl+F显示搜索框并聚焦输入框
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 检查是否按下了Ctrl+F (or Cmd+F on Mac) 且canvas有焦点
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f' && canvasFocused) {
+        e.preventDefault();
+        setSearchVisible(true);
+      }
+    };
+
+    // 只在canvas有焦点或鼠标在canvas区域时监听
+    if (projectId) {
+      document.addEventListener('keydown', handleKeyDown);
+      
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [projectId, canvasFocused]);
+
+  // 当搜索框显示时，聚焦到输入框
+  useEffect(() => {
+    if (searchVisible && searchInputRef.current) {
+      // 使用setTimeout确保DOM更新后再聚焦
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }, 10);
+    }
+  }, [searchVisible]);
 
   // 初始化 Canvas - 在canvas元素实际渲染后执行
   useEffect(() => {
@@ -62,15 +98,31 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     rendererRef.current = renderer;
     interactionRef.current = interaction;
 
+    // Canvas获取焦点事件
+    const handleCanvasFocus = () => {
+      setCanvasFocused(true);
+    };
+    
+    // Canvas失去焦点事件
+    const handleCanvasBlur = () => {
+      setCanvasFocused(false);
+    };
+
     // 窗口大小变化时重新调整
     const handleResize = () => {
       renderer.resizeCanvas();
     };
+    
+    // 添加事件监听器
+    canvasRef.current.addEventListener('focus', handleCanvasFocus);
+    canvasRef.current.addEventListener('blur', handleCanvasBlur);
     window.addEventListener('resize', handleResize);
 
     return () => {
       interaction.destroy();
       window.removeEventListener('resize', handleResize);
+      canvasRef.current?.removeEventListener('focus', handleCanvasFocus);
+      canvasRef.current?.removeEventListener('blur', handleCanvasBlur);
     };
   }, [projectId]); // 依赖projectId,在项目选中后初始化
 
@@ -87,13 +139,26 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     }
   }, [currentVersionId]);
 
-  // 渲染版本树
+  // 渲染版本树并自动定位到选中的版本
   useEffect(() => {
     if (!rendererRef.current || !projectId) return;
 
     const projectVersions = versions.filter((v) => v.projectId === projectId);
     rendererRef.current.renderTree(projectVersions);
-  }, [versions, projectId]);
+    
+    // 如果有选中的版本，自动定位并确保该版本靠近canvas下方
+    if (currentVersionId) {
+      // 延迟执行确保渲染完成后再定位
+      setTimeout(() => {
+        if (rendererRef.current) {
+          // 先选中该版本
+          rendererRef.current.selectNode(currentVersionId);
+          // 将该版本定位在canvas的正中间
+          rendererRef.current.centerNodeAtPosition(currentVersionId, 0.5, 0.5);
+        }
+      }, 100); // 短暂延迟确保渲染完成
+    }
+  }, [versions, projectId, currentVersionId]);
 
   // 搜索结果高亮和自动滚动
   useEffect(() => {
@@ -131,28 +196,21 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     if (!selectedVersionId) return;
     
     if (confirm('确定删除此版本吗？子版本将连接到父版本。')) {
-      await deleteVersion(selectedVersionId);
-      setSelectedVersionId(null);
+      try {
+        await deleteVersion(selectedVersionId);
+        setSelectedVersionId(null);
+      } catch (error) {
+        alert(`删除失败: ${error}`);
+      }
     }
   };
 
-  const handleCreateChild = async () => {
-    if (!selectedVersionId || !projectId) return;
-    
-    const parentVersion = versions.find((v) => v.id === selectedVersionId);
-    if (!parentVersion) return;
-    
-    // 创建子版本，复制父版本内容
-    const newVersionId = await createVersion(
-      projectId,
-      parentVersion.content,
-      selectedVersionId
-    );
-    
-    if (onNodeClick) {
-      onNodeClick(newVersionId);
-    }
+  const handleCloseSearch = () => {
+    setSearchVisible(false);
+    handleClear(); // 同时清空搜索内容
   };
+
+  
 
   if (!projectId) {
     return (
@@ -166,78 +224,82 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   }
 
   return (
-    <div className="h-full relative bg-surface-variant" data-testid="version-canvas">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-        style={{ display: 'block', position: 'relative', zIndex: 1 }}
-      />
+    <div className="h-full flex flex-col bg-surface-variant" data-testid="version-canvas">
+      {/* 顶部控制区域 - 固定高度，不与canvas重叠 */}
+      <div className="p-3 space-y-3 bg-surface-variant">
+        {/* 搜索栏 - 只在searchVisible为true时显示 */}
+        {searchVisible && (
+          <div className="max-w-md">
+            <SearchBar
+              ref={searchInputRef}
+              query={query}
+              currentIndex={currentIndex}
+              total={total}
+              onQueryChange={handleQueryChange}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              onClear={handleClear}
+              onClose={handleCloseSearch}
+              placeholder="搜索版本内容..."
+            />
+          </div>
+        )}
 
-      {/* 搜索栏 */}
-      <div className="absolute top-4 left-4 right-4 z-10 max-w-md">
-        <SearchBar
-          query={query}
-          currentIndex={currentIndex}
-          total={total}
-          onQueryChange={handleQueryChange}
-          onNext={handleNext}
-          onPrev={handlePrev}
-          onClear={handleClear}
-          placeholder="搜索版本内容..."
-        />
+        {/* 版本操作按钮 */}
+        {selectedVersionId && (
+          <div className="flex gap-2">
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleDeleteVersion}
+              className="[&]:text-error [&]:hover:bg-error-container [&]:hover:border-transparent"
+              title="删除此版本"
+            >
+              🗑️ 删除
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* 版本操作按钮 */}
-      {selectedVersionId && (
-        <div className="absolute top-20 left-4 flex gap-2 z-10">
+      {/* Canvas容器 - 占据剩余空间，不与上方控制区域重叠 */}
+      <div className="flex-1 relative overflow-hidden">
+        <canvas
+          ref={canvasRef}
+          className="w-full h-full"
+          style={{ display: 'block' }}
+          tabIndex={0} // 使canvas可以获得焦点
+        />
+
+        {/* 画布控制按钮 - 浮动在canvas上，但位置固定在右下角 */}
+        <div className="absolute bottom-4 right-4 flex gap-2 z-10">
           <Button
-            variant="filled"
+            variant="outlined"
             size="small"
-            onClick={handleCreateChild}
-            title="创建子版本（复制内容）"
+            onClick={handleZoomIn}
+            title="放大"
+            aria-label="放大画布"
           >
-            ➕ 创建子版本
+            🔍+
           </Button>
           <Button
             variant="outlined"
             size="small"
-            onClick={handleDeleteVersion}
-            title="删除此版本"
+            onClick={handleZoomOut}
+            title="缩小"
+            aria-label="缩小画布"
           >
-            🗑️ 删除
+            🔍-
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleResetView}
+            title="重置视图"
+            aria-label="重置画布视图"
+          >
+            ↺
           </Button>
         </div>
-      )}
-
-      {/* 画布控制按钮 - 移至右下角 (US6) */}
-      <div className="absolute bottom-4 right-4 flex gap-2 z-10">
-        <Button
-          variant="filled"
-          size="small"
-          onClick={handleZoomIn}
-          title="放大"
-          aria-label="放大画布"
-        >
-          🔍+
-        </Button>
-        <Button
-          variant="filled"
-          size="small"
-          onClick={handleZoomOut}
-          title="缩小"
-          aria-label="缩小画布"
-        >
-          🔍-
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={handleResetView}
-          title="重置视图"
-          aria-label="重置画布视图"
-        >
-          ↺
-        </Button>
       </div>
     </div>
   );
