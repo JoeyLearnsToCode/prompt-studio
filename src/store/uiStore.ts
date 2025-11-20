@@ -22,6 +22,7 @@ interface UiState {
   layoutPreference: LayoutPreference;
   isDraggingSplitter: boolean;
   setCanvasRatio: (ratio: number) => void;
+  setEditorHeightRatio: (ratio: number) => void;
   startDragging: () => void;
   stopDragging: () => void;
   loadLayoutPreference: () => void;
@@ -81,6 +82,15 @@ export const useUiStore = create<UiState>((set, get) => ({
     }));
   },
 
+  setEditorHeightRatio: (ratio) => {
+    set((state) => ({
+      layoutPreference: {
+        ...state.layoutPreference,
+        editorHeightRatio: ratio,
+      },
+    }));
+  },
+
   startDragging: () => {
     set({ isDraggingSplitter: true });
   },
@@ -97,6 +107,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   saveLayoutPreference: () => {
     const { layoutPreference } = get();
     layoutManager.saveCanvasRatio(layoutPreference.canvasPanelWidthRatio);
+    layoutManager.saveEditorHeightRatio(layoutPreference.editorHeightRatio);
     if (layoutPreference.sidebarCollapsed !== undefined) {
       layoutManager.saveSidebarCollapsed(layoutPreference.sidebarCollapsed);
     }

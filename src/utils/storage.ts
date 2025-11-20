@@ -58,6 +58,7 @@ export const storage = {
  */
 export const STORAGE_KEYS = {
   CANVAS_RATIO: 'layout.canvasPanelWidthRatio',
+  EDITOR_HEIGHT_RATIO: 'layout.editorHeightRatio',
   SIDEBAR_COLLAPSED: 'layout.sidebarCollapsed',
   SEARCH_LAST_QUERY: 'search.lastQuery',
 } as const;

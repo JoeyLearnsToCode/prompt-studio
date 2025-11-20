@@ -2,13 +2,14 @@
 description: 
 alwaysApply: true
 enabled: true
-updatedAt: 2025-11-18T08:39:01.377Z
+updatedAt: 2025-11-20T06:28:13.563Z
 provider: 
 ---
 
 ## 索引
 
 文件 @docs/general_index.md 列出了代码库中的所有包、文件，并简要说明了它们的作用。
+该索引可能是最新的，也可能不是。
 
 ## 更新索引
 

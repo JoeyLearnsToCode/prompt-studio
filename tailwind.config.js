@@ -28,7 +28,9 @@ export default {
         surface: {
           DEFAULT: '#fdfcf5',
           variant: '#e4e3d6',
-          containerHighest: '#d4d3c6', // 更深的容器色
+          container: '#d4d3c6',
+          'container-high': '#d4d3c6', // 更深的容器色，用于编辑器
+          containerHighest: '#d4d3c6',
           onSurface: '#1b1c18',
           onVariant: '#2a2b24', // 更深的变体文字色，提高对比度
         },
@@ -37,6 +39,10 @@ export default {
           container: '#ffdad6',
           onError: '#ffffff',
           onContainer: '#410002',
+        },
+        outline: {
+          DEFAULT: '#79747e',
+          variant: '#cac4d0',
         },
       },
       borderRadius: {
@@ -48,6 +54,9 @@ export default {
         'm3-1': '0px 1px 2px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15)',
         'm3-2': '0px 1px 2px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15)',
         'm3-3': '0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px rgba(0,0,0,0.3)',
+        'elevation-level1': '0px 1px 2px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15)',
+        'elevation-level2': '0px 1px 2px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15)',
+        'elevation-level3': '0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px rgba(0,0,0,0.3)',
       },
     },
   },

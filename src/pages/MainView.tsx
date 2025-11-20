@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useProjectStore } from '@/store/projectStore';
 import { useVersionStore } from '@/store/versionStore';
 import { attachmentManager } from '@/services/attachmentManager';
@@ -12,6 +12,7 @@ import { CompareModal } from '@/components/version/CompareModal';
 import { useVersionCompare } from '@/hooks/useVersionCompare';
 import { DuplicateDialog } from '@/components/common/DuplicateDialog';
 import { ResizableSplitter } from '@/components/common/ResizableSplitter';
+import { VerticalResizableSplitter } from '@/components/common/VerticalResizableSplitter';
 import { useUiStore } from '@/store/uiStore';
 import type { Version } from '@/models/Version';
 
@@ -30,6 +31,7 @@ const MainView: React.FC = () => {
   const {
     layoutPreference,
     setCanvasRatio,
+    setEditorHeightRatio,
     startDragging,
     stopDragging,
   } = useUiStore();
@@ -37,6 +39,9 @@ const MainView: React.FC = () => {
   const [editorContent, setEditorContent] = useState('');
   const [canSaveInPlace, setCanSaveInPlace] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  
+  // 编辑区容器的 ref，用于垂直分隔条计算
+  const editorContainerRef = useRef<HTMLDivElement>(null);
 
   // 重复提醒对话框状态
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
@@ -221,10 +226,13 @@ const MainView: React.FC = () => {
             canSaveInPlace={canSaveInPlace}
           />
 
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden" ref={editorContainerRef}>
             {currentProjectId ? (
               <>
-                <div className="flex-1 p-4 overflow-y-auto">
+                <div 
+                  className="overflow-hidden"
+                  style={{ height: `${layoutPreference.editorHeightRatio * 100}%` }}
+                >
                   <PromptEditor
                     value={editorContent}
                     onChange={setEditorContent}
@@ -233,9 +241,25 @@ const MainView: React.FC = () => {
                   />
                 </div>
                 
+                {/* 垂直分隔条 */}
+                {currentVersionId && (
+                  <VerticalResizableSplitter
+                    ratio={layoutPreference.editorHeightRatio}
+                    onRatioChange={setEditorHeightRatio}
+                    onDragStart={startDragging}
+                    onDragEnd={stopDragging}
+                    minRatio={0.3}
+                    maxRatio={0.9}
+                    containerRef={editorContainerRef}
+                  />
+                )}
+                
                 {/* 附件区域 */}
                 {currentVersionId && (
-                  <div className="border-t border-surface-onVariant/20 p-4 max-h-[300px] overflow-y-auto">
+                  <div 
+                    className="p-4 overflow-y-auto bg-surface-container-low"
+                    style={{ height: `${(1 - layoutPreference.editorHeightRatio) * 100}%` }}
+                  >
                     <h3 className="text-sm font-semibold mb-3">📎 附件</h3>
                     <AttachmentGallery
                       versionId={currentVersionId}
