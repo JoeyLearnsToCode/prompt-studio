@@ -48,11 +48,15 @@ export const useVersionStore = create<VersionState>((set, get) => ({
 
   loadVersions: async (projectId) => {
     const versions = await db.versions.where('projectId').equals(projectId).toArray();
-    set({ versions });
+    // 为每个版本计算运行时的 normalizedContent
+    const versionsWithNormalized = versions.map(v => ({
+      ...v,
+      normalizedContent: normalize(v.content)
+    }));
+    set({ versions: versionsWithNormalized });
   },
 
   createVersion: async (projectId, content, parentId, skipDuplicateCheck = false, name) => {
-    const normalizedContent = normalize(content);
     const contentHash = computeContentHash(content);
 
     // 重复检测(除非明确跳过)
@@ -70,7 +74,6 @@ export const useVersionStore = create<VersionState>((set, get) => ({
       createdAt: Date.now(),
       updatedAt: Date.now(),
       content,
-      normalizedContent,
       contentHash,
       name, // 添加版本名称（可选）
     };
@@ -79,6 +82,9 @@ export const useVersionStore = create<VersionState>((set, get) => ({
       await db.versions.add(version);
       await db.projects.update(projectId, { updatedAt: Date.now() });
     });
+
+    // 添加运行时计算的 normalizedContent
+    version.normalizedContent = normalize(content);
 
     set((state) => ({
       versions: [...state.versions, version],
@@ -98,13 +104,12 @@ export const useVersionStore = create<VersionState>((set, get) => ({
     //   throw new Error('只能原地更新叶子节点');
     // }
 
-    const normalizedContent = normalize(content);
     const contentHash = computeContentHash(content);
+    const normalizedContent = normalize(content);
 
     await db.transaction('rw', db.versions, db.projects, async () => {
       await db.versions.update(id, {
         content,
-        normalizedContent,
         contentHash,
         name, // 更新版本名称
         updatedAt: Date.now(),

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { webdavService, type WebDAVConfig } from '@/services/webdavService';
 import { exportService } from '@/services/exportService';
+import { useProjectStore } from '@/store/projectStore';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 
 const Settings: React.FC = () => {
+  const navigate = useNavigate();
+  const { loadFolders, loadProjects } = useProjectStore();
   const [webdavConfig, setWebdavConfig] = useState<WebDAVConfig>({
     url: '',
     username: '',
@@ -118,6 +122,12 @@ ${remotePath}`)) {
     }
   };
 
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -131,8 +141,12 @@ ${remotePath}`)) {
         alert('不支持的文件格式');
         return;
       }
-      alert('导入成功！请刷新页面查看数据。');
-      window.location.reload();
+      
+      // 刷新数据而不是重新加载页面
+      await loadFolders();
+      await loadProjects();
+      
+      alert('导入成功！返回主页后数据将自动刷新。');
     } catch (error) {
       alert(`导入失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
@@ -151,8 +165,16 @@ ${remotePath}`)) {
 
   return (
     <div className="min-h-screen bg-surface text-surface-onSurface">
-      <header className="bg-primary text-onPrimary px-6 py-4 shadow-m3-1">
+      <header className="bg-primary text-onPrimary px-6 py-1 shadow-m3-1 flex items-center justify-between">
         <h1 className="text-2xl font-bold">设置</h1>
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 px-4 py-2 rounded-m3-medium hover:bg-onPrimary/20 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
       </header>
 
       <div className="p-6">
@@ -171,20 +193,16 @@ ${remotePath}`)) {
               </div>
 
               <div>
-                <label className="block">
-                  <Button className="w-full sm:w-auto cursor-pointer">
-                    📥 从文件导入
-                  </Button>
-                  <input
-                    type="file"
-                    accept=".json,.zip"
-                    className="hidden"
-                    onChange={handleImportFile}
-                  />
-                </label>
-                <p className="text-sm text-surface-onVariant mt-2">
-                  支持 JSON 和 ZIP 格式的备份文件
-                </p>
+                <Button onClick={handleImportClick} className="w-full sm:w-auto">
+                  📥 从 ZIP 文件导入
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".zip"
+                  className="hidden"
+                  onChange={handleImportFile}
+                />
               </div>
             </div>
           </section>

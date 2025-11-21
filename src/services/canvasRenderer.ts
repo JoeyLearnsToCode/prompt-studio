@@ -57,14 +57,16 @@ export class CanvasRenderer {
    * 调整画布大小以匹配容器（带防抖）
    */
   resizeCanvas() {
-    // 清除之前的定时器
+    // 如果已有定时器在运行，说明在防抖期间，不执行
     if (this.resizeTimer !== null) {
-      window.clearTimeout(this.resizeTimer);
+      return;
     }
 
-    // 设置新的定时器，150ms 后执行实际的 resize
+    // 执行实际的resize
+    this.performResize();
+    
+    // 设置定时器，150ms内不允许再次执行
     this.resizeTimer = window.setTimeout(() => {
-      this.performResize();
       this.resizeTimer = null;
     }, 150);
   }

@@ -104,7 +104,6 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         createdAt: Date.now(),
         updatedAt: Date.now(),
         content: '',
-        normalizedContent: '',
         contentHash: '',
       };
       await db.versions.add(rootVersion);

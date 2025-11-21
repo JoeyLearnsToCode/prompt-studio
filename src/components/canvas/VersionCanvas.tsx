@@ -213,7 +213,8 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     if (currentMatchId) {
       // 选中当前匹配的版本
       rendererRef.current.selectNode(currentMatchId);
-      // 可以添加高亮效果到渲染器(需要扩展CanvasRenderer)
+      // 将匹配的版本定位到canvas中间，复用现有的定位逻辑
+      rendererRef.current.centerNodeAtPosition(currentMatchId, 0.5, 0.5);
     }
   }, [searchActive, currentIndex, getCurrentMatchId]);
 

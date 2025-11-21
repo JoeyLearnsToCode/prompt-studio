@@ -23,16 +23,15 @@ export const versionManager = {
     return await db.versions.get(id);
   },
 
-  /**
-   * 创建新版本
-   */
+/**
+ * 创建新版本
+ */
   async createVersion(
     projectId: string,
     content: string,
     parentId: string | null,
     score?: number
   ): Promise<Version> {
-    const normalizedContent = normalize(content);
     const contentHash = computeContentHash(content);
 
     const version: Version = {
@@ -42,7 +41,6 @@ export const versionManager = {
       createdAt: Date.now(),
       updatedAt: Date.now(),
       content,
-      normalizedContent,
       contentHash,
       score,
     };
@@ -53,12 +51,14 @@ export const versionManager = {
       await db.projects.update(projectId, { updatedAt: Date.now() });
     });
 
+    // 添加运行时计算的 normalizedContent
+    version.normalizedContent = normalize(content);
     return version;
   },
 
-  /**
-   * 原地更新版本（仅叶子节点）
-   */
+/**
+ * 原地更新版本（仅叶子节点）
+ */
   async updateVersionInPlace(id: string, content: string): Promise<void> {
     const version = await db.versions.get(id);
     if (!version) {
@@ -71,13 +71,11 @@ export const versionManager = {
       throw new Error('只能原地更新叶子节点');
     }
 
-    const normalizedContent = normalize(content);
     const contentHash = computeContentHash(content);
 
     await db.transaction('rw', db.versions, db.projects, async () => {
       await db.versions.update(id, {
         content,
-        normalizedContent,
         contentHash,
         updatedAt: Date.now(),
       });

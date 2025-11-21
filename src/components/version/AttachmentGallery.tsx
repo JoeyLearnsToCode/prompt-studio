@@ -104,12 +104,20 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
 
   const handlePreview = useCallback((attachment: Attachment) => {
     const url = attachmentManager.getPreviewUrl(attachment);
-    setPreviewImage({ url, fileName: attachment.fileName });
+    if (url) {
+      setPreviewImage({ url, fileName: attachment.fileName });
+    } else {
+      alert('附件文件已丢失或损坏，无法预览');
+    }
   }, []);
 
-  const handleDownload = useCallback(async (attachmentId: string) => {
+  const handleDownload = useCallback(async (attachment: Attachment) => {
     try {
-      await attachmentManager.downloadAttachment(attachmentId);
+      if (attachment.isMissing) {
+        alert('附件文件已丢失或损坏，无法下载');
+        return;
+      }
+      await attachmentManager.downloadAttachment(attachment.id);
     } catch (error) {
       console.error('下载附件失败:', error);
       alert('下载失败');
@@ -170,60 +178,88 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className="relative group w-24 h-24 flex-shrink-0 bg-surface-container rounded-m3-medium overflow-hidden shadow-elevation-1 hover:shadow-elevation-2 transition-shadow"
+              className={`
+                relative group w-24 h-24 flex-shrink-0 rounded-m3-medium overflow-hidden shadow-elevation-1 hover:shadow-elevation-2 transition-shadow
+                ${attachment.isMissing 
+                  ? 'bg-error-container border border-error/50' 
+                  : 'bg-surface-container'
+                }
+              `}
             >
               {/* 缩略图 - 点击主体预览 */}
               <div
-                className="w-full h-full cursor-pointer"
-                onClick={() => isImage(attachment.fileType) && handlePreview(attachment)}
+                className={`w-full h-full ${
+                  attachment.isMissing ? 'cursor-not-allowed' : 'cursor-pointer'
+                }`}
+                onClick={() => !attachment.isMissing && isImage(attachment.fileType) && handlePreview(attachment)}
               >
-                {isImage(attachment.fileType) && (
-                  <img
-                    src={attachmentManager.getPreviewUrl(attachment)}
-                    alt={attachment.fileName}
-                    className="w-full h-full object-contain bg-black/5"
-                  />
-                )}
-                {isVideo(attachment.fileType) && (
-                  <video
-                    src={attachmentManager.getPreviewUrl(attachment)}
-                    className="w-full h-full object-contain bg-black/5"
-                    onClick={(e) => e.stopPropagation()}
-                  />
+                {attachment.isMissing ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center">
+                    <div className="text-2xl mb-1">⚠️</div>
+                    <div className="text-xs text-error font-medium">附件丢失</div>
+                    <div className="text-[10px] text-onErrorContainer mt-1">
+                      {attachment.fileName}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {isImage(attachment.fileType) && (
+                      <img
+                        src={attachmentManager.getPreviewUrl(attachment) || ''}
+                        alt={attachment.fileName}
+                        className="w-full h-full object-contain bg-black/5"
+                      />
+                    )}
+                    {isVideo(attachment.fileType) && (
+                      <video
+                        src={attachmentManager.getPreviewUrl(attachment) || ''}
+                        className="w-full h-full object-contain bg-black/5"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    )}
+                  </>
                 )}
               </div>
 
               {/* 顶部操作按钮 */}
               <div className="absolute top-1 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                {isImage(attachment.fileType) && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePreview(attachment);
-                    }}
-                    className="w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors text-xs"
-                    aria-label="预览"
-                  >
-                    👁
-                  </button>
+                {!attachment.isMissing && (
+                  <>
+                    {isImage(attachment.fileType) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePreview(attachment);
+                        }}
+                        className="w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors text-xs"
+                        aria-label="预览"
+                      >
+                        👁
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(attachment);
+                      }}
+                      className="w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors text-xs"
+                      aria-label="下载"
+                    >
+                      ⬇
+                    </button>
+                  </>
                 )}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDownload(attachment.id);
-                  }}
-                  className="w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors text-xs"
-                  aria-label="下载"
-                >
-                  ⬇
-                </button>
                 {!readonly && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(attachment.id);
                     }}
-                    className="w-6 h-6 bg-error/80 hover:bg-error rounded-full flex items-center justify-center text-white transition-colors text-xs"
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-white transition-colors text-xs ${
+                      attachment.isMissing 
+                        ? 'bg-error/90 hover:bg-error' 
+                        : 'bg-error/80 hover:bg-error'
+                    }`}
                     aria-label="删除"
                   >
                     🗑
@@ -231,10 +267,12 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                 )}
               </div>
 
-              {/* 文件名提示 */}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-[10px] p-1 truncate">
-                {attachment.fileName}
-              </div>
+              {/* 文件名提示 - 只对非缺失附件显示 */}
+              {!attachment.isMissing && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-[10px] p-1 truncate">
+                  {attachment.fileName}
+                </div>
+              )}
             </motion.div>
           ))}
         </AnimatePresence>

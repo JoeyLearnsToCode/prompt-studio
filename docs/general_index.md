@@ -56,7 +56,6 @@ src/
 |   |-- version/: 版本相关组件
 |   |   |-- AttachmentGallery.tsx: 附件画廊组件，支持图片/视频上传、预览、下载
 |   |   |-- CompareModal.tsx: 版本比较模态框组件
-|   |   |-- DiffViewer.tsx: 差异查看器组件
 |   |   |-- VersionCard.tsx: 版本卡片组件
 |-- contexts/: React上下文目录
 |-- db/: 数据库相关
@@ -70,9 +69,8 @@ src/
 |   |-- Folder.ts: 文件夹数据模型
 |   |-- Project.ts: 项目数据模型
 |   |-- Snippet.ts: 代码片段数据模型
-|   |-- Version.ts: 版本数据模型
+|   |-- Version.ts: 版本数据模型（normalizedContent 字段为运行时计算，不保存到数据库）
 |-- pages/: 页面组件
-|   |-- DiffView.tsx: 差异查看页面
 |   |-- MainView.tsx: 主视图页面
 |   |-- Settings.tsx: 设置页面
 |   |-- SnippetLibrary.tsx: 代码片段库页面
@@ -81,7 +79,7 @@ src/
 |   |-- canvasInteraction.ts: 画布交互服务
 |   |-- canvasRenderer.ts: 画布渲染服务
 |   |-- diffService.ts: 差异计算服务
-|   |-- exportService.ts: 导出功能服务
+|   |-- exportService.ts: 导入导出功能服务（支持 JSON 和 ZIP 格式，导出时自动清理运行时字段）
 |   |-- folderManager.ts: 文件夹管理服务
 |   |-- layoutManager.ts: 布局管理服务，管理画布宽度和编辑器高度比例
 |   |-- projectManager.ts: 项目管理服务
@@ -113,7 +111,7 @@ src/
 ```
 tests/
 |-- component/: 组件测试
-|   |-- DiffViewer.test.tsx: 差异查看器组件测试
+
 |   |-- ProjectList.test.tsx: 项目列表组件测试
 |   |-- PromptEditor.test.tsx: 提示词编辑器组件测试
 |   |-- VersionCanvas.test.tsx: 版本画布组件测试
