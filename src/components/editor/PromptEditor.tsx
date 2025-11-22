@@ -360,7 +360,7 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(({
       <CodeMirror
         value={value}
         onChange={onChange}
-        extensions={[markdown(), search({ top: false }), customKeymap, theme]}
+        extensions={[markdown(), search({ top: false }), customKeymap, theme, EditorView.lineWrapping]}
         readOnly={readOnly}
         className="h-full w-full"
         onCreateEditor={(editor) => setView(editor)}

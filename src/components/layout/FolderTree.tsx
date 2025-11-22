@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useProjectStore } from '@/store/projectStore';
 import { useUiStore } from '@/store/uiStore';
 import type { Folder } from '@/models/Folder';
@@ -80,6 +80,27 @@ const FolderItem: React.FC<TreeItemProps> = ({
   const childFolders = sortByName(folders.filter((f) => f.parentId === folder.id));
   const childProjects = sortByName(projects.filter((p) => p.folderId === folder.id));
 
+  // 递归计算文件夹中所有项目的数量（包括子文件夹中的项目）
+  const getAllProjectsCount = useMemo(() => {
+    const countProjectsInFolder = (folderId: string): number => {
+      // 获取当前文件夹直接子项目
+      const directChildProjects = projects.filter((p) => p.folderId === folderId);
+      let totalCount = directChildProjects.length;
+      
+      // 获取当前文件夹的子文件夹
+      const childFoldersList = folders.filter((f) => f.parentId === folderId);
+      
+      // 递归计算每个子文件夹中的项目数量
+      for (const childFolder of childFoldersList) {
+        totalCount += countProjectsInFolder(childFolder.id);
+      }
+      
+      return totalCount;
+    };
+    
+    return countProjectsInFolder(folder.id);
+  }, [folders, projects, folder.id]);
+
   return (
     <div>
       <div
@@ -106,7 +127,7 @@ const FolderItem: React.FC<TreeItemProps> = ({
         </span>
         <span className="text-sm flex-1 truncate">{folder.name}</span>
         <span className="text-xs text-surface-onVariant">
-          {childProjects.length}
+          {getAllProjectsCount}
         </span>
       </div>
       

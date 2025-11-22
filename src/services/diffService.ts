@@ -22,6 +22,7 @@ export function createDiffEditorExtensions(): Extension[] {
     markdown(),
     EditorState.readOnly.of(true),
     EditorView.editable.of(false),
+    EditorView.lineWrapping,
   ];
 }
 
