@@ -5,6 +5,7 @@ import { exportService } from '@/services/exportService';
 import { useProjectStore } from '@/store/projectStore';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { Modal } from '@/components/common/Modal';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +21,10 @@ const Settings: React.FC = () => {
     Array<{ name: string; path: string; size: number; lastMod: string }>
   >([]);
   const [loading, setLoading] = useState(false);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [restoreBackups, setRestoreBackups] = useState<
+    Array<{ name: string; path: string; size: number; lastMod: string }>
+  >([]);
 
   useEffect(() => {
     // 从 localStorage 加载配置
@@ -86,12 +91,30 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleRestore = async (remotePath: string) => {
-    if (!confirm(`确定从此备份还原数据吗？
-${remotePath}`)) {
+  const handleOpenRestoreModal = async () => {
+    if (!isConnected) {
+      alert('请先配置并测试 WebDAV 连接');
       return;
     }
 
+    setLoading(true);
+    try {
+      const list = await webdavService.listBackups();
+      setRestoreBackups(list);
+      setShowRestoreModal(true);
+    } catch (error) {
+      alert(`获取备份列表失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestore = async (remotePath: string) => {
+    if (!confirm(`确定从此备份还原数据吗？`)) {
+      return;
+    }
+
+    setShowRestoreModal(false);
     setLoading(true);
     try {
       await webdavService.restoreFromWebDAV(remotePath);
@@ -105,15 +128,16 @@ ${remotePath}`)) {
   };
 
   const handleDeleteBackup = async (remotePath: string) => {
-    if (!confirm(`确定删除此备份吗？
-${remotePath}`)) {
+    if (!confirm(`确定删除此备份吗？`)) {
       return;
     }
 
     try {
       await webdavService.deleteBackup(remotePath);
       alert('删除成功！');
+      // 更新备份列表和模态框中的备份列表
       loadBackups();
+      setRestoreBackups(prev => prev.filter(b => b.path !== remotePath));
     } catch (error) {
       alert(`删除失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
@@ -254,57 +278,75 @@ ${remotePath}`)) {
               </div>
 
               <div className="pt-4 border-t border-surface-onVariant/20">
-                <Button
-                  onClick={handleBackup}
-                  disabled={!isConnected || loading}
-                  className="w-full sm:w-auto"
-                >
-                  {loading ? '备份中...' : '🔄 备份到 WebDAV'}
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleBackup}
+                    disabled={!isConnected || loading}
+                    className="w-full sm:w-auto"
+                  >
+                    {loading ? '备份中...' : '🔄 备份到 WebDAV'}
+                  </Button>
+                  <Button
+                    onClick={handleOpenRestoreModal}
+                    disabled={!isConnected || loading}
+                    className="w-full sm:w-auto"
+                  >
+                    {loading ? '加载中...' : '📥 从 WebDAV 还原'}
+                  </Button>
+                </div>
               </div>
             </div>
           </section>
-
-          {/* 备份列表 */}
-          {backups.length > 0 && (
-            <section className="bg-surface-container rounded-m3-large p-6 shadow-m3-1">
-              <h2 className="text-xl font-bold mb-4">远程备份列表</h2>
-              <div className="space-y-2">
-                {backups.map((backup) => (
-                  <div
-                    key={backup.path}
-                    className="flex items-center justify-between p-3 bg-surface-containerHighest rounded-m3-medium"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {backup.name}
-                      </p>
-                      <p className="text-xs text-surface-onVariant">
-                        {formatDate(backup.lastMod)} • {formatFileSize(backup.size)}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 ml-4">
-                      <button
-                        onClick={() => handleRestore(backup.path)}
-                        className="px-3 py-1 text-sm bg-primary text-onPrimary rounded-m3-small hover:bg-primary/90 transition-colors"
-                        disabled={loading}
-                      >
-                        还原
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBackup(backup.path)}
-                        className="px-3 py-1 text-sm bg-error text-onError rounded-m3-small hover:bg-error/90 transition-colors"
-                      >
-                        删除
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
         </div>
       </div>
+
+      {/* 从 WebDAV 还原模态框 */}
+      <Modal
+        isOpen={showRestoreModal}
+        onClose={() => setShowRestoreModal(false)}
+        title="从 WebDAV 还原备份"
+        size="large"
+      >
+        <div className="space-y-4">
+          {restoreBackups.length === 0 ? (
+            <p className="text-center text-surface-onVariant py-8">
+              暂无可用的备份文件
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {restoreBackups.map((backup) => (
+                <div
+                  key={backup.path}
+                  className="flex items-center justify-between p-4 bg-surface-containerHighest rounded-m3-medium hover:bg-surface-containerHigh transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {backup.name}
+                    </p>
+                    <p className="text-xs text-surface-onVariant mt-1">
+                      {formatDate(backup.lastMod)} • {formatFileSize(backup.size)}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => handleRestore(backup.path)}
+                    disabled={loading}
+                    className="ml-4"
+                  >
+                    还原
+                  </Button>
+                  <Button
+                    onClick={() => handleDeleteBackup(backup.path)}
+                    disabled={loading}
+                    className="ml-4"
+                  >
+                    删除
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -12,6 +12,8 @@ export interface WebDAVConfig {
   password: string;
 }
 
+const WEBDAV_DIR = 'prompt-studio-backups';
+
 export class WebDAVService {
   private client: WebDAVClient | null = null;
   private config: WebDAVConfig | null = null;
@@ -125,11 +127,11 @@ export class WebDAVService {
 
       // 3. 上传到 WebDAV
       const filename = `prompt-studio-backup-${Date.now()}.zip`;
-      const remotePath = `/prompt-studio-backups/${filename}`;
+      const remotePath = `/${WEBDAV_DIR}/${filename}`;
 
       // 确保目录存在
       try {
-        await this.client.createDirectory('/prompt-studio-backups');
+        await this.client.createDirectory(`/${WEBDAV_DIR}`);
       } catch (error) {
         // 目录可能已存在，忽略错误
       }
@@ -153,7 +155,7 @@ export class WebDAVService {
     }
 
     try {
-      const dirPath = '/prompt-studio-backups';
+      const dirPath = `/${WEBDAV_DIR}/`
       const exists = await this.client.exists(dirPath);
 
       if (!exists) {
@@ -161,6 +163,7 @@ export class WebDAVService {
       }
 
       const contents = await this.client.getDirectoryContents(dirPath);
+      console.log(`contents: ${JSON.stringify(contents)}`)
 
       return (contents as any[])
         .filter((item) => item.type === 'file' && item.basename.endsWith('.zip'))
