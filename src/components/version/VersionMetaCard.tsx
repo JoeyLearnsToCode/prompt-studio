@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVersionStore } from '@/store/versionStore';
+import { useTranslation } from '@/i18n/I18nContext';
 
 interface VersionMetaCardProps {
   versionId: string;
@@ -19,6 +20,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
   notes = '',
   readonly = false,
 }) => {
+  const t = useTranslation();
   const { updateVersionScore, updateVersionNotes } = useVersionStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [localScore, setLocalScore] = useState(score);
@@ -123,7 +125,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
           
           {/* 评分显示 */}
             <div className="text-center">
-              {localScore > 0 ? ( `${localScore}/10` ): ( '评分' )}
+              {localScore > 0 ? ( `${localScore}/10` ): ( t('components.compareModal.score') )}
             </div>
         </div>
       </div>
@@ -150,12 +152,12 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
               <div className="pt-6 pl-6 pr-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold text-surface-onVariant">
-                  ℹ️ 评分
+                  ℹ️ {t('components.compareModal.score')}
                   </h3>
                   <button
                     onClick={() => setIsModalOpen(false)}
                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-containerHighest transition-colors"
-                    aria-label="关闭"
+                    aria-label={t('common.close')}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -205,7 +207,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                           }
                           ${isSaving ? 'cursor-not-allowed opacity-50' : ''}
                         `}
-                        aria-label="清除评分"
+                        aria-label={t('components.versionMeta.clearScore')}
                       >
                         ✕
                       </button>
@@ -219,7 +221,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                     htmlFor={`notes-${versionId}`}
                     className="text-base font-semibold text-surface-onVariant block mb-2"
                   >
-                    📝 备注
+                    📝 {t('components.compareModal.notes')}
                   </label>
                   <textarea
                     id={`notes-${versionId}`}
@@ -227,7 +229,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                     onChange={(e) => setLocalNotes(e.target.value)}
                     onBlur={handleNotesBlur}
                     disabled={readonly || isSaving}
-                    placeholder={readonly ? '暂无备注' : '添加备注...'}
+                    placeholder={readonly ? t('components.versionMeta.noNotes') : t('components.versionMeta.addNotes')}
                     className={`
                       w-full px-3 py-2 text-sm rounded-m3-medium border
                       bg-surface border-surface-onVariant/30
@@ -246,7 +248,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                   onClick={() => setIsModalOpen(false)}
                   className="px-6 py-2 bg-primary text-onPrimary rounded-m3-medium hover:shadow-elevation-1 transition-shadow"
                 >
-                  完成
+                  {t('components.versionMeta.done')}
                 </button>
               </div>
             </motion.div>

@@ -7,6 +7,7 @@ import { useEffect, useRef } from 'react';
 import { MergeView } from '@codemirror/merge';
 import type { Version } from '@/models/Version';
 import { createDiffEditorExtensions, diffService } from '@/services/diffService';
+import { useTranslation } from '@/i18n/I18nContext';
 
 export interface CompareModalProps {
   /** 模态框是否打开 */
@@ -30,8 +31,10 @@ export function CompareModal({
   sourceVersion,
   targetVersion,
   onClose,
-  title = '版本对比',
+  title,
 }: CompareModalProps) {
+  const t = useTranslation();
+  const modalTitle = title || t('components.compareModal.title');
   const mergeViewRef = useRef<MergeView | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -111,11 +114,11 @@ export function CompareModal({
         {/* Header */}
         <header className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{modalTitle}</h2>
             <button
               onClick={onClose}
               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="关闭"
+              aria-label={t('components.compareModal.close')}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -126,7 +129,7 @@ export function CompareModal({
           {/* 相似度指示器 */}
           {sourceVersion && targetVersion && (
             <div className="mt-4 flex items-center gap-2">
-              <span className="text-sm text-gray-600">相似度:</span>
+              <span className="text-sm text-gray-600">{t('components.compareModal.similarity')}:</span>
               <span className="font-bold text-blue-600">{similarity}%</span>
               <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden ml-2">
                 <div 
@@ -145,14 +148,14 @@ export function CompareModal({
                   {sourceVersion.name || `版本 ${sourceVersion.id.slice(0, 8)}`}
                 </h3>
                 <div className="text-xs text-gray-600 mt-1 space-y-1">
-                  <div>创建于: {formatDate(sourceVersion.createdAt)}</div>
-                  <div>更新于: {formatDate(sourceVersion.updatedAt)}</div>
+                  <div>{t('components.versionCard.createdAt')}: {formatDate(sourceVersion.createdAt)}</div>
+                  <div>{t('components.versionCard.updatedAt')}: {formatDate(sourceVersion.updatedAt)}</div>
                   {sourceVersion.score !== undefined && sourceVersion.score > 0 && (
-                    <div>评分: ⭐ {sourceVersion.score}/10</div>
+                    <div>{t('components.compareModal.score')}: ⭐ {sourceVersion.score}/10</div>
                   )}
                   {sourceVersion.notes && (
                     <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                      <div className="font-medium mb-1">备注:</div>
+                      <div className="font-medium mb-1">{t('components.compareModal.notes')}:</div>
                       <div className="text-gray-700 whitespace-pre-wrap line-clamp-2">{sourceVersion.notes}</div>
                     </div>
                   )}
@@ -163,14 +166,14 @@ export function CompareModal({
                   {targetVersion.name || `版本 ${targetVersion.id.slice(0, 8)}`}
                 </h3>
                 <div className="text-xs text-gray-600 mt-1 space-y-1">
-                  <div>创建于: {formatDate(targetVersion.createdAt)}</div>
-                  <div>更新于: {formatDate(targetVersion.updatedAt)}</div>
+                  <div>{t('components.versionCard.createdAt')}: {formatDate(targetVersion.createdAt)}</div>
+                  <div>{t('components.versionCard.updatedAt')}: {formatDate(targetVersion.updatedAt)}</div>
                   {targetVersion.score !== undefined && targetVersion.score > 0 && (
-                    <div>评分: ⭐ {targetVersion.score}/10</div>
+                    <div>{t('components.compareModal.score')}: ⭐ {targetVersion.score}/10</div>
                   )}
                   {targetVersion.notes && (
                     <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                      <div className="font-medium mb-1">备注:</div>
+                      <div className="font-medium mb-1">{t('components.compareModal.notes')}:</div>
                       <div className="text-gray-700 whitespace-pre-wrap line-clamp-2">{targetVersion.notes}</div>
                     </div>
                   )}

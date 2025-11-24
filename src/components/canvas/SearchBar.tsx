@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useTranslation } from '@/i18n/I18nContext';
 
 interface SearchBarProps {
   /** 搜索关键词 */
@@ -34,6 +35,7 @@ interface SearchBarProps {
  * 支持防抖输入、结果导航和键盘快捷键
  */
 export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, ref) => {
+  const t = useTranslation();
   const {
     query,
     currentIndex,
@@ -43,7 +45,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
     onPrev,
     onClear,
     onClose,
-    placeholder = '搜索版本内容...',
+    placeholder = t('components.canvas.searchPlaceholder'),
   } = props;
   
   const [localQuery, setLocalQuery] = useState(query);
@@ -126,7 +128,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className="flex-1 bg-transparent outline-none text-surface-onVariant placeholder-surface-onVariant/60 text-sm"
-        aria-label="搜索版本内容"
+        aria-label={t('components.canvas.search')}
       />
 
       {/* 结果计数 */}
@@ -141,8 +143,8 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
         onClick={onPrev}
         disabled={!canNavigate}
         className="p-1.5 rounded-full hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        aria-label="上一个结果 (Shift+Enter)"
-        title="上一个结果 (Shift+Enter)"
+        aria-label={t('components.canvas.prevResult')}
+        title={t('components.canvas.prevResult')}
       >
         <svg
           className="w-4 h-4 text-surface-onVariant"
@@ -159,8 +161,8 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
         onClick={onNext}
         disabled={!canNavigate}
         className="p-1.5 rounded-full hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        aria-label="下一个结果 (Enter)"
-        title="下一个结果 (Enter)"
+        aria-label={t('components.canvas.nextResult')}
+        title={t('components.canvas.nextResult')}
       >
         <svg
           className="w-4 h-4 text-surface-onVariant"
@@ -177,8 +179,8 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
         <button
           onClick={onClear}
           className="p-1.5 rounded-full hover:bg-surface transition-colors"
-          aria-label="清空搜索"
-          title="清空搜索"
+          aria-label={t('components.canvas.clearSearch')}
+          title={t('components.canvas.clearSearch')}
         >
           <svg
             className="w-4 h-4 text-surface-onVariant"
@@ -195,8 +197,8 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
       <button
         onClick={onClose}
         className="p-1.5 rounded-full hover:bg-surface transition-colors"
-        aria-label="关闭搜索 (ESC)"
-        title="关闭搜索 (ESC)"
+        aria-label={t('components.canvas.closeSearch')}
+        title={t('components.canvas.closeSearch')}
       >
         <svg
           className="w-4 h-4 text-surface-onVariant"

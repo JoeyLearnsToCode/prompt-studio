@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Version } from '@/models/Version';
+import { useTranslation } from '@/i18n/I18nContext';
 
 interface VersionCardProps {
   version: Version;
@@ -14,13 +15,15 @@ export const VersionCard: React.FC<VersionCardProps> = ({
   isLeaf = false,
   onClick,
 }) => {
+  const t = useTranslation();
+  
   const handleClick = () => {
     onClick?.(version);
   };
 
   // 提取前两行作为预览
   const getPreview = (content: string): string => {
-    if (!content) return '空内容';
+    if (!content) return t('components.versionCard.emptyContent');
     
     const lines = content.split('\n').filter(line => line.trim());
     const preview = lines.slice(0, 2).join('\n');
@@ -83,7 +86,7 @@ export const VersionCard: React.FC<VersionCardProps> = ({
         <div
           data-testid="leaf-indicator"
           className="absolute top-2 right-2 w-2 h-2 rounded-full bg-tertiary"
-          title="叶子节点（可原地更新）"
+          title={t('components.versionCard.leafNode')}
         />
       )}
 
@@ -103,7 +106,7 @@ export const VersionCard: React.FC<VersionCardProps> = ({
       {/* 更新时间（如果不同于创建时间） */}
       {version.updatedAt !== version.createdAt && (
         <div className="text-xs text-on-surface-variant">
-          更新: {formatTime(version.updatedAt)}
+          {t('components.versionCard.updatedAt')}: {formatTime(version.updatedAt)}
         </div>
       )}
     </div>

@@ -15,11 +15,14 @@ import { CompareModal } from '@/components/version/CompareModal';
 import { DuplicateDialog } from '@/components/common/DuplicateDialog';
 import { ResizableSplitter } from '@/components/common/ResizableSplitter';
 import { VerticalResizableSplitter } from '@/components/common/VerticalResizableSplitter';
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { useUiStore } from '@/store/uiStore';
+import { useTranslation } from '@/i18n/I18nContext';
 import type { Version } from '@/models/Version';
 
 const MainView: React.FC = () => {
   const navigate = useNavigate();
+  const t = useTranslation();
   const { currentProjectId } = useProjectStore();
   const {
     versions,
@@ -145,13 +148,13 @@ const MainView: React.FC = () => {
       const att = await attachmentManager.getAttachmentsByVersion(versionId);
       setAttachments(att);
     } catch (error) {
-      console.error('加载附件失败:', error);
+      console.error(t('pages.mainView.errors.loadAttachmentsFailed'), error);
     }
   };
 
   const handleSave = async () => {
     if (!currentProjectId) {
-      alert('请先选择或创建项目');
+      alert(t('pages.mainView.errors.selectProjectFirst'));
       return;
     }
 
@@ -166,7 +169,7 @@ const MainView: React.FC = () => {
       setCurrentVersion(versionId);
       await loadVersions(currentProjectId);
     } catch (error) {
-      alert(`保存失败: ${error}`);
+      alert(`${t('pages.mainView.errors.saveFailed')}: ${error}`);
     }
   };
 
@@ -192,7 +195,7 @@ const MainView: React.FC = () => {
       setDuplicateVersion(null);
       setPendingSaveData(null);
     } catch (error) {
-      alert(`保存失败: ${error}`);
+      alert(`${t('pages.mainView.errors.saveFailed')}: ${error}`);
     }
   };
 
@@ -204,7 +207,7 @@ const MainView: React.FC = () => {
 
   const handleSaveInPlace = async () => {
     if (!currentVersionId) {
-      alert('请先创建或选择一个版本');
+      alert(t('pages.mainView.errors.selectVersionFirst'));
       return;
     }
 
@@ -213,7 +216,7 @@ const MainView: React.FC = () => {
       await updateVersionInPlace(currentVersionId, editorContent, versionName);
       await loadVersions(currentProjectId!);
     } catch (error) {
-      alert(`保存失败: ${error}`);
+      alert(`${t('pages.mainView.errors.saveFailed')}: ${error}`);
     }
   };
 
@@ -222,16 +225,19 @@ const MainView: React.FC = () => {
       {/* 顶部标题栏 */}
       <header className="bg-primary text-onPrimary px-6 py-1 shadow-m3-1 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Prompt Studio</h1>
-        <button
-          onClick={() => navigate('/settings')}
-          className="p-2 rounded-full hover:bg-onPrimary/20 transition-colors"
-          aria-label="设置"
-        >
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <button
+            onClick={() => navigate('/settings')}
+            className="p-2 rounded-full hover:bg-onPrimary/20 transition-colors"
+            aria-label={t('common.settings')}
+          >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-        </button>
+          </button>
+        </div>
       </header>
 
       {/* 主要内容区域 */}
@@ -256,7 +262,7 @@ const MainView: React.FC = () => {
             <div className="px-4 py-2 bg-surface-variant border-b border-surface-onVariant/20">
               <div className="flex items-center gap-2">
                 <label htmlFor="version-name" className="text-sm font-medium text-surface-onVariant">
-                  版本名称:
+                  {t('pages.mainView.versionName')}:
                 </label>
                 <input
                   ref={versionNameInputRef}
@@ -289,7 +295,7 @@ const MainView: React.FC = () => {
                       editorRef.current?.focus();
                     }
                   }}
-                  placeholder="(可选) 为版本添加名称"
+                  placeholder={t('pages.mainView.versionNamePlaceholder')}
                   className="flex-1 px-3 py-1.5 text-sm bg-surface border border-surface-onVariant/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                 />
               </div>
@@ -332,7 +338,7 @@ const MainView: React.FC = () => {
                     className="p-4 overflow-y-auto bg-surface-container-low"
                     style={{ height: `${(1 - layoutPreference.editorHeightRatio) * 100}%` }}
                   >
-                    <h3 className="text-sm font-semibold mb-3">📎 附件</h3>
+                    <h3 className="text-sm font-semibold mb-3">📎 {t('pages.mainView.attachments')}</h3>
                     <AttachmentGallery
                       versionId={currentVersionId}
                       attachments={attachments}
@@ -353,8 +359,8 @@ const MainView: React.FC = () => {
             ) : (
               <div className="h-full flex items-center justify-center text-surface-onVariant">
                 <div className="text-center">
-                  <p className="text-xl mb-2">👈 请先选择或创建项目</p>
-                  <p className="text-sm">点击左侧"创建项目"按钮开始</p>
+                  <p className="text-xl mb-2">👈 {t('pages.mainView.noProject')}</p>
+                  <p className="text-sm">{t('pages.mainView.noProjectHint')}</p>
                 </div>
               </div>
             )}

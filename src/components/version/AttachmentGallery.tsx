@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { attachmentManager } from '@/services/attachmentManager';
 import type { Attachment } from '@/models/Attachment';
 import { ImagePreview } from '@/components/common/ImagePreview';
+import { useTranslation } from '@/i18n/I18nContext';
 
 interface AttachmentGalleryProps {
   versionId: string;
@@ -19,6 +20,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
   readonly = false,
   extraCard,
 }) => {
+  const t = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [previewImage, setPreviewImage] = useState<{
     url: string;
@@ -44,13 +46,13 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
 
         // 验证文件类型
         if (!validTypes.includes(file.type)) {
-          alert(`不支持的文件类型: ${file.type}`);
+          alert(`${t('components.attachmentGallery.unsupportedType')}: ${file.type}`);
           continue;
         }
 
         // 验证文件大小（50MB）
         if (file.size > 50 * 1024 * 1024) {
-          alert(`文件 ${file.name} 超过 50MB 限制`);
+          alert(`${t('components.attachmentGallery.fileTooLarge')}: ${file.name}`);
           continue;
         }
 
@@ -58,7 +60,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
           await attachmentManager.uploadAttachment(versionId, file);
         } catch (error) {
           console.error('上传附件失败:', error);
-          alert(`上传 ${file.name} 失败`);
+          alert(`${t('components.attachmentGallery.uploadFailed')}: ${file.name}`);
         }
       }
 
@@ -91,17 +93,17 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
 
   const handleDelete = useCallback(
     async (attachmentId: string) => {
-      if (confirm('确定删除此附件吗？')) {
+      if (confirm(t('components.attachmentGallery.confirmDelete'))) {
         try {
           await attachmentManager.deleteAttachment(attachmentId);
           onAttachmentsChange();
         } catch (error) {
           console.error('删除附件失败:', error);
-          alert('删除失败');
+          alert(t('components.attachmentGallery.deleteFailed'));
         }
       }
     },
-    [onAttachmentsChange]
+    [onAttachmentsChange, t]
   );
 
   const handlePreview = useCallback((attachment: Attachment) => {
@@ -109,22 +111,22 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
     if (url) {
       setPreviewImage({ url, fileName: attachment.fileName });
     } else {
-      alert('附件文件已丢失或损坏，无法预览');
+      alert(t('components.attachmentGallery.fileMissing'));
     }
-  }, []);
+  }, [t]);
 
   const handleDownload = useCallback(async (attachment: Attachment) => {
     try {
       if (attachment.isMissing) {
-        alert('附件文件已丢失或损坏，无法下载');
+        alert(t('components.attachmentGallery.fileMissing'));
         return;
       }
       await attachmentManager.downloadAttachment(attachment.id);
     } catch (error) {
       console.error('下载附件失败:', error);
-      alert('下载失败');
+      alert(t('components.attachmentGallery.downloadFailed'));
     }
-  }, []);
+  }, [t]);
 
   const isImage = (type: string) => type.startsWith('image/');
   const isVideo = (type: string) => type.startsWith('video/');
@@ -161,11 +163,11 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
               onChange={(e) => handleFileSelect(e.target.files)}
             />
             <div className="text-center px-2">
-              <p className="text-xs text-surface-onVariant mb-1">点击上传</p>
+              <p className="text-xs text-surface-onVariant mb-1">{t('components.attachmentGallery.clickToUpload')}</p>
               <p className="text-[10px] text-surface-onVariant/70 leading-tight">
-                图片/视频
+                {t('components.attachmentGallery.imageVideo')}
                 <br />
-                最大50MB
+                {t('components.attachmentGallery.maxSize')}
               </p>
             </div>
           </div>
@@ -201,7 +203,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                 {attachment.isMissing ? (
                   <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center">
                     <div className="text-2xl mb-1">⚠️</div>
-                    <div className="text-xs text-error font-medium">附件丢失</div>
+                    <div className="text-xs text-error font-medium">{t('components.attachmentGallery.attachmentMissing')}</div>
                     <div className="text-[10px] text-onErrorContainer mt-1">
                       {attachment.fileName}
                     </div>
@@ -237,7 +239,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                           handlePreview(attachment);
                         }}
                         className="w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors text-xs"
-                        aria-label="预览"
+                        aria-label={t('components.attachmentGallery.preview')}
                       >
                         👁
                       </button>
@@ -248,7 +250,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                         handleDownload(attachment);
                       }}
                       className="w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors text-xs"
-                      aria-label="下载"
+                      aria-label={t('components.attachmentGallery.download')}
                     >
                       ⬇
                     </button>
@@ -261,11 +263,11 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                       handleDelete(attachment.id);
                     }}
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-white transition-colors text-xs ${
-                      attachment.isMissing 
-                        ? 'bg-error/90 hover:bg-error' 
+                      attachment.isMissing
+                        ? 'bg-error/90 hover:bg-error'
                         : 'bg-error/80 hover:bg-error'
                     }`}
-                    aria-label="删除"
+                    aria-label={t('common.delete')}
                   >
                     🗑
                   </button>
@@ -285,7 +287,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
         {/* 无附件提示 */}
         {attachments.length === 0 && readonly && (
           <div className="text-center py-4 text-sm text-surface-onVariant w-full">
-            暂无附件
+            {t('components.attachmentGallery.noAttachments')}
           </div>
         )}
       </div>

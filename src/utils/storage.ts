@@ -63,4 +63,5 @@ export const STORAGE_KEYS = {
   SEARCH_LAST_QUERY: 'promptStudio.search.lastQuery',
   FIRST_OPEN_TIME: 'promptStudio.app.firstOpenTime',
   WEBDAV_CONFIG: 'promptStudio.settings.webdav_config',
+  UI_LANGUAGE: 'promptStudio.app.ui_language',
 } as const;

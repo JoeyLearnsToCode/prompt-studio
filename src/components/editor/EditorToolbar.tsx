@@ -1,12 +1,13 @@
 import React from 'react';
 import { Button } from '@/components/common/Button';
+import { useTranslation } from '@/i18n/I18nContext';
 
 interface EditorToolbarProps {
   onSave: () => void;
   onSaveInPlace: () => void;
   onSnippets?: () => void;
   canSaveInPlace: boolean;
-  hasProject: boolean; // 是否有选中的项目
+  hasProject: boolean;
 }
 
 const EditorToolbar: React.FC<EditorToolbarProps> = ({
@@ -16,6 +17,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
   canSaveInPlace,
   hasProject,
 }) => {
+  const t = useTranslation();
   return (
     <div className="flex items-center gap-2 p-3 bg-surface-variant border-b border-surface-onVariant/20">
       <Button
@@ -23,9 +25,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         variant="outlined"
         size="small"
         disabled={!canSaveInPlace || !hasProject}
-        title="原地更新当前版本 (Ctrl+S / Ctrl+Enter)"
+        title={`${t('components.toolbar.saveInPlace')} (Ctrl+S / Ctrl+Enter)`}
       >
-        原地保存
+        {t('components.toolbar.saveInPlace')}
       </Button>
 
       <Button
@@ -33,16 +35,14 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         variant="outlined"
         size="small"
         disabled={!hasProject}
-        title="创建新版本 (Ctrl+Shift+S / Ctrl+Shift+Enter)"
+        title={`${t('components.toolbar.saveNew')} (Ctrl+Shift+S / Ctrl+Shift+Enter)`}
       >
-        保存新版本
+        {t('components.toolbar.saveNew')}
       </Button>
 
-      
-
       {onSnippets && (
-        <Button onClick={onSnippets} variant="outlined" size="small" title="片段库">
-          片段
+        <Button onClick={onSnippets} variant="outlined" size="small" title={t('components.toolbar.snippets')}>
+          {t('components.toolbar.snippets')}
         </Button>
       )}
 

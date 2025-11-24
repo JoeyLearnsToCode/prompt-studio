@@ -3,8 +3,10 @@ import { useProjectStore } from '@/store/projectStore';
 import { useUiStore } from '@/store/uiStore';
 import { Button } from '@/components/common/Button';
 import { FolderTree } from './FolderTree';
+import { useTranslation } from '@/i18n/I18nContext';
 
 const Sidebar: React.FC = () => {
+  const t = useTranslation();
   const { sidebarCollapsed, toggleSidebar } = useUiStore();
   const { loadFolders, loadProjects, createFolder, createProject, selectProject } = useProjectStore();
 
@@ -14,7 +16,7 @@ const Sidebar: React.FC = () => {
   }, [loadFolders, loadProjects]);
 
   const handleCreateFolder = async () => {
-    const folderName = prompt('请输入文件夹名称:');
+    const folderName = prompt(t('components.sidebar.folderName'));
     if (folderName && folderName.trim()) {
       await createFolder(folderName.trim(), null);
       await loadFolders();
@@ -22,7 +24,7 @@ const Sidebar: React.FC = () => {
   };
 
   const handleCreateProject = async () => {
-    const projectName = prompt('请输入项目名称:');
+    const projectName = prompt(t('components.sidebar.projectName'));
     if (projectName && projectName.trim()) {
       // 查找或创建默认根文件夹
       let rootFolderId = 'root';
@@ -43,7 +45,7 @@ const Sidebar: React.FC = () => {
         <button
           onClick={toggleSidebar}
           className="w-8 h-8 p-0 flex items-center justify-center rounded-m3-small transition-colors hover:bg-surface-containerHighest"
-          aria-label="展开侧边栏"
+          aria-label={t('components.sidebar.expandSidebar')}
         >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -59,11 +61,11 @@ const Sidebar: React.FC = () => {
     <div className="w-64 bg-surface-variant border-r border-surface-onVariant/20 flex flex-col">
       <div className="p-3">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-lg">项目</h2>
+          <h2 className="font-bold text-lg">{t('components.sidebar.projects')}</h2>
           <button
             onClick={toggleSidebar}
             className="w-8 h-8 p-0 flex items-center justify-center rounded-m3-small transition-colors hover:bg-surface-containerHighest"
-            aria-label="折叠侧边栏"
+            aria-label={t('components.sidebar.collapseSidebar')}
           >
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5">
               <line x1="3" y1="6" x2="21" y2="6" />
@@ -73,22 +75,22 @@ const Sidebar: React.FC = () => {
           </button>
         </div>
         <div className="flex gap-2 justify-center">
-          <Button 
-            variant="outlined" 
-            size="small" 
-            onClick={handleCreateFolder} 
-            className="w-10 h-10 p-0 flex items-center justify-center relative" 
-            title="新建文件夹"
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleCreateFolder}
+            className="w-10 h-10 p-0 flex items-center justify-center relative"
+            title={t('components.sidebar.createFolder')}
           >
             <span className="text-base leading-none">📁</span>
             <span className="absolute top-0 right-1 text-base leading-none font-bold opacity-70">+</span>
           </Button>
-          <Button 
-            variant="outlined" 
-            size="small" 
-            onClick={handleCreateProject} 
-            className="w-10 h-10 p-0 flex items-center justify-center relative" 
-            title="新建项目"
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleCreateProject}
+            className="w-10 h-10 p-0 flex items-center justify-center relative"
+            title={t('components.sidebar.createProject')}
           >
             <span className="text-base leading-none">📄</span>
             <span className="absolute top-0 right-1 text-base leading-none font-bold opacity-70">+</span>

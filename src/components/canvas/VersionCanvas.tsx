@@ -5,6 +5,7 @@ import { CanvasInteraction } from '@/services/canvasInteraction';
 import { Button } from '@/components/common/Button';
 import { SearchBar } from '@/components/canvas/SearchBar';
 import { useVersionSearch } from '@/hooks/useVersionSearch';
+import { useTranslation } from '@/i18n/I18nContext';
 
 interface VersionCanvasProps {
   projectId: string | null;
@@ -17,6 +18,8 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   onNodeClick,
   hasProject = false,
 }) => {
+  const t = useTranslation();
+  
   // 对比模式下的处理函数
   const handleCompare = () => {
     if (compareMode) {
@@ -254,12 +257,12 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   const handleDeleteVersion = async () => {
     if (!selectedVersionId) return;
     
-    if (confirm('确定删除此版本吗？子版本将连接到父版本。')) {
+    if (confirm(t('components.canvas.confirmDelete'))) {
       try {
         await deleteVersion(selectedVersionId);
         setSelectedVersionId(null);
       } catch (error) {
-        alert(`删除失败: ${error}`);
+        alert(`${t('components.canvas.deleteFailed')}: ${error}`);
       }
     }
   };
@@ -277,7 +280,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
         className="h-full flex items-center justify-center bg-surface-variant text-surface-onVariant"
         data-testid="version-canvas"
       >
-        <p>请先选择项目</p>
+        <p>{t('components.canvas.selectProject')}</p>
       </div>
     );
   }
@@ -299,7 +302,6 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
               onPrev={handlePrev}
               onClear={handleClear}
               onClose={handleCloseSearch}
-              placeholder="搜索版本内容..."
             />
           </div>
         )}
@@ -312,19 +314,18 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
               size="small"
               onClick={handleCompare}
               disabled={!hasProject || !currentVersionId}
-              title={compareMode ? "退出对比模式" : "点击对比进入对比选择模式"}
+              title={compareMode ? t('components.canvas.exitCompare') : t('components.canvas.enterCompare')}
               className={compareMode ? "bg-primary-container border-primary" : ""}
             >
-              {compareMode ? "退出对比" : "对比"}
+              {compareMode ? t('components.canvas.exitCompare') : t('components.canvas.compare')}
             </Button>
             <Button
               variant="outlined"
               size="small"
               onClick={handleDeleteVersion}
-              // className="[&]:text-error/80 [&]:hover:bg-error-container [&]:hover:border-transparent"
-              title="删除此版本"
+              title={t('components.canvas.deleteVersion')}
             >
-              🗑️ 删除
+              🗑️ {t('common.delete')}
             </Button>
           </div>
         )}
@@ -345,8 +346,8 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
             variant="canvasControl"
             size="small"
             onClick={handleZoomIn}
-            title="放大"
-            aria-label="放大画布"
+            title={t('components.canvas.zoomIn')}
+            aria-label={t('components.canvas.zoomIn')}
           >
             🔍+
           </Button>
@@ -354,8 +355,8 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
             variant="canvasControl"
             size="small"
             onClick={handleZoomOut}
-            title="缩小"
-            aria-label="缩小画布"
+            title={t('components.canvas.zoomOut')}
+            aria-label={t('components.canvas.zoomOut')}
           >
             🔍-
           </Button>
@@ -363,8 +364,8 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
             variant="canvasControl"
             size="small"
             onClick={handleResetView}
-            title="重置视图"
-            aria-label="重置画布视图"
+            title={t('components.canvas.resetView')}
+            aria-label={t('components.canvas.resetView')}
           >
             ↺
           </Button>

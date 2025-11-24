@@ -7,6 +7,9 @@ import { db } from '@/db/schema';
 import { projectManager } from './projectManager';
 import { versionManager } from './versionManager';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
+import { translations } from '@/i18n/locales';
+import { initializeLanguage } from '@/i18n/detectLanguage';
+import type { Locale } from '@/i18n/types';
 
 /**
  * 检查是否为全新用户（LocalStorage和IndexedDB都没有数据）
@@ -30,34 +33,38 @@ async function isNewUser(): Promise<boolean> {
  * @returns 创建的项目ID
  */
 async function createSampleProject(): Promise<string> {
-  // 创建示例项目（无文件夹）
-  const project = await projectManager.createProject('示例项目', null as any);
+  // 获取当前语言的翻译
+  const locale: Locale = initializeLanguage();
+  const t = translations[locale];
   
-  // 创建根版本：小狗嬉戏
+  // 创建示例项目（无文件夹）
+  const project = await projectManager.createProject(t.sampleData.projectName, null as any);
+  
+  // 创建根版本
   const rootVersion = await versionManager.createVersion(
     project.id,
-    '一只可爱的小狗在春意盎然的公园草地上嬉戏',
+    t.sampleData.versions.root.content,
     null,
     undefined, // score
-    '小狗嬉戏' // name
+    t.sampleData.versions.root.name // name
   );
   
-  // 创建根分支1：帅气小狗
+  // 创建根分支1
   await versionManager.createVersion(
     project.id,
-    '一只威风凛凛帅气的德牧在春意盎然的公园草地上嬉戏',
+    t.sampleData.versions.branch1.content,
     rootVersion.id,
     undefined, // score
-    '帅气小狗' // name
+    t.sampleData.versions.branch1.name // name
   );
 
-  // 创建根分支2：冬日小狗
+  // 创建根分支2
   await versionManager.createVersion(
     project.id,
-    '一只可爱的小狗在冬季白雪覆盖的公园草地上嬉戏',
+    t.sampleData.versions.branch2.content,
     rootVersion.id,
     undefined, // score
-    '冬日小狗' // name
+    t.sampleData.versions.branch2.name // name
   );
 
   return project.id;

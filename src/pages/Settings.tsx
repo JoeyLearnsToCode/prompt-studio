@@ -7,9 +7,11 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
+import { useTranslation } from '@/i18n/I18nContext';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
+  const t = useTranslation();
   const { loadFolders, loadProjects } = useProjectStore();
   const [webdavConfig, setWebdavConfig] = useState<WebDAVConfig>({
     url: '',
@@ -48,13 +50,13 @@ const Settings: React.FC = () => {
       const result = await webdavService.testConnection();
       setIsConnected(result);
       if (result) {
-        alert('连接成功！');
+        alert(t('pages.settings.webdav.connectionSuccess'));
         loadBackups();
       } else {
-        alert('连接失败，请检查配置');
+        alert(t('pages.settings.webdav.connectionFailed'));
       }
     } catch (error) {
-      alert(`连接失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`${t('pages.settings.webdav.connectionFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
       setIsConnected(false);
     } finally {
       setTesting(false);
@@ -66,23 +68,23 @@ const Settings: React.FC = () => {
       const list = await webdavService.listBackups();
       setBackups(list);
     } catch (error) {
-      console.error('加载备份列表失败:', error);
+      console.error(t('pages.settings.errors.loadBackupsFailed'), error);
     }
   };
 
   const handleBackup = async () => {
     if (!isConnected) {
-      alert('请先配置并测试 WebDAV 连接');
+      alert(t('pages.settings.webdav.configureFirst'));
       return;
     }
 
     setLoading(true);
     try {
       await webdavService.backupToWebDAV();
-      alert('备份成功！');
+      alert(t('pages.settings.webdav.backupSuccess'));
       loadBackups();
     } catch (error) {
-      alert(`备份失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`${t('pages.settings.webdav.backupFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
     } finally {
       setLoading(false);
     }
@@ -90,7 +92,7 @@ const Settings: React.FC = () => {
 
   const handleOpenRestoreModal = async () => {
     if (!isConnected) {
-      alert('请先配置并测试 WebDAV 连接');
+      alert(t('pages.settings.webdav.configureFirst'));
       return;
     }
 
@@ -100,14 +102,14 @@ const Settings: React.FC = () => {
       setBackups(list);
       setShowRestoreModal(true);
     } catch (error) {
-      alert(`获取备份列表失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`${t('pages.settings.errors.loadBackupsFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleRestore = async (remotePath: string) => {
-    if (!confirm(`确定从此备份还原数据吗？`)) {
+    if (!confirm(t('pages.settings.webdav.confirmRestore'))) {
       return;
     }
 
@@ -115,28 +117,28 @@ const Settings: React.FC = () => {
     setLoading(true);
     try {
       await webdavService.restoreFromWebDAV(remotePath);
-      alert('还原成功！请刷新页面查看数据。');
+      alert(t('pages.settings.webdav.restoreSuccess'));
       window.location.reload();
     } catch (error) {
-      alert(`还原失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`${t('pages.settings.webdav.restoreFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteBackup = async (remotePath: string) => {
-    if (!confirm(`确定删除此备份吗？`)) {
+    if (!confirm(t('pages.settings.webdav.confirmDelete'))) {
       return;
     }
 
     try {
       await webdavService.deleteBackup(remotePath);
-      alert('删除成功！');
+      alert(t('pages.settings.webdav.deleteSuccess'));
       // 更新备份列表和模态框中的备份列表
       loadBackups();
       setBackups(prev => prev.filter(b => b.path !== remotePath));
     } catch (error) {
-      alert(`删除失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`${t('pages.settings.webdav.deleteFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
     }
   };
 
@@ -144,7 +146,7 @@ const Settings: React.FC = () => {
     try {
       await exportService.exportAllAsZip();
     } catch (error) {
-      alert(`导出失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`${t('pages.settings.local.exportFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
     }
   };
 
@@ -164,7 +166,7 @@ const Settings: React.FC = () => {
       } else if (file.name.endsWith('.json')) {
         await exportService.importFromJSON(file);
       } else {
-        alert('不支持的文件格式');
+        alert(t('pages.settings.local.unsupportedFormat'));
         return;
       }
       
@@ -172,9 +174,9 @@ const Settings: React.FC = () => {
       await loadFolders();
       await loadProjects();
       
-      alert('导入成功！');
+      alert(t('pages.settings.local.importSuccess'));
     } catch (error) {
-      alert(`导入失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`${t('pages.settings.local.importFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
     }
   };
 
@@ -192,7 +194,7 @@ const Settings: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface text-surface-onSurface">
       <header className="bg-primary text-onPrimary px-6 py-1 shadow-m3-1 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">设置</h1>
+        <h1 className="text-2xl font-bold">{t('pages.settings.title')}</h1>
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-2 px-4 py-2 rounded-m3-medium hover:bg-onPrimary/20 transition-colors"
@@ -207,20 +209,20 @@ const Settings: React.FC = () => {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* 本地导入导出 */}
           <section className="bg-surface-container rounded-m3-large p-6 shadow-m3-1">
-            <h2 className="text-xl font-bold mb-4">本地备份</h2>
+            <h2 className="text-xl font-bold mb-4">{t('pages.settings.local.title')}</h2>
             <div className="space-y-4">
               <div>
                 <Button onClick={handleExportJSON} className="w-full sm:w-auto">
-                  📦 导出所有数据为 ZIP
+                  📦 {t('pages.settings.local.exportZip')}
                 </Button>
                 <p className="text-sm text-surface-onVariant mt-2">
-                  导出包含项目、版本、附件的完整备份文件
+                  {t('pages.settings.local.exportDescription')}
                 </p>
               </div>
 
               <div>
                 <Button onClick={handleImportClick} className="w-full sm:w-auto">
-                  📥 从 ZIP 文件导入
+                  📥 {t('pages.settings.local.importZip')}
                 </Button>
                 <input
                   ref={fileInputRef}
@@ -235,10 +237,10 @@ const Settings: React.FC = () => {
 
           {/* WebDAV 配置 */}
           <section className="bg-surface-container rounded-m3-large p-6 shadow-m3-1">
-            <h2 className="text-xl font-bold mb-4">WebDAV 远程备份</h2>
+            <h2 className="text-xl font-bold mb-4">{t('pages.settings.webdav.title')}</h2>
             <div className="space-y-4">
               <Input
-                label="WebDAV 服务器地址"
+                label={t('pages.settings.webdav.serverUrl')}
                 placeholder="https://example.com/webdav"
                 value={webdavConfig.url}
                 onChange={(e) =>
@@ -246,7 +248,7 @@ const Settings: React.FC = () => {
                 }
               />
               <Input
-                label="用户名"
+                label={t('pages.settings.webdav.username')}
                 placeholder="username"
                 value={webdavConfig.username}
                 onChange={(e) =>
@@ -254,7 +256,7 @@ const Settings: React.FC = () => {
                 }
               />
               <Input
-                label="密码"
+                label={t('pages.settings.webdav.password')}
                 type="password"
                 placeholder="password"
                 value={webdavConfig.password}
@@ -265,11 +267,11 @@ const Settings: React.FC = () => {
 
               <div className="flex gap-3">
                 <Button onClick={handleTestConnection} disabled={testing}>
-                  {testing ? '测试中...' : '测试连接'}
+                  {testing ? t('pages.settings.webdav.testing') : t('pages.settings.webdav.testConnection')}
                 </Button>
                 {isConnected && (
                   <span className="flex items-center text-sm text-green-600">
-                    ✓ 已连接
+                    ✓ {t('pages.settings.webdav.connected')}
                   </span>
                 )}
               </div>
@@ -281,14 +283,14 @@ const Settings: React.FC = () => {
                     disabled={!isConnected || loading}
                     className="w-full sm:w-auto"
                   >
-                    {loading ? '备份中...' : '🔄 备份到 WebDAV'}
+                    {loading ? t('pages.settings.webdav.backingUp') : `🔄 ${t('pages.settings.webdav.backupToWebdav')}`}
                   </Button>
                   <Button
                     onClick={handleOpenRestoreModal}
                     disabled={!isConnected || loading}
                     className="w-full sm:w-auto"
                   >
-                    {loading ? '加载中...' : '📥 从 WebDAV 还原'}
+                    {loading ? t('pages.settings.webdav.loading') : `📥 ${t('pages.settings.webdav.restoreFromWebdav')}`}
                   </Button>
                 </div>
               </div>
@@ -301,13 +303,13 @@ const Settings: React.FC = () => {
       <Modal
         isOpen={showRestoreModal}
         onClose={() => setShowRestoreModal(false)}
-        title="从 WebDAV 还原备份"
+        title={t('pages.settings.webdav.restoreModalTitle')}
         size="large"
       >
         <div className="space-y-4">
           {backups.length === 0 ? (
             <p className="text-center text-surface-onVariant py-8">
-              暂无可用的备份文件
+              {t('pages.settings.webdav.noBackups')}
             </p>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -329,14 +331,14 @@ const Settings: React.FC = () => {
                     disabled={loading}
                     className="ml-4"
                   >
-                    还原
+                    {t('pages.settings.webdav.restore')}
                   </Button>
                   <Button
                     onClick={() => handleDeleteBackup(backup.path)}
                     disabled={loading}
                     className="ml-4"
                   >
-                    删除
+                    {t('pages.settings.webdav.delete')}
                   </Button>
                 </div>
               ))}
