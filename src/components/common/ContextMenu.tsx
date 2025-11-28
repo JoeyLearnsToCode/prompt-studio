@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface ContextMenuItem {
@@ -23,6 +23,22 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onClose,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
+  const [adjustedPosition, setAdjustedPosition] = useState(position);
+
+  useEffect(() => {
+    if (isOpen && menuRef.current) {
+      const menuRect = menuRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - position.y;
+      
+      let newY = position.y;
+      if (spaceBelow < menuRect.height && position.y > menuRect.height) {
+        newY = position.y - menuRect.height;
+      }
+      
+      setAdjustedPosition({ x: position.x, y: newY });
+    }
+  }, [isOpen, position]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -59,8 +75,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           transition={{ duration: 0.1 }}
           className="fixed z-50 w-auto bg-surface-container/90 backdrop-blur-md rounded-m3-medium shadow-elevation-2 py-2"
           style={{
-            left: `${position.x}px`,
-            top: `${position.y}px`,
+            left: `${adjustedPosition.x}px`,
+            top: `${adjustedPosition.y}px`,
           }}
         >
           {items.map((item, index) => (
