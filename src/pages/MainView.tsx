@@ -67,6 +67,9 @@ const MainView: React.FC = () => {
     parentId: string | null;
   } | null>(null);
 
+  // 附件区域拖拽状态
+  const [isDraggingAttachments, setIsDraggingAttachments] = useState(false);
+
   
 
   // 处理版本树中的节点点击，考虑对比模式
@@ -220,6 +223,61 @@ const MainView: React.FC = () => {
     }
   };
 
+  const handleUploadFiles = async (files: FileList) => {
+    setIsDraggingAttachments(false);
+    if (!currentVersionId) return;
+
+    const validTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'video/mp4',
+      'video/webm',
+    ];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // 验证文件类型
+      if (!validTypes.includes(file.type)) {
+        alert(`${t('components.attachmentGallery.unsupportedType')}: ${file.type}`);
+        continue;
+      }
+
+      // 验证文件大小（50MB）
+      if (file.size > 50 * 1024 * 1024) {
+        alert(`${t('components.attachmentGallery.fileTooLarge')}: ${file.name}`);
+        continue;
+      }
+
+      try {
+        await attachmentManager.uploadAttachment(currentVersionId, file);
+      } catch (error) {
+        console.error('上传附件失败:', error);
+        alert(`${t('components.attachmentGallery.uploadFailed')}: ${file.name}`);
+      }
+    }
+    loadAttachments(currentVersionId);
+  };
+
+  const handleAttachmentDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingAttachments(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleUploadFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleAttachmentDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingAttachments(true);
+  };
+
+  const handleAttachmentDragLeave = () => {
+    setIsDraggingAttachments(false);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-surface">
       {/* 顶部标题栏 */}
@@ -360,8 +418,14 @@ const MainView: React.FC = () => {
                 {/* 附件区域 */}
                 {currentVersionId && (
                   <div 
-                    className="p-4 overflow-y-auto bg-surface-container-low"
+                    className={`p-4 overflow-y-auto transition-colors duration-200 ${isDraggingAttachments
+                      ? 'bg-primary-container/30 border-2 border-dashed border-primary'
+                      : 'bg-surface-container-low'
+                      }`}
                     style={{ height: `${(1 - layoutPreference.editorHeightRatio) * 100}%` }}
+                    onDrop={handleAttachmentDrop}
+                    onDragOver={handleAttachmentDragOver}
+                    onDragLeave={handleAttachmentDragLeave}
                   >
                     <h3 className="text-sm font-semibold mb-3">📎 {t('pages.mainView.attachments')}</h3>
                     <AttachmentGallery
@@ -369,6 +433,7 @@ const MainView: React.FC = () => {
                       attachments={attachments}
                       onAttachmentsChange={() => loadAttachments(currentVersionId)}
                       readonly={false}
+                      onUpload={handleUploadFiles}
                       extraCard={
                         <VersionMetaCard
                           versionId={currentVersionId}

@@ -11,6 +11,7 @@ interface AttachmentGalleryProps {
   onAttachmentsChange: () => void;
   readonly?: boolean;
   extraCard?: React.ReactNode; // 额外的卡片，会显示在上传区后面
+  onUpload?: (files: FileList) => Promise<void>;
 }
 
 export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
@@ -19,6 +20,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
   onAttachmentsChange,
   readonly = false,
   extraCard,
+  onUpload,
 }) => {
   const t = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
@@ -31,6 +33,12 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
   const handleFileSelect = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return;
+
+      if (onUpload) {
+        await onUpload(files);
+        onAttachmentsChange();
+        return;
+      }
 
       const validTypes = [
         'image/jpeg',
@@ -66,12 +74,13 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
 
       onAttachmentsChange();
     },
-    [versionId, onAttachmentsChange]
+    [versionId, onAttachmentsChange, onUpload, t]
   );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
+      e.stopPropagation();
       setIsDragging(false);
 
       if (readonly) return;
