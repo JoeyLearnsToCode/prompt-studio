@@ -37,7 +37,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   onSelect,
   onCloseAllMenus,
 }) => {
-  const touchTimerRef = useRef<number | null>(null);
+  const touchTimerRef = useRef<NodeJS.Timeout | number | null>(null);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -128,7 +128,7 @@ const FolderItem: React.FC<TreeItemProps> = ({
 }) => {
   const { folders, projects } = useProjectStore();
   const isExpanded = expanded.has(folder.id);
-  const touchTimerRef = useRef<number | null>(null);
+  const touchTimerRef = useRef<NodeJS.Timeout | number | null>(null);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
   
   const childFolders = sortByName(folders.filter((f) => f.parentId === folder.id));

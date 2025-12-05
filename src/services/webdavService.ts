@@ -82,7 +82,7 @@ export class WebDAVService {
       // 附件 blob 保存到单独的文件夹
       const attachmentsFolder = zip.folder('attachments');
       for (const attachment of attachments) {
-        if (attachmentsFolder) {
+        if (attachmentsFolder && attachment.blob) {
           attachmentsFolder.file(attachment.id, attachment.blob);
         }
       }
