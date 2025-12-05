@@ -51,6 +51,7 @@ const MainView: React.FC = () => {
   
   // 编辑区容器的 ref，用于垂直分隔条计算
   const editorContainerRef = useRef<HTMLDivElement>(null);
+  const mainSplitContainerRef = useRef<HTMLDivElement>(null);
   
   // 编辑器的 ref，用于聚焦
   const editorRef = useRef<PromptEditorRef>(null);
@@ -314,6 +315,8 @@ const MainView: React.FC = () => {
         {/* 左侧边栏 */}
         <Sidebar />
 
+        {/* 主要内容包装器，用于隔离左侧边栏，确保分隔条比例计算正确 */}
+        <div className="flex-1 flex overflow-hidden w-0 min-w-0" ref={mainSplitContainerRef}>
         {/* 中央编辑区 */}
         <div 
           className="flex flex-col"
@@ -465,6 +468,7 @@ const MainView: React.FC = () => {
           onDragEnd={stopDragging}
           minRatio={0.2}
           maxRatio={0.8}
+            containerRef={mainSplitContainerRef}
         />
 
         {/* 右侧画布区 - 版本树可视化 */}
@@ -477,6 +481,7 @@ const MainView: React.FC = () => {
             onNodeClick={handleVersionNodeClick}
             hasProject={!!currentProjectId}
           />
+        </div>
         </div>
       </div>
 

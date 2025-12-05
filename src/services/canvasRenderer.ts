@@ -250,17 +250,17 @@ export class CanvasRenderer {
       ? this.colors.selectedNode
       : this.colors.surface;
     // 选中节点不显示边框，看起来无边框
-    if (!isSelected) {
-      ctx.strokeStyle = this.colors.outline;
-      ctx.lineWidth = 1;
-    }
+    // if (!isSelected) {
+    //   ctx.strokeStyle = this.colors.outline;
+    //   ctx.lineWidth = 1;
+    // }
 
     this.roundRect(ctx, node.x, node.y, node.width, node.height, 12);
     ctx.fill();
     // 只有未选中的节点才绘制边框
-    if (!isSelected) {
-      ctx.stroke();
-    }
+    // if (!isSelected) {
+    //   ctx.stroke();
+    // }
 
     // 版本名称（如果有）
     let currentY = node.y + 8;

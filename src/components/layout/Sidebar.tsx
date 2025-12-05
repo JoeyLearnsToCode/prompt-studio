@@ -41,7 +41,7 @@ const Sidebar: React.FC = () => {
 
   if (sidebarCollapsed) {
     return (
-      <div className="w-16 bg-surface-variant border-r border-surface-onVariant/20 flex flex-col items-center py-4">
+      <div className="w-16 flex-shrink-0 bg-surface-variant border-r border-surface-onVariant/20 flex flex-col items-center py-4">
         <button
           onClick={toggleSidebar}
           className="w-8 h-8 p-0 flex items-center justify-center rounded-m3-small transition-colors hover:bg-surface-containerHighest"
@@ -58,7 +58,7 @@ const Sidebar: React.FC = () => {
   }
 
   return (
-    <div className="w-64 bg-surface-variant border-r border-surface-onVariant/20 flex flex-col">
+    <div className="w-[18%] min-w-[160px] flex-shrink-0 bg-surface-variant border-r border-surface-onVariant/20 flex flex-col">
       <div className="p-3">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold text-lg">{t('components.sidebar.projects')}</h2>

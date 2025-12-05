@@ -21,6 +21,9 @@ interface ResizableSplitterProps {
   
   /** 可选：自定义样式类名 */
   className?: string;
+
+  /** 容器引用，用于计算相对宽度 */
+  containerRef?: React.RefObject<HTMLElement>;
 }
 
 /**
@@ -35,6 +38,7 @@ export const ResizableSplitter: React.FC<ResizableSplitterProps> = ({
   minRatio = 0.2,
   maxRatio = 0.8,
   className = '',
+  containerRef,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const rafRef = useRef<number | null>(null);
@@ -44,6 +48,9 @@ export const ResizableSplitter: React.FC<ResizableSplitterProps> = ({
     setIsDragging(true);
     onDragStart?.();
 
+    const startX = e.clientX;
+    const startRatio = _ratio;
+
     const handleMouseMove = (e: MouseEvent) => {
       // 使用requestAnimationFrame确保60fps流畅度
       if (rafRef.current !== null) {
@@ -51,7 +58,9 @@ export const ResizableSplitter: React.FC<ResizableSplitterProps> = ({
       }
 
       rafRef.current = requestAnimationFrame(() => {
-        const newRatio = e.clientX / window.innerWidth;
+        const deltaX = e.clientX - startX;
+        const totalWidth = containerRef?.current?.clientWidth || window.innerWidth;
+        const newRatio = startRatio + deltaX / totalWidth;
         const clampedRatio = Math.max(minRatio, Math.min(maxRatio, newRatio));
         onRatioChange(clampedRatio);
       });
@@ -71,12 +80,15 @@ export const ResizableSplitter: React.FC<ResizableSplitterProps> = ({
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  }, [minRatio, maxRatio, onRatioChange, onDragStart, onDragEnd]);
+  }, [minRatio, maxRatio, onRatioChange, onDragStart, onDragEnd, _ratio]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     setIsDragging(true);
     onDragStart?.();
+
+    const startX = e.touches[0].clientX;
+    const startRatio = _ratio;
 
     const handleTouchMove = (e: TouchEvent) => {
       if (rafRef.current !== null) {
@@ -85,7 +97,9 @@ export const ResizableSplitter: React.FC<ResizableSplitterProps> = ({
 
       rafRef.current = requestAnimationFrame(() => {
         const touch = e.touches[0];
-        const newRatio = touch.clientX / window.innerWidth;
+        const deltaX = touch.clientX - startX;
+        const totalWidth = containerRef?.current?.clientWidth || window.innerWidth;
+        const newRatio = startRatio + deltaX / totalWidth;
         const clampedRatio = Math.max(minRatio, Math.min(maxRatio, newRatio));
         onRatioChange(clampedRatio);
       });
@@ -105,7 +119,7 @@ export const ResizableSplitter: React.FC<ResizableSplitterProps> = ({
 
     document.addEventListener('touchmove', handleTouchMove);
     document.addEventListener('touchend', handleTouchEnd);
-  }, [minRatio, maxRatio, onRatioChange, onDragStart, onDragEnd]);
+  }, [minRatio, maxRatio, onRatioChange, onDragStart, onDragEnd, _ratio]);
 
   // 组件卸载时清理RAF
   useEffect(() => {
