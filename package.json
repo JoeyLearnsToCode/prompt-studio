@@ -24,7 +24,7 @@
     "framer-motion": "^10.16.16",
     "js-sha256": "^0.10.1",
     "jszip": "^3.10.1",
-    "monaco-editor": "^0.54.0",
+    "monaco-editor": "^0.49.0",
     "nanoid": "^5.1.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

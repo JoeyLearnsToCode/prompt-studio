@@ -185,6 +185,8 @@ export function CompareModal({
               original={sourceVersion.content}
               modified={targetVersion.content}
               onMount={handleEditorDidMount}
+              keepCurrentModifiedModel={true}
+              keepCurrentOriginalModel={true}
               options={{
                 readOnly: true,
                 fontSize: editorFontSize,

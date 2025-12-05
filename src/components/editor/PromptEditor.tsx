@@ -34,7 +34,7 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(({
   loader.config({
     paths: {
       // 显式指定 CDN 路径，防止 loader 使用默认的 0.55.1 版本（有问题）
-      vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.51.0/min/vs',
+      vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs',
     },
     'vs/nls': {
       availableLanguages: {
