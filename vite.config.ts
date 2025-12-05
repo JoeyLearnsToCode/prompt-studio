@@ -42,10 +42,25 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/api'),
+            urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/api'),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // Monaco Editor CDN 缓存策略
+            urlPattern: ({ url }: { url: URL }) => url.origin === 'https://cdn.jsdelivr.net' && url.pathname.includes('monaco-editor'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'monaco-cdn-cache',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
               cacheableResponse: {
                 statuses: [0, 200],
               },

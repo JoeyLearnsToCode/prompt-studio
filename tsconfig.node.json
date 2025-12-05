@@ -4,7 +4,8 @@
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "lib": ["ES2020", "DOM"]
   },
   "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts"]
 }
