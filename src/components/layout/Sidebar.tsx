@@ -5,9 +5,9 @@ import { Button } from '@/components/common/Button';
 import { FolderTree } from './FolderTree';
 import { useTranslation } from '@/i18n/I18nContext';
 
-const Sidebar: React.FC = () => {
+export const Sidebar: React.FC = () => {
   const t = useTranslation();
-  const { sidebarCollapsed, toggleSidebar } = useUiStore();
+  const { sidebarCollapsed } = useUiStore();
   const { loadFolders, loadProjects, createFolder, createProject, selectProject } = useProjectStore();
 
   useEffect(() => {
@@ -40,21 +40,7 @@ const Sidebar: React.FC = () => {
   };
 
   if (sidebarCollapsed) {
-    return (
-      <div className="w-16 flex-shrink-0 bg-surface-variant border-r border-surface-onVariant/20 flex flex-col items-center py-4">
-        <button
-          onClick={toggleSidebar}
-          className="w-8 h-8 p-0 flex items-center justify-center rounded-m3-small transition-colors hover:bg-surface-containerHighest"
-          aria-label={t('components.sidebar.expandSidebar')}
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -62,17 +48,7 @@ const Sidebar: React.FC = () => {
       <div className="p-3">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold text-lg">{t('components.sidebar.projects')}</h2>
-          <button
-            onClick={toggleSidebar}
-            className="w-8 h-8 p-0 flex items-center justify-center rounded-m3-small transition-colors hover:bg-surface-containerHighest"
-            aria-label={t('components.sidebar.collapseSidebar')}
-          >
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
+          <SidebarToggle />
         </div>
         <div className="flex gap-2 justify-center">
           <Button
@@ -105,4 +81,20 @@ const Sidebar: React.FC = () => {
   );
 };
 
-export default Sidebar;
+export const SidebarToggle = () => {
+  const t = useTranslation();
+  const { toggleSidebar } = useUiStore();
+  return (
+    <button
+      onClick={toggleSidebar}
+      className="w-8 h-8 p-0 flex items-center justify-center rounded-m3-small transition-colors hover:bg-surface-containerHighest"
+      aria-label={t('components.sidebar.collapseSidebar')}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    </button>
+  );
+};

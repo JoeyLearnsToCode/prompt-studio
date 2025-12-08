@@ -142,10 +142,11 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(({
           scrollBeyondLastLine: false,
           wordWrap: 'on',
           automaticLayout: true,
-          padding: { top: 16, bottom: 16 },
+          padding: { top: 0, bottom: 10 },
           lineNumbers: 'on',
-          lineNumbersMinChars: 1,
+          lineNumbersMinChars: 2,
           renderLineHighlight: 'all',
+          folding: false,
         }}
       />
     </div>

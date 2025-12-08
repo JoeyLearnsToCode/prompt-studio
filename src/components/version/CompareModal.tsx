@@ -195,8 +195,9 @@ export function CompareModal({
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
+                useInlineViewWhenSpaceIsLimited: false,
                 automaticLayout: true,
-                padding: { top: 16, bottom: 16 },
+                padding: { top: 0, bottom: 10 },
                 renderSideBySide: true,
               }}
             />

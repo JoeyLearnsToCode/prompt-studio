@@ -4,7 +4,7 @@ import { useProjectStore } from '@/store/projectStore';
 import { useVersionStore } from '@/store/versionStore';
 import { attachmentManager } from '@/services/attachmentManager';
 import type { Attachment } from '@/models/Attachment';
-import Sidebar from '@/components/layout/Sidebar';
+import { Sidebar, SidebarToggle } from '@/components/layout/Sidebar';
 import PromptEditor, { PromptEditorRef } from '@/components/editor/PromptEditor';
 import { useUiStore } from '@/store/uiStore';
 import { useTranslation } from '@/i18n/I18nContext';
@@ -42,6 +42,7 @@ const MainView: React.FC = () => {
     setEditorHeightRatio,
     startDragging,
     stopDragging,
+    sidebarCollapsed,
   } = useUiStore();
 
   const [editorContent, setEditorContent] = useState('');
@@ -323,69 +324,76 @@ const MainView: React.FC = () => {
           style={{ width: `${layoutPreference.canvasPanelWidthRatio * 100}%` }}
         >
           {/* 版本名称输入框 */}
-          {currentProjectId && currentVersionId && (
-            <div className="px-4 py-3 bg-surface-variant border-b border-surface-onVariant/20">
-              <div className="flex items-center gap-2 h-10">
-                <label htmlFor="version-name" className="text-sm font-medium text-surface-onVariant whitespace-nowrap">
-                  {t('pages.mainView.versionName')}:
-                </label>
-                <input
-                  ref={versionNameInputRef}
-                  id="version-name"
-                  type="text"
-                  value={versionName}
-                  onChange={(e) => setVersionName(e.target.value)}
-                  onKeyDown={(e) => {
-                    // 处理保存快捷键
-                    if (e.ctrlKey && e.key === 'Enter') {
-                      if (e.shiftKey) {
-                        // Ctrl+Shift+Enter: 保存新版本
-                        handleSave();
-                      } else {
-                        // Ctrl+Enter: 原地保存
-                        handleSaveInPlace();
-                      }
-                    } else if (e.ctrlKey && e.key === 's') {
-                      e.preventDefault();
-                      if (e.shiftKey) {
-                        // Ctrl+Shift+S: 保存新版本
-                        handleSave();
-                      } else {
-                        // Ctrl+S: 原地保存
-                        handleSaveInPlace();
-                      }
-                    } else if (e.key === 'Tab' && !e.shiftKey) {
-                      // Tab: 切换到编辑器
-                      e.preventDefault();
-                      editorRef.current?.focus();
-                    }
-                  }}
-                  placeholder={t('pages.mainView.versionNamePlaceholder')}
-                  className="flex-1 px-3 py-2 text-sm bg-surface border border-surface-onVariant/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                />
-                
-                {/* 保存按钮 */}
-                <Button
-                  onClick={handleSaveInPlace}
-                  variant="outlined"
-                  size="small"
-                  disabled={!canSaveInPlace || !currentProjectId}
-                  title={`${t('components.toolbar.saveInPlace')} (Ctrl+S / Ctrl+Enter)`}
-                >
-                  {t('components.toolbar.saveInPlace')}
-                </Button>
-
-                <Button
-                  onClick={handleSave}
-                  variant="outlined"
-                  size="small"
-                  disabled={!currentProjectId}
-                  title={`${t('components.toolbar.saveNew')} (Ctrl+Shift+S / Ctrl+Shift+Enter)`}
-                >
-                  {t('components.toolbar.saveNew')}
-                </Button>
+            {sidebarCollapsed && (!currentProjectId || !currentVersionId) && (
+              <div className="px-4 py-3">
+                <SidebarToggle />
               </div>
-            </div>
+            )}
+
+          {currentProjectId && currentVersionId && (
+              <div className="px-4 py-3 bg-surface-variant border-b border-surface-onVariant/20">
+                <div className="flex items-center gap-2 h-10">
+                  {sidebarCollapsed && (<SidebarToggle />)}
+                  <label htmlFor="version-name" className="text-sm font-medium text-surface-onVariant whitespace-nowrap">
+                    {t('pages.mainView.versionName')}:
+                  </label>
+                  <input
+                    ref={versionNameInputRef}
+                    id="version-name"
+                    type="text"
+                    value={versionName}
+                    onChange={(e) => setVersionName(e.target.value)}
+                    onKeyDown={(e) => {
+                      // 处理保存快捷键
+                      if (e.ctrlKey && e.key === 'Enter') {
+                        if (e.shiftKey) {
+                          // Ctrl+Shift+Enter: 保存新版本
+                          handleSave();
+                        } else {
+                          // Ctrl+Enter: 原地保存
+                          handleSaveInPlace();
+                        }
+                      } else if (e.ctrlKey && e.key === 's') {
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                          // Ctrl+Shift+S: 保存新版本
+                          handleSave();
+                        } else {
+                          // Ctrl+S: 原地保存
+                          handleSaveInPlace();
+                        }
+                      } else if (e.key === 'Tab' && !e.shiftKey) {
+                        // Tab: 切换到编辑器
+                        e.preventDefault();
+                        editorRef.current?.focus();
+                      }
+                    }}
+                    placeholder={t('pages.mainView.versionNamePlaceholder')}
+                    className="flex-1 px-3 py-2 text-sm bg-surface border border-surface-onVariant/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  />
+
+                  {/* 保存按钮 */}
+                  <Button
+                    onClick={handleSaveInPlace}
+                    variant="outlined"
+                    size="small"
+                    disabled={!canSaveInPlace || !currentProjectId}
+                    title={`${t('components.toolbar.saveInPlace')} (Ctrl+S / Ctrl+Enter)`}
+                  >
+                    {t('components.toolbar.saveInPlace')}
+                  </Button>
+
+                  <Button
+                    onClick={handleSave}
+                    variant="outlined"
+                    size="small"
+                    disabled={!currentProjectId}
+                    title={`${t('components.toolbar.saveNew')} (Ctrl+Shift+S / Ctrl+Shift+Enter)`}
+                  >
+                    {t('components.toolbar.saveNew')}
+                  </Button>
+                </div>
+              </div>
           )}
 
           <div className="flex-1 flex flex-col overflow-hidden" ref={editorContainerRef}>
