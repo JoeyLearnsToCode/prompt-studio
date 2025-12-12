@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useProjectStore } from '@/store/projectStore';
 import { useUiStore } from '@/store/uiStore';
 import { Button } from '@/components/common/Button';
+import { Icons } from '@/components/icons/Icons';
 import { FolderTree } from './FolderTree';
 import { useTranslation } from '@/i18n/I18nContext';
 
@@ -55,20 +56,20 @@ export const Sidebar: React.FC = () => {
             variant="outlined"
             size="small"
             onClick={handleCreateFolder}
-            className="w-10 h-10 p-0 flex items-center justify-center relative"
+            className="w-fit aspect-square flex items-center justify-center relative"
             title={t('components.sidebar.createFolder')}
           >
-            <span className="text-base leading-none">📁</span>
+            <Icons.Folder size={16} />
             <span className="absolute top-0 right-1 text-base leading-none font-bold opacity-70">+</span>
           </Button>
           <Button
             variant="outlined"
             size="small"
             onClick={handleCreateProject}
-            className="w-10 h-10 p-0 flex items-center justify-center relative"
+            className="w-fit aspect-square flex items-center justify-center relative"
             title={t('components.sidebar.createProject')}
           >
-            <span className="text-base leading-none">📄</span>
+            <Icons.File size={16} />
             <span className="absolute top-0 right-1 text-base leading-none font-bold opacity-70">+</span>
           </Button>
         </div>
@@ -90,11 +91,7 @@ export const SidebarToggle = () => {
       className="w-8 h-8 p-0 flex items-center justify-center rounded-m3-small transition-colors hover:bg-surface-containerHighest"
       aria-label={t('components.sidebar.collapseSidebar')}
     >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5">
-        <line x1="3" y1="6" x2="21" y2="6" />
-        <line x1="3" y1="12" x2="21" y2="12" />
-        <line x1="3" y1="18" x2="21" y2="18" />
-      </svg>
+      <Icons.Menu size={20} />
     </button>
   );
 };

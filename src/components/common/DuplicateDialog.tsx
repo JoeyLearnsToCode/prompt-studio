@@ -5,6 +5,7 @@
 
 import { useEffect } from 'react';
 import type { Version } from '@/models/Version';
+import { Icons } from '@/components/icons/Icons';
 
 export interface DuplicateDialogProps {
   /** 对话框是否打开 */
@@ -64,19 +65,7 @@ export function DuplicateDialog({
       <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
         {/* 图标和标题 */}
         <div className="flex items-center gap-3 mb-4">
-          <svg
-            className="w-8 h-8 text-amber-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
+          <Icons.Warning className="w-8 h-8 text-amber-500" />
           <h2 className="text-xl font-bold text-gray-900">检测到重复内容</h2>
         </div>
 

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { attachmentManager } from '@/services/attachmentManager';
 import type { Attachment } from '@/models/Attachment';
 import { ImagePreview } from '@/components/common/ImagePreview';
+import { Icons } from '@/components/icons/Icons';
 import { useTranslation } from '@/i18n/I18nContext';
 
 interface AttachmentGalleryProps {
@@ -211,7 +212,9 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
               >
                 {attachment.isMissing ? (
                   <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center">
-                    <div className="text-2xl mb-1">⚠️</div>
+                    <div className="mb-1">
+                      <Icons.Warning size={24} className="text-error" />
+                    </div>
                     <div className="text-xs text-error font-medium">{t('components.attachmentGallery.attachmentMissing')}</div>
                     <div className="text-[10px] text-onErrorContainer mt-1">
                       {attachment.fileName}
@@ -250,7 +253,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                         className="w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors text-xs"
                         aria-label={t('components.attachmentGallery.preview')}
                       >
-                        👁
+                        <Icons.Eye size={12} />
                       </button>
                     )}
                     <button
@@ -261,7 +264,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                       className="w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors text-xs"
                       aria-label={t('components.attachmentGallery.download')}
                     >
-                      ⬇
+                      <Icons.Download size={12} />
                     </button>
                   </>
                 )}
@@ -278,7 +281,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                     }`}
                     aria-label={t('common.delete')}
                   >
-                    🗑
+                    <Icons.Trash size={12} />
                   </button>
                 )}
               </div>

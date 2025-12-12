@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from '@/i18n/I18nContext';
+import { Icons } from '@/components/icons/Icons';
 
 interface SearchBarProps {
   /** 搜索关键词 */
@@ -104,20 +105,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
   return (
     <div className="flex items-center gap-2 px-3 py-2 bg-surface-variant rounded-lg shadow-sm">
       {/* 搜索图标 */}
-      <svg
-        className="w-5 h-5 text-surface-onVariant flex-shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
+      <Icons.Search className="w-5 h-5 text-surface-onVariant flex-shrink-0" />
 
       {/* 输入框 */}
       <input
@@ -146,14 +134,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
         aria-label={t('components.canvas.prevResult')}
         title={t('components.canvas.prevResult')}
       >
-        <svg
-          className="w-4 h-4 text-surface-onVariant"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
+        <Icons.UpArrow className="w-4 h-4 text-surface-onVariant" />
       </button>
 
       {/* 下一个结果按钮 */}
@@ -164,14 +145,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
         aria-label={t('components.canvas.nextResult')}
         title={t('components.canvas.nextResult')}
       >
-        <svg
-          className="w-4 h-4 text-surface-onVariant"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <Icons.DownArrow className="w-4 h-4 text-surface-onVariant" />
       </button>
 
       {/* 清空按钮 */}
@@ -182,14 +156,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
           aria-label={t('components.canvas.clearSearch')}
           title={t('components.canvas.clearSearch')}
         >
-          <svg
-            className="w-4 h-4 text-surface-onVariant"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <Icons.Clear className="w-4 h-4 text-surface-onVariant" />
         </button>
       )}
 
@@ -200,14 +167,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
         aria-label={t('components.canvas.closeSearch')}
         title={t('components.canvas.closeSearch')}
       >
-        <svg
-          className="w-4 h-4 text-surface-onVariant"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <Icons.Close className="w-4 h-4 text-surface-onVariant" />
       </button>
     </div>
   );

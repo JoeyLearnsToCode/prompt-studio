@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { Icons } from '@/components/icons/Icons';
 
 interface VerticalResizableSplitterProps {
   /** 当前高度比例(0-1) */
@@ -172,13 +173,7 @@ export const VerticalResizableSplitter: React.FC<VerticalResizableSplitterProps>
           }}
           aria-label={isCollapsed ? "Expand" : "Collapse"}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
-            {/* Use conditional logic for arrow direction: 
-                If collapsed (Bottom panel hidden), we want to expand (Move splitter Up) -> Up Arrow
-                If expanded (Bottom panel visible), we want to collapse (Move splitter Down) -> Down Arrow
-             */}
-            {isCollapsed ? <path d="M18 15l-6-6-6 6" /> : <path d="M6 9l6 6 6-6" />}
-          </svg>
+          {isCollapsed ? <Icons.UpArrow /> : <Icons.DownArrow />}
         </button>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useRef, useImperativeHandle, forwardRef, useEffect, useState } from 're
 import Editor, { Monaco, OnMount, loader } from '@monaco-editor/react';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useI18nStore } from '@/store/i18nStore';
+import { Icons } from '@/components/icons/Icons';
 // import { editor } from 'monaco-editor';
 
 interface PromptEditorProps {
@@ -217,21 +218,21 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(({
             className="p-3 text-gray-600 bg-white/40 rounded-xl transition-all active:scale-95 shadow-sm"
             title="Select All"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-text-select-icon lucide-text-select w-6 h-6"><path d="M14 21h1" /><path d="M14 3h1" /><path d="M19 3a2 2 0 0 1 2 2" /><path d="M21 14v1" /><path d="M21 19a2 2 0 0 1-2 2" /><path d="M21 9v1" /><path d="M3 14v1" /><path d="M3 9v1" /><path d="M5 21a2 2 0 0 1-2-2" /><path d="M5 3a2 2 0 0 0-2 2" /><path d="M7 12h10" /><path d="M7 16h6" /><path d="M7 8h8" /><path d="M9 21h1" /><path d="M9 3h1" /></svg>
+            <Icons.TextSelect className="lucide lucide-text-select-icon lucide-text-select w-6 h-6" />
           </button>
           <button
             onClick={handleSelectLine}
             className="p-3 text-gray-600 bg-white/40 rounded-xl transition-all active:scale-95 shadow-sm"
             title="Select Line"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-row-select"> <path d="M7 5h10" /> <path d="M7 19h10" /> <path d="M9 12h6" /> <path d="M6 9H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h1" /> <path d="M18 9h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1" /> </svg>
+            <Icons.RowSelect className="lucide lucide-row-select" />
           </button>
           <button
             onClick={handleCopy}
             className="p-3 text-gray-600 bg-white/40 rounded-xl transition-all active:scale-95 shadow-sm"
             title="Copy"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy-icon lucide-copy w-6 h-6"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+            <Icons.Copy className="lucide lucide-copy-icon lucide-copy w-6 h-6" />
           </button>
         </div>
       )}

@@ -6,6 +6,7 @@ import { useProjectStore } from '@/store/projectStore';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
+import { Icons } from '@/components/icons/Icons';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
 import { useTranslation } from '@/i18n/I18nContext';
 
@@ -199,9 +200,7 @@ const Settings: React.FC = () => {
           onClick={() => navigate('/')}
           className="flex items-center gap-2 px-4 py-2 rounded-m3-medium hover:bg-onPrimary/20 transition-colors"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
+          <Icons.LeftArrow className="h-5 w-5" />
         </button>
       </header>
 
@@ -213,7 +212,8 @@ const Settings: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <Button onClick={handleExportJSON} className="w-full sm:w-auto">
-                  📦 {t('pages.settings.local.exportZip')}
+                  <Icons.Package size={16} />
+                  <span className="ml-2">{t('pages.settings.local.exportZip')}</span>
                 </Button>
                 <p className="text-sm text-surface-onVariant mt-2">
                   {t('pages.settings.local.exportDescription')}
@@ -222,7 +222,8 @@ const Settings: React.FC = () => {
 
               <div>
                 <Button onClick={handleImportClick} className="w-full sm:w-auto">
-                  📥 {t('pages.settings.local.importZip')}
+                  <Icons.Download size={16} />
+                  <span className="ml-2">{t('pages.settings.local.importZip')}</span>
                 </Button>
                 <input
                   ref={fileInputRef}
@@ -283,14 +284,28 @@ const Settings: React.FC = () => {
                     disabled={!isConnected || loading}
                     className="w-full sm:w-auto"
                   >
-                    {loading ? t('pages.settings.webdav.backingUp') : `🔄 ${t('pages.settings.webdav.backupToWebdav')}`}
+                    {loading ? (
+                      t('pages.settings.webdav.backingUp')
+                    ) : (
+                      <>
+                        <Icons.Refresh size={16} />
+                        <span className="ml-2">{t('pages.settings.webdav.backupToWebdav')}</span>
+                      </>
+                    )}
                   </Button>
                   <Button
                     onClick={handleOpenRestoreModal}
                     disabled={!isConnected || loading}
                     className="w-full sm:w-auto"
                   >
-                    {loading ? t('pages.settings.webdav.loading') : `📥 ${t('pages.settings.webdav.restoreFromWebdav')}`}
+                    {loading ? (
+                      t('pages.settings.webdav.loading')
+                    ) : (
+                      <>
+                        <Icons.Download size={16} />
+                        <span className="ml-2">{t('pages.settings.webdav.restoreFromWebdav')}</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>

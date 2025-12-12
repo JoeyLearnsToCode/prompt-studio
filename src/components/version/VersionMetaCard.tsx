@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVersionStore } from '@/store/versionStore';
+import { Icons } from '@/components/icons/Icons';
 import { useTranslation } from '@/i18n/I18nContext';
 
 interface VersionMetaCardProps {
@@ -121,7 +122,9 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
       >
         <div className="w-full h-full flex flex-col items-center justify-center p-2">
           {/* 图标 */}
-          <div className="text-2xl mb-1">ℹ️</div>
+          <div className="mb-1">
+            <Icons.Info size={24} />
+          </div>
           
           {/* 评分显示 */}
             <div className="text-center">
@@ -151,17 +154,16 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
               {/* Header */}
               <div className="pt-6 pl-6 pr-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-surface-onVariant">
-                  ℹ️ {t('components.compareModal.score')}
+                  <h3 className="text-xl font-bold text-surface-onVariant flex items-center gap-2">
+                    <Icons.Info size={20} />
+                    {t('components.compareModal.score')}
                   </h3>
                   <button
                     onClick={() => setIsModalOpen(false)}
                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-containerHighest transition-colors"
                     aria-label={t('common.close')}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <Icons.Clear className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -200,7 +202,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                         onClick={() => handleScoreChange(0)}
                         disabled={isSaving}
                         className={`
-                          w-10 h-10 rounded-xl text-sm transition-colors flex-shrink-0
+                          w-10 h-10 rounded-xl text-sm transition-colors flex-shrink-0 flex items-center justify-center
                           ${localScore > 0 
                             ? 'bg-error/10 hover:bg-error/20 text-error' 
                             : 'bg-surface-containerHighest text-surface-onVariant/30 cursor-not-allowed'
@@ -209,7 +211,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                         `}
                         aria-label={t('components.versionMeta.clearScore')}
                       >
-                        ✕
+                        <Icons.X size={14} />
                       </button>
                     )}
                   </div>
@@ -219,9 +221,10 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                 <div>
                   <label
                     htmlFor={`notes-${versionId}`}
-                    className="text-base font-semibold text-surface-onVariant block mb-2"
+                    className="text-base font-semibold text-surface-onVariant block mb-2 flex items-center gap-2"
                   >
-                    📝 {t('components.compareModal.notes')}
+                    <Icons.Note size={18} />
+                    {t('components.compareModal.notes')}
                   </label>
                   <textarea
                     id={`notes-${versionId}`}

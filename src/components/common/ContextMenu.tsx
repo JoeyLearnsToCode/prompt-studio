@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export interface ContextMenuItem {
   label: string;
   onClick: () => void;
-  icon?: string;
+  icon?: string | React.ComponentType<any>;
   disabled?: boolean;
   danger?: boolean;
 }
@@ -102,7 +102,15 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               `}
               aria-label={item.label}
             >
-              {item.icon && <span className="text-lg">{item.icon}</span>}
+              {item.icon && (
+                typeof item.icon === 'string' ? (
+                  <span className="text-lg">{item.icon}</span>
+                ) : (
+                  <span className="flex items-center justify-center w-5 h-5">
+                    {React.createElement(item.icon, { size: 18 })}
+                  </span>
+                )
+              )}
               <span>{item.label}</span>
             </button>
           ))}

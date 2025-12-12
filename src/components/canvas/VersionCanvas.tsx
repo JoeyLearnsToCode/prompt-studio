@@ -5,6 +5,7 @@ import { CanvasInteraction } from '@/services/canvasInteraction';
 import { Button } from '@/components/common/Button';
 import { SearchBar } from '@/components/canvas/SearchBar';
 import { useVersionSearch } from '@/hooks/useVersionSearch';
+import { Icons } from '@/components/icons/Icons';
 import { useTranslation } from '@/i18n/I18nContext';
 
 interface VersionCanvasProps {
@@ -312,7 +313,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
 
         {/* 版本操作按钮 */}
         {selectedVersionId && (
-          <div className="flex gap-2 h-10 items-center">
+          <div className="flex gap-2 h-10 items-center @container">
             <Button
               variant="outlined"
               size="small"
@@ -321,7 +322,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
               title={compareMode ? t('components.canvas.exitCompare') : t('components.canvas.enterCompare')}
               className={compareMode ? "bg-primary-container border-primary" : ""}
             >
-              {compareMode ? t('components.canvas.exitCompare') : t('components.canvas.compare')}
+              <Icons.Compare size={16} className='inline @xs:hidden' /> <span className='hidden @xs:inline'>{compareMode ? t('components.canvas.exitCompare') : t('components.canvas.compare')}</span>
             </Button>
             <Button
               variant="outlined"
@@ -329,14 +330,14 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
               onClick={handleDeleteVersion}
               title={t('components.canvas.deleteVersion')}
             >
-              🗑️ {t('common.delete')}
+              <Icons.Trash size={16} className='inline @xs:hidden' /> <span className='hidden @xs:inline'>{t('common.delete')}</span>
             </Button>
           </div>
         )}
       </div>
 
       {/* Canvas容器 - 占据剩余空间，不与上方控制区域重叠 */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative overflow-hidden @container">
         <canvas
           ref={canvasRef}
           className="w-full h-full"
@@ -345,7 +346,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
         />
 
         {/* 画布控制按钮 - 浮动在canvas上，但位置固定在右下角 */}
-        <div className="absolute bottom-4 right-4 flex gap-2 z-10">
+        <div className="absolute bottom-4 right-4 flex flex-col @xs:flex-row gap-2 z-10">
           <Button
             variant="canvasControl"
             size="small"
@@ -353,7 +354,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
             title={t('components.canvas.zoomIn')}
             aria-label={t('components.canvas.zoomIn')}
           >
-            🔍+
+            <Icons.SearchPlus size={16} />
           </Button>
           <Button
             variant="canvasControl"
@@ -362,7 +363,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
             title={t('components.canvas.zoomOut')}
             aria-label={t('components.canvas.zoomOut')}
           >
-            🔍-
+            <Icons.SearchMinus size={16} />
           </Button>
           <Button
             variant="canvasControl"
@@ -371,7 +372,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
             title={t('components.canvas.resetView')}
             aria-label={t('components.canvas.resetView')}
           >
-            ↺
+            <Icons.Refresh size={16} />
           </Button>
         </div>
       </div>

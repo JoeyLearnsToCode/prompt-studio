@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { DiffEditor, DiffOnMount } from '@monaco-editor/react';
 import type { Version } from '@/models/Version';
 import { diffService } from '@/services/diffService';
+import { Icons } from '@/components/icons/Icons';
 import { useTranslation } from '@/i18n/I18nContext';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useI18nStore } from '@/store/i18nStore';
@@ -111,9 +112,7 @@ export function CompareModal({
               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
               aria-label={t('components.compareModal.close')}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <Icons.Clear className="w-6 h-6" />
             </button>
           </div>
           
@@ -142,7 +141,10 @@ export function CompareModal({
                   <div>{t('components.versionCard.createdAt')}: {formatDate(sourceVersion.createdAt)}</div>
                   <div>{t('components.versionCard.updatedAt')}: {formatDate(sourceVersion.updatedAt)}</div>
                   {sourceVersion.score !== undefined && sourceVersion.score > 0 && (
-                    <div>{t('components.compareModal.score')}: ⭐ {sourceVersion.score}/10</div>
+                    <div className="flex items-center gap-1">
+                      <Icons.Star size={14} className="text-yellow-500" />
+                      <span>{t('components.compareModal.score')}: {sourceVersion.score}/10</span>
+                    </div>
                   )}
                   {sourceVersion.notes && (
                     <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
@@ -160,7 +162,10 @@ export function CompareModal({
                   <div>{t('components.versionCard.createdAt')}: {formatDate(targetVersion.createdAt)}</div>
                   <div>{t('components.versionCard.updatedAt')}: {formatDate(targetVersion.updatedAt)}</div>
                   {targetVersion.score !== undefined && targetVersion.score > 0 && (
-                    <div>{t('components.compareModal.score')}: ⭐ {targetVersion.score}/10</div>
+                    <div className="flex items-center gap-1">
+                      <Icons.Star size={14} className="text-yellow-500" />
+                      <span>{t('components.compareModal.score')}: {targetVersion.score}/10</span>
+                    </div>
                   )}
                   {targetVersion.notes && (
                     <div className="mt-2 p-2 bg-gray-50 rounded text-xs">

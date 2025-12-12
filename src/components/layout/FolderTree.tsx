@@ -4,7 +4,10 @@ import { useUiStore } from '@/store/uiStore';
 import type { Folder } from '@/models/Folder';
 import type { Project } from '@/models/Project';
 import { ContextMenu, type ContextMenuItem } from '@/components/common/ContextMenu';
+import { Icons } from '@/components/icons/Icons';
 import { sortByName } from '@/utils/tree';
+
+
 
 interface FolderTreeProps {
   onProjectSelect?: (projectId: string) => void;
@@ -102,7 +105,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         e.dataTransfer.setData('projectName', project.name);
       }}
     >
-      <span className="text-sm">📄</span>
+      <Icons.File size={16} className="flex-shrink-0" />
       <span className="text-sm truncate flex-1">{project.name}</span>
       {project.tags && (
         <div className="flex gap-1">
@@ -221,8 +224,8 @@ const FolderItem: React.FC<TreeItemProps> = ({
           }
         }}
       >
-        <span className="text-sm select-none">
-          {isExpanded ? '📂' : '📁'}
+        <span className="flex-shrink-0">
+          {isExpanded ? <Icons.FolderOpen size={16} /> : <Icons.Folder size={16} />}
         </span>
         <span className="text-sm flex-1 truncate">{folder.name}</span>
         <span className="text-xs text-surface-onVariant">
@@ -420,7 +423,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect: _onProj
   const folderMenuItems: ContextMenuItem[] = [
     {
       label: '新建项目',
-      icon: '📄',
+      icon: Icons.File,
       onClick: async () => {
         if (folderContextMenu.folder) {
           const projectName = prompt('请输入项目名称:');
@@ -435,17 +438,17 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect: _onProj
     },
     {
       label: '新建子文件夹',
-      icon: '📁',
+      icon: Icons.Folder,
       onClick: handleCreateSubfolder,
     },
     {
       label: '重命名',
-      icon: '✏️',
+      icon: Icons.Edit,
       onClick: handleFolderRename,
     },
     {
       label: '删除',
-      icon: '🗑️',
+      icon: Icons.Trash,
       danger: true,
       onClick: handleFolderDelete,
     },
@@ -454,12 +457,12 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onProjectSelect: _onProj
   const projectMenuItems: ContextMenuItem[] = [
     {
       label: '重命名',
-      icon: '✏️',
+      icon: Icons.Edit,
       onClick: handleProjectRename,
     },
     {
       label: '删除',
-      icon: '🗑️',
+      icon: Icons.Trash,
       danger: true,
       onClick: handleProjectDelete,
     },
