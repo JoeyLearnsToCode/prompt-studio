@@ -52,6 +52,8 @@ const MainView: React.FC = () => {
     startDragging,
     stopDragging,
     sidebarCollapsed,
+    sidebarTemporarilyExpanded,
+    setTemporarilyExpanded,
   } = useUiStore();
 
   const [editorContent, setEditorContent] = useState('');
@@ -114,6 +116,25 @@ const MainView: React.FC = () => {
       }, 200); // 稍微延迟一点时间，确保版本加载完成
     }
   }, [currentProjectId, loadVersions, setCurrentVersion]);
+
+  // 页面加载时的临时展开逻辑
+  useEffect(() => {
+    // 仅在页面首次加载且没有选中项目时执行
+    if (!currentProjectId && !sidebarTemporarilyExpanded) {
+      // 如果LocalStorage中侧边栏是折叠状态，临时展开它
+      if (sidebarCollapsed) {
+        setTemporarilyExpanded(true);
+      }
+    }
+  }, [currentProjectId, sidebarCollapsed, sidebarTemporarilyExpanded, setTemporarilyExpanded]);
+
+  // 项目选择后的自动折叠逻辑
+  useEffect(() => {
+    // 当用户选择了项目且之前是临时展开状态时，取消临时展开
+    if (currentProjectId && sidebarTemporarilyExpanded) {
+      setTemporarilyExpanded(false);
+    }
+  }, [currentProjectId, sidebarTemporarilyExpanded, setTemporarilyExpanded]);
 
   // 更新编辑器内容和附件，自动选择最近更新的版本
   useEffect(() => {
@@ -333,7 +354,7 @@ const MainView: React.FC = () => {
           className="flex flex-col"
             style={{ width: isRightPanelCollapsed ? '100%' : `${layoutPreference.canvasPanelWidthRatio * 100}%` }}
           >
-            {sidebarCollapsed && (!currentProjectId || !currentVersionId) && (
+            {sidebarCollapsed && !sidebarTemporarilyExpanded && (!currentProjectId || !currentVersionId) && (
               <div className="px-4 py-3">
                 <SidebarToggle />
               </div>
@@ -343,7 +364,7 @@ const MainView: React.FC = () => {
             {currentProjectId && currentVersionId && (
               <div ref={toolbarRef} className="toolbar px-4 py-3 bg-surface-variant border-b border-surface-onVariant/20 @container">
                 <div className="flex items-center gap-2 h-10">
-                  {sidebarCollapsed && (<div className="flex-shrink-0"><SidebarToggle /></div>)}
+                  {sidebarCollapsed && !sidebarTemporarilyExpanded && (<div className="flex-shrink-0"><SidebarToggle /></div>)}
                   <label
                     htmlFor="version-name"
                     className="text-sm font-medium text-surface-onVariant whitespace-nowrap overflow-hidden text-ellipsis min-w-0"

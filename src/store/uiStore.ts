@@ -4,7 +4,9 @@ import { layoutManager, type LayoutPreference } from '@/services/layoutManager';
 interface UiState {
   // Sidebar
   sidebarCollapsed: boolean;
+  sidebarTemporarilyExpanded: boolean; // 新增：临时展开状态
   toggleSidebar: () => void;
+  setTemporarilyExpanded: (temporarilyExpanded: boolean) => void; // 新增：设置临时展开状态
 
   // Folder Tree
   expandedFolders: string[];
@@ -44,6 +46,7 @@ interface UiState {
 
 export const useUiStore = create<UiState>((set, get) => ({
   sidebarCollapsed: layoutManager.loadPreference().sidebarCollapsed ?? false,
+  sidebarTemporarilyExpanded: false, // 默认不是临时展开状态
   toggleSidebar: () => {
     set((state) => {
       const newCollapsed = !state.sidebarCollapsed;
@@ -51,6 +54,9 @@ export const useUiStore = create<UiState>((set, get) => ({
       layoutManager.saveSidebarCollapsed(newCollapsed);
       return { sidebarCollapsed: newCollapsed };
     });
+  },
+  setTemporarilyExpanded: (temporarilyExpanded) => {
+    set({ sidebarTemporarilyExpanded: temporarilyExpanded });
   },
 
   expandedFolders: [],

@@ -8,7 +8,7 @@ import { useTranslation } from '@/i18n/I18nContext';
 
 export const Sidebar: React.FC = () => {
   const t = useTranslation();
-  const { sidebarCollapsed } = useUiStore();
+  const { sidebarCollapsed, sidebarTemporarilyExpanded } = useUiStore();
   const { loadFolders, loadProjects, createFolder, createProject, selectProject } = useProjectStore();
 
   useEffect(() => {
@@ -40,7 +40,8 @@ export const Sidebar: React.FC = () => {
     }
   };
 
-  if (sidebarCollapsed) {
+  // 如果侧边栏折叠且不是临时展开状态，则不显示
+  if (sidebarCollapsed && !sidebarTemporarilyExpanded) {
     return null;
   }
 
