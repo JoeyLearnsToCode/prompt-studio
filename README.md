@@ -1,6 +1,6 @@
 # Prompt Studio
 
-**🌐 直接使用 | Use it here：[https://prompt-studio.joeylearnstocode.deno.net/](https://prompt-studio.joeylearnstocode.deno.net/)**
+**🌐 直接使用 | Use it here：[prompt.hahadalin.eu.org](https://prompt.hahadalin.eu.org/)**
 
 [English Version](#english-version) | [中文版本](#中文版本)
 
