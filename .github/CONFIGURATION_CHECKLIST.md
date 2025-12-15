@@ -4,7 +4,7 @@
 
 在使用 GitHub Actions 部署到 Cloudflare Pages 之前，请完成以下配置：
 
-### 1. Cloudflare API Token (CF_API_TOKEN)
+### 1. Cloudflare API Token (CF_PAGES_API_TOKEN)
 
 **用途**: 授权 GitHub Actions 访问您的 Cloudflare 账户
 
@@ -30,7 +30,7 @@
 2. 点击 "Settings" (设置)
 3. 选择左侧 "Secrets and variables" → "Actions"
 4. 点击 "New repository secret"
-5. Name: `CF_API_TOKEN`
+5. Name: `CF_PAGES_API_TOKEN`
 6. Value: 粘贴刚才复制的令牌
 7. 点击 "Add secret"
 
@@ -130,7 +130,7 @@
 ### 常见问题
 
 1. **部署失败 - 权限错误**
-   - 检查 `CF_API_TOKEN` 是否有足够权限
+   - 检查 `CF_PAGES_API_TOKEN` 是否有足够权限
    - 确认 Account ID 是否正确
 
 2. **构建失败**

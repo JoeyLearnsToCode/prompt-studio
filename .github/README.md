@@ -24,7 +24,7 @@
 
 ### 必需的 Secrets
 
-1. **CF_API_TOKEN**
+1. **CF_PAGES_API_TOKEN**
    - 用途：Cloudflare API 令牌，用于授权部署操作
    - 如何获取：
      1. 登录 Cloudflare 控制台
