@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import type { Version } from '@/models/Version';
 
 export interface SearchState {
-  query: string;                 // 搜索关键词
-  matches: string[];             // 匹配的版本ID列表
-  currentIndex: number;          // 当前聚焦的匹配结果索引(0-based)
-  total: number;                 // 匹配总数
-  isActive: boolean;             // 搜索是否激活
+  query: string; // 搜索关键词
+  matches: string[]; // 匹配的版本ID列表
+  currentIndex: number; // 当前聚焦的匹配结果索引(0-based)
+  total: number; // 匹配总数
+  isActive: boolean; // 搜索是否激活
 }
 
 interface SearchStore extends SearchState {
@@ -42,8 +42,8 @@ export const useSearchStore = create<SearchStore>((set, get) => ({
 
     const lowerQuery = query.toLowerCase();
     const matches = versions
-      .filter(v => v.content.toLowerCase().includes(lowerQuery))
-      .map(v => v.id);
+      .filter((v) => v.content.toLowerCase().includes(lowerQuery))
+      .map((v) => v.id);
 
     set({
       query,

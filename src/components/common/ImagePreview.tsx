@@ -1,11 +1,17 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Icons } from '@/components/icons/Icons';
+import { MinimalButton } from './MinimalButton';
 
 interface ImagePreviewProps {
   isOpen: boolean;
   imageUrl: string | null;
   fileName?: string;
   onClose: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  hasPrev?: boolean;
+  hasNext?: boolean;
 }
 
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
@@ -13,25 +19,34 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   imageUrl,
   fileName,
   onClose,
+  onPrev,
+  onNext,
+  hasPrev = false,
+  hasNext = false,
 }) => {
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
+      } else if (e.key === 'ArrowLeft' && hasPrev && onPrev) {
+        onPrev();
+      } else if (e.key === 'ArrowRight' && hasNext && onNext) {
+        onNext();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, onPrev, onNext, hasPrev, hasNext]);
 
+  console.log(`${hasPrev} ${hasNext}`)
   return (
     <AnimatePresence>
       {isOpen && imageUrl && (
@@ -39,45 +54,66 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          transition={{ duration: 0.1 }}
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm"
           onClick={onClose}
         >
-          {/* 顶部信息栏 - 浮在图片外 */}
-          <div className="w-full max-w-[90vw] mb-2">
-            <div className="flex items-center justify-between px-4 py-2 bg-black/60 text-white rounded-lg backdrop-blur-sm">
-              {fileName && (
-                <p className="text-sm truncate flex-1 mr-4">{fileName}</p>
-              )}
-              <button
-                onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
-                aria-label="关闭预览"
-              >
-                ✕
-              </button>
-            </div>
+          {/* 顶部信息栏 */}
+          <div
+            className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-white/90 font-medium truncate px-4">{fileName}</p>
+            <MinimalButton
+              variant="ghost"
+              onClick={onClose}
+              className="p-2 text-white hover:text-white hover:bg-white/20 !rounded-full"
+              aria-label="关闭"
+            >
+              <Icons.Close size={24} />
+            </MinimalButton>
           </div>
 
+          {/* 左侧切换按钮 */}
+          <MinimalButton
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrev?.();
+            }}
+            disabled={!hasPrev}
+            className="absolute left-4 p-3 !rounded-full text-white hover:text-white hover:bg-white/20 z-10"
+            aria-label="上一张"
+          >
+            <Icons.LeftArrow size={32} />
+          </MinimalButton>
+
+          {/* 右侧切换按钮 */}
+          <MinimalButton
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              onNext?.();
+            }}
+            disabled={!hasNext}
+            className="absolute right-4 p-3 !rounded-full text-white hover:text-white hover:bg-white/20 z-10"
+            aria-label="下一张"
+          >
+            <Icons.RightArrow size={32} />
+          </MinimalButton>
+
           {/* 图片容器 */}
-          <div className="flex-1 flex items-center justify-center max-w-[90vw] max-h-[calc(90vh-100px)]">
+          <div className="w-full h-full flex items-center justify-center p-4 md:p-12">
             <motion.img
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
+              key={imageUrl} // key 变化触发动画
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2 }}
               src={imageUrl}
               alt={fileName || '预览'}
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              className="max-w-full max-h-full object-contain shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
-          </div>
-
-          {/* 底部提示 - 浮在图片外 */}
-          <div className="w-full max-w-[90vw] mt-2">
-            <div className="text-center bg-black/60 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm">
-              按 ESC 或点击空白处关闭
-            </div>
           </div>
         </motion.div>
       )}

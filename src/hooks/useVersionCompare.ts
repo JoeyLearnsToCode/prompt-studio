@@ -7,23 +7,15 @@ import { useVersionStore } from '@/store/versionStore';
 import type { Version } from '@/models/Version';
 
 export function useVersionCompare() {
-  const { 
-    versions, 
-    compareState, 
-    openCompare, 
-    setCompareTarget, 
-    closeCompare 
-  } = useVersionStore();
+  const { versions, compareState, openCompare, setCompareTarget, closeCompare } = useVersionStore();
 
-  const sourceVersion: Version | null = 
-    versions.find(v => v.id === compareState.sourceVersionId) || null;
-  
-  const targetVersion: Version | null = 
-    versions.find(v => v.id === compareState.targetVersionId) || null;
+  const sourceVersion: Version | null =
+    versions.find((v) => v.id === compareState.sourceVersionId) || null;
 
-  const availableVersions = versions.filter(
-    v => v.id !== compareState.sourceVersionId
-  );
+  const targetVersion: Version | null =
+    versions.find((v) => v.id === compareState.targetVersionId) || null;
+
+  const availableVersions = versions.filter((v) => v.id !== compareState.sourceVersionId);
 
   const handleOpenCompare = (versionId: string) => {
     openCompare(versionId);

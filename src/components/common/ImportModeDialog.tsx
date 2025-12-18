@@ -8,11 +8,7 @@ export interface ImportModeDialogProps {
   onConfirm: (mode: 'merge' | 'overwrite') => void;
 }
 
-export const ImportModeDialog: React.FC<ImportModeDialogProps> = ({
-  open,
-  onClose,
-  onConfirm,
-}) => {
+export const ImportModeDialog: React.FC<ImportModeDialogProps> = ({ open, onClose, onConfirm }) => {
   const t = useTranslation();
 
   const handleMerge = () => {
@@ -29,9 +25,10 @@ export const ImportModeDialog: React.FC<ImportModeDialogProps> = ({
     <Modal isOpen={open} onClose={onClose} title={t('pages.settings.local.importMode.selectMode')}>
       <div className="space-y-4">
         <div className="space-y-3">
+          {/* 这里保留大按钮样式，因为 MinimalButton 不适合承载复杂的内部布局 */}
           <button
             onClick={handleMerge}
-            className="w-full text-left p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full text-left p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
             autoFocus
           >
             <div className="flex items-start space-x-3">
@@ -48,7 +45,7 @@ export const ImportModeDialog: React.FC<ImportModeDialogProps> = ({
 
           <button
             onClick={handleOverwrite}
-            className="w-full text-left p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full text-left p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-error transition-colors"
           >
             <div className="flex items-start space-x-3">
               <div className="flex-1">

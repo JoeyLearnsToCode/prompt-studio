@@ -50,9 +50,9 @@ export const useVersionStore = create<VersionState>((set, get) => ({
   loadVersions: async (projectId) => {
     const versions = await db.versions.where('projectId').equals(projectId).toArray();
     // 为每个版本计算运行时的 normalizedContent
-    const versionsWithNormalized = versions.map(v => ({
+    const versionsWithNormalized = versions.map((v) => ({
       ...v,
-      normalizedContent: normalize(v.content)
+      normalizedContent: normalize(v.content),
     }));
     set({ versions: versionsWithNormalized });
   },
@@ -158,7 +158,7 @@ export const useVersionStore = create<VersionState>((set, get) => ({
         .equals(version.projectId)
         .and((v) => v.parentId === null)
         .toArray();
-      
+
       // 如果只有一个根版本，则不允许删除
       if (rootVersions.length <= 1) {
         throw new Error('每个项目必须至少保留一个根版本，不能删除唯一的根版本');
@@ -229,12 +229,12 @@ export const useVersionStore = create<VersionState>((set, get) => ({
         ...state.compareState,
         targetVersionId,
       };
-      
+
       // 如果目标版本已设置，则打开对比模态框
       if (targetVersionId) {
         newState.isOpen = true;
       }
-      
+
       return {
         compareState: newState,
         compareMode: false, // 设置目标后退出对比模式
@@ -257,7 +257,7 @@ export const useVersionStore = create<VersionState>((set, get) => ({
 
   toggleCompareMode: (sourceVersionId = null) => {
     const currentCompareMode = get().compareMode;
-    
+
     if (currentCompareMode) {
       // 退出对比模式
       set({ compareMode: false });
@@ -266,15 +266,15 @@ export const useVersionStore = create<VersionState>((set, get) => ({
       if (!sourceVersionId) {
         sourceVersionId = get().currentVersionId;
       }
-      
+
       if (sourceVersionId) {
-        set({ 
+        set({
           compareMode: true,
           compareState: {
             isOpen: false,
             sourceVersionId,
             targetVersionId: null,
-          }
+          },
         });
       }
     }

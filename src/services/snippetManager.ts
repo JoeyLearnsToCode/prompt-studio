@@ -10,10 +10,7 @@ export class SnippetManager {
   /**
    * 创建片段
    */
-  async createSnippet(
-    name: string,
-    content: string
-  ): Promise<string> {
+  async createSnippet(name: string, content: string): Promise<string> {
     const snippet: Snippet = {
       id: nanoid(),
       name,
@@ -59,7 +56,7 @@ export class SnippetManager {
   async searchSnippets(query: string): Promise<Snippet[]> {
     const all = await this.getAllSnippets();
     const lowerQuery = query.toLowerCase();
-    
+
     return all.filter(
       (snippet) =>
         snippet.name.toLowerCase().includes(lowerQuery) ||

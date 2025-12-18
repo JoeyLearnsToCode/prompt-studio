@@ -95,7 +95,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
     await db.transaction('rw', db.projects, db.versions, async () => {
       await db.projects.add(project);
-      
+
       // 创建初始根版本
       const rootVersion = {
         id: crypto.randomUUID(),

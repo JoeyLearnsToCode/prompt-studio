@@ -8,12 +8,12 @@ import { CanvasRenderer } from './canvasRenderer';
 export class CanvasInteraction {
   private renderer: CanvasRenderer;
   private canvas: HTMLCanvasElement;
-  
+
   private isDragging = false;
   private dragStartX = 0;
   private dragStartY = 0;
   private globalMouseUpHandler: ((e: MouseEvent) => void) | null = null;
-  
+
   private onNodeClick?: (nodeId: string) => void;
 
   constructor(

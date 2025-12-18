@@ -22,10 +22,13 @@ export const useVersionSearch = () => {
 
   const { versions } = useVersionStore();
 
-  const handleQueryChange = useCallback((newQuery: string) => {
-    setQuery(newQuery);
-    executeSearch(versions, newQuery);
-  }, [versions, setQuery, executeSearch]);
+  const handleQueryChange = useCallback(
+    (newQuery: string) => {
+      setQuery(newQuery);
+      executeSearch(versions, newQuery);
+    },
+    [versions, setQuery, executeSearch]
+  );
 
   const handleClear = useCallback(() => {
     clearSearch();
@@ -44,16 +47,22 @@ export const useVersionSearch = () => {
   /**
    * 检查指定版本是否匹配搜索
    */
-  const isVersionMatched = useCallback((versionId: string) => {
-    return matches.includes(versionId);
-  }, [matches]);
+  const isVersionMatched = useCallback(
+    (versionId: string) => {
+      return matches.includes(versionId);
+    },
+    [matches]
+  );
 
   /**
    * 检查指定版本是否为当前高亮版本
    */
-  const isCurrentMatch = useCallback((versionId: string) => {
-    return getCurrentMatchId() === versionId;
-  }, [getCurrentMatchId]);
+  const isCurrentMatch = useCallback(
+    (versionId: string) => {
+      return getCurrentMatchId() === versionId;
+    },
+    [getCurrentMatchId]
+  );
 
   return {
     query,

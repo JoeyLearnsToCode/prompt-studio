@@ -10,10 +10,7 @@ export class AttachmentManager {
   /**
    * 上传附件
    */
-  async uploadAttachment(
-    versionId: string,
-    file: File
-  ): Promise<string> {
+  async uploadAttachment(versionId: string, file: File): Promise<string> {
     const buffer = await file.arrayBuffer();
     const blob = new Blob([buffer], { type: file.type });
 
@@ -36,24 +33,26 @@ export class AttachmentManager {
     return await db.attachments.where('versionId').equals(versionId).toArray();
   }
 
-/**
- * 删除附件
- */
+  /**
+   * 删除附件
+   */
   async deleteAttachment(id: string): Promise<void> {
     await db.attachments.delete(id);
   }
 
-/**
- * 下载附件
- */
-  async downloadAttachment(attachment: string | { id: string; isMissing?: boolean }): Promise<void> {
+  /**
+   * 下载附件
+   */
+  async downloadAttachment(
+    attachment: string | { id: string; isMissing?: boolean }
+  ): Promise<void> {
     const id = typeof attachment === 'string' ? attachment : attachment.id;
-    
+
     // 如果是附件对象且标记为缺失，则抛出错误
     if (typeof attachment === 'object' && attachment.isMissing) {
       throw new Error('附件文件已丢失或损坏');
     }
-    
+
     const attachmentData = await db.attachments.get(id);
     if (!attachmentData || !attachmentData.blob) {
       throw new Error('附件不存在或数据不完整');
@@ -67,9 +66,9 @@ export class AttachmentManager {
     URL.revokeObjectURL(url);
   }
 
-/**
- * 获取附件预览 URL
- */
+  /**
+   * 获取附件预览 URL
+   */
   getPreviewUrl(attachment: Attachment): string | null {
     // 如果附件缺失或 blob 不存在，返回 null
     if (!attachment.blob || attachment.isMissing) {

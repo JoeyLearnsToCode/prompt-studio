@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@/components/common/Button';
+import { MinimalButton } from '@/components/common/MinimalButton';
 import { useTranslation } from '@/i18n/I18nContext';
 
 interface EditorToolbarProps {
@@ -20,30 +20,32 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const t = useTranslation();
   return (
     <div className="flex items-center gap-2 p-3 bg-surface-variant border-b border-surface-onVariant/20">
-      <Button
+      <MinimalButton
         onClick={onSaveInPlace}
-        variant="outlined"
-        size="small"
+        variant="default"
         disabled={!canSaveInPlace || !hasProject}
         title={`${t('components.toolbar.saveInPlace')} (Ctrl+S / Ctrl+Enter)`}
       >
         {t('components.toolbar.saveInPlace')}
-      </Button>
+      </MinimalButton>
 
-      <Button
+      <MinimalButton
         onClick={onSave}
-        variant="outlined"
-        size="small"
+        variant="default"
         disabled={!hasProject}
         title={`${t('components.toolbar.saveNew')} (Ctrl+Shift+S / Ctrl+Shift+Enter)`}
       >
         {t('components.toolbar.saveNew')}
-      </Button>
+      </MinimalButton>
 
       {onSnippets && (
-        <Button onClick={onSnippets} variant="outlined" size="small" title={t('components.toolbar.snippets')}>
+        <MinimalButton
+          onClick={onSnippets}
+          variant="default"
+          title={t('components.toolbar.snippets')}
+        >
           {t('components.toolbar.snippets')}
-        </Button>
+        </MinimalButton>
       )}
 
       <div className="flex-1" />

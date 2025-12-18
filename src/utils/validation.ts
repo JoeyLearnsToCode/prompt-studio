@@ -53,9 +53,7 @@ export async function validateDataIntegrity(): Promise<string[]> {
 /**
  * 检测循环引用
  */
-function detectCycles<T extends { id: string; parentId: string | null }>(
-  items: T[]
-): string[] {
+function detectCycles<T extends { id: string; parentId: string | null }>(items: T[]): string[] {
   const cycles: string[] = [];
   const visited = new Set<string>();
   const recursionStack = new Set<string>();
@@ -97,8 +95,7 @@ function detectCycles<T extends { id: string; parentId: string | null }>(
  * 验证 UUID 格式
  */
 export function isValidUUID(uuid: string): boolean {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 }
 

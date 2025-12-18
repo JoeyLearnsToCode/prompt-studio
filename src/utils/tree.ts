@@ -91,7 +91,7 @@ export function buildVersionTree(versions: Version[]): VersionTreeNode[] {
 /**
  * 计算树形布局 - 改进的 Reingold-Tilford 算法
  * 根据子树的实际宽度计算节点位置，避免重叠
- * 
+ *
  * @param root 根节点
  * @param nodeWidth 单个节点的宽度
  * @param nodeHeight 单个节点的高度
@@ -113,23 +113,19 @@ export function calculateTreeLayout(
     }
 
     // 递归计算所有子节点的宽度
-    const childrenWidths = node.children.map(child => calculateSubtreeWidth(child));
-    
+    const childrenWidths = node.children.map((child) => calculateSubtreeWidth(child));
+
     // 子树总宽度 = 所有子节点宽度之和 + 子节点之间的间距
-    const totalWidth = childrenWidths.reduce((sum, w) => sum + w, 0) + 
-                       (node.children.length - 1) * horizontalSpacing;
-    
+    const totalWidth =
+      childrenWidths.reduce((sum, w) => sum + w, 0) +
+      (node.children.length - 1) * horizontalSpacing;
+
     // 返回当前节点宽度和子树总宽度中的较大值
     return Math.max(nodeWidth, totalWidth);
   }
 
   // 第二步：前序遍历，根据子树宽度设置节点位置
-  function layoutNode(
-    node: VersionTreeNode, 
-    x: number, 
-    y: number, 
-    subtreeWidth: number
-  ): void {
+  function layoutNode(node: VersionTreeNode, x: number, y: number, subtreeWidth: number): void {
     // 节点位置 = 子树宽度的中心
     node.x = x + (subtreeWidth - nodeWidth) / 2;
     node.y = y;
@@ -139,9 +135,10 @@ export function calculateTreeLayout(
     }
 
     // 计算所有子节点的宽度
-    const childrenWidths = node.children.map(child => calculateSubtreeWidth(child));
-    const totalChildrenWidth = childrenWidths.reduce((sum, w) => sum + w, 0) + 
-                               (node.children.length - 1) * horizontalSpacing;
+    const childrenWidths = node.children.map((child) => calculateSubtreeWidth(child));
+    const totalChildrenWidth =
+      childrenWidths.reduce((sum, w) => sum + w, 0) +
+      (node.children.length - 1) * horizontalSpacing;
 
     // 子树起始 X 位置（让子树在父节点下方居中）
     let childX = x + (subtreeWidth - totalChildrenWidth) / 2;
@@ -151,16 +148,16 @@ export function calculateTreeLayout(
     for (let i = 0; i < node.children.length; i++) {
       const child = node.children[i];
       const childWidth = childrenWidths[i];
-      
+
       layoutNode(child, childX, childY, childWidth);
-      
+
       childX += childWidth + horizontalSpacing;
     }
   }
 
   // 计算根节点的子树宽度
   const rootSubtreeWidth = calculateSubtreeWidth(root);
-  
+
   // 从 (0, 0) 开始布局
   layoutNode(root, 0, 0, rootSubtreeWidth);
 
@@ -208,7 +205,7 @@ export function sortByName<T extends { name: string }>(items: T[]): T[] {
   return items.sort((a, b) => {
     return a.name.localeCompare(b.name, undefined, {
       numeric: true,
-      sensitivity: 'base'
+      sensitivity: 'base',
     });
   });
 }

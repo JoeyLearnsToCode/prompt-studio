@@ -2,43 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Material Design 3 System Color Variables */
-:root {
-  --md-sys-color-primary: #76a866;
-  --md-sys-color-on-primary: #1a2400;
-  --md-sys-color-primary-container: #76a866;
-  --md-sys-color-on-primary-container: #2b3a00;
-  
-  --md-sys-color-secondary: #5c7e50;
-  --md-sys-color-on-secondary: #0f2400;
-  --md-sys-color-secondary-container: #5c7e50;
-  --md-sys-color-on-secondary-container: #1a3a0f;
-  
-  --md-sys-color-tertiary: #5a9bc4;
-  --md-sys-color-on-tertiary: #072231;
-  --md-sys-color-tertiary-container: #a3d1f0;
-  --md-sys-color-on-tertiary-container: #0f2e42;
-  
-  --md-sys-color-surface: #fdfcf5;
-  --md-sys-color-on-surface: #1b1c18;
-  --md-sys-color-surface-variant: #e4e3d6;
-  --md-sys-color-on-surface-variant: #2a2b24;
-  --md-sys-color-surface-container-high: #d4d3c6;
-  --md-sys-color-surface-container-highest: #d4d3c6;
-  
-  --md-sys-color-outline: #79747e;
-  --md-sys-color-outline-variant: #cac4d0;
-  
-  --md-sys-color-error: #ba1a1a;
-  --md-sys-color-on-error: #ffffff;
-  --md-sys-color-error-container: #ffdad6;
-  --md-sys-color-on-error-container: #410002;
-  
-  --md-sys-elevation-level1: 0px 1px 2px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15);
-  --md-sys-elevation-level2: 0px 1px 2px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15);
-  --md-sys-elevation-level3: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px rgba(0,0,0,0.3);
-}
-
 * {
   margin: 0;
   padding: 0;
@@ -46,37 +9,49 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: theme('colors.surface.DEFAULT');
+  background-color: theme('colors.background.DEFAULT');
   color: theme('colors.surface.onSurface');
+}
+
+/* Dark mode overrides applied via class usually, but keeping simple defaults here */
+.dark body {
+  background-color: theme('colors.background.dark');
+  color: #f4f4f5;
 }
 
 #root {
   min-height: 100vh;
   min-height: 100dvh;
-  }
-  
-  @layer utilities {
-    .h-dynamic-screen {
-      height: 100vh;
-      height: 100dvh;
-    }
-  
-    .min-h-dynamic-screen {
-      min-height: 100vh;
-      min-height: 100dvh;
-    }
+  display: flex;
+  flex-direction: column;
 }
 
-/* CodeMirror M3 主题 */
+@layer utilities {
+  .h-dynamic-screen {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .min-h-dynamic-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+/* CodeMirror Theme Customization */
 .cm-editor {
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .cm-content {
@@ -88,29 +63,40 @@ body {
 }
 
 .cm-selectionBackground {
-  background-color: theme('colors.primary.container') !important;
+  background-color: theme('colors.primary.selection') !important;
 }
 
-/* 滚动条样式 */
+/* Scrollbar Styles */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: theme('colors.surface.variant');
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: theme('colors.surface.onVariant');
+  background: #d4d4d8; /* Fallback */
+  background: theme('colors.scrollbar.thumb', #d4d4d8);
   border-radius: 4px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #52525b; /* Fallback */
+  background: theme('colors.scrollbar.thumbDark', #52525b);
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.primary.DEFAULT');
+  background: #a1a1aa; /* Fallback */
+  background: theme('colors.scrollbar.thumbHover', #a1a1aa);
 }
 
 /* Monaco Editor Scrollbar Styles */
 .monaco-scrollable-element > .scrollbar > .slider {
   border-radius: 4px;
+  background: theme('colors.scrollbar.thumb', #d4d4d8) !important;
+}
+.dark .monaco-scrollable-element > .scrollbar > .slider {
+  background: theme('colors.scrollbar.thumbDark', #52525b) !important;
 }

@@ -37,19 +37,16 @@ export class DiffService {
     const diffs = this.dmp.diff_main(text1, text2);
     const levenshtein = this.dmp.diff_levenshtein(diffs);
     const maxLength = Math.max(text1.length, text2.length);
-    
+
     if (maxLength === 0) return 100;
-    
+
     return Math.round(((maxLength - levenshtein) / maxLength) * 100);
   }
 
   /**
    * 生成统一格式的 Diff (类似 Git Diff)
    */
-  generateUnifiedDiff(
-    text1: string,
-    text2: string
-  ): string {
+  generateUnifiedDiff(text1: string, text2: string): string {
     const diffs = this.dmp.diff_main(text1, text2);
     this.dmp.diff_cleanupSemantic(diffs);
 

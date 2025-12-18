@@ -39,6 +39,7 @@ lerna-debug.log*
 
 # OS
 Thumbs.db
+!.vscode/extensions.json
 .DS_Store
 
 # Temporary files

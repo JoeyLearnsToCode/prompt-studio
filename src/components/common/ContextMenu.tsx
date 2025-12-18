@@ -16,12 +16,7 @@ interface ContextMenuProps {
   onClose: () => void;
 }
 
-export const ContextMenu: React.FC<ContextMenuProps> = ({
-  isOpen,
-  position,
-  items,
-  onClose,
-}) => {
+export const ContextMenu: React.FC<ContextMenuProps> = ({ isOpen, position, items, onClose }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [adjustedPosition, setAdjustedPosition] = useState(position);
 
@@ -30,12 +25,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       const menuRect = menuRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       const spaceBelow = viewportHeight - position.y;
-      
+
       let newY = position.y;
       if (spaceBelow < menuRect.height && position.y > menuRect.height) {
         newY = position.y - menuRect.height;
       }
-      
+
       setAdjustedPosition({ x: position.x, y: newY });
     }
   }, [isOpen, position]);
@@ -73,7 +68,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.1 }}
-          className="fixed z-50 w-auto bg-surface-container/90 backdrop-blur-md rounded-m3-medium shadow-elevation-2 py-2"
+          className="fixed z-50 w-auto bg-surface-containerHighest/50 backdrop-blur-md rounded-m3-medium shadow-elevation-2 py-2"
           style={{
             left: `${adjustedPosition.x}px`,
             top: `${adjustedPosition.y}px`,
@@ -96,21 +91,20 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                   item.disabled
                     ? 'opacity-50 cursor-not-allowed'
                     : item.danger
-                    ? 'hover:bg-error-container [&]:text-error'
-                    : 'hover:bg-primary-container text-primary'
+                      ? 'hover:bg-error-container [&]:text-error'
+                      : 'hover:bg-primary-container text-primary'
                 }
               `}
               aria-label={item.label}
             >
-              {item.icon && (
-                typeof item.icon === 'string' ? (
+              {item.icon &&
+                (typeof item.icon === 'string' ? (
                   <span className="text-lg">{item.icon}</span>
                 ) : (
                   <span className="flex items-center justify-center w-5 h-5">
                     {React.createElement(item.icon, { size: 18 })}
                   </span>
-                )
-              )}
+                ))}
               <span>{item.label}</span>
             </button>
           ))}

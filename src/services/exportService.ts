@@ -6,7 +6,7 @@ import { db } from '@/db/schema';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
-import { importService, } from './importService';
+import { importService } from './importService';
 import type { ImportOptions, ImportProgressCallback } from '@/types/import';
 
 export class ExportService {
@@ -16,7 +16,10 @@ export class ExportService {
   async exportProjectAsJSON(projectId: string): Promise<void> {
     const project = await db.projects.get(projectId);
     const versions = await db.versions.where('projectId').equals(projectId).toArray();
-    const attachments = await db.attachments.where('versionId').anyOf(versions.map(v => v.id)).toArray();
+    const attachments = await db.attachments
+      .where('versionId')
+      .anyOf(versions.map((v) => v.id))
+      .toArray();
 
     // 清理版本数据，移除运行时计算的字段
     const cleanVersions = versions.map(({ normalizedContent, ...version }) => version);
@@ -25,7 +28,7 @@ export class ExportService {
     const cleanAttachments = attachments.map(({ blob, isMissing, ...attachment }) => ({
       ...attachment,
       // 保留原始文件名和类型信息，但不包含实际二进制数据
-      hasBlob: !!blob && !isMissing
+      hasBlob: !!blob && !isMissing,
     }));
 
     const data = {
@@ -59,7 +62,7 @@ export class ExportService {
     const cleanAttachments = attachments.map(({ blob, isMissing, ...attachment }) => ({
       ...attachment,
       // 保留原始文件名和类型信息，但不包含实际二进制数据
-      hasBlob: !!blob && !isMissing
+      hasBlob: !!blob && !isMissing,
     }));
 
     zip.file('projects.json', JSON.stringify(projects, null, 2));
@@ -74,7 +77,10 @@ export class ExportService {
       for (const attachment of attachments) {
         if (attachment.blob && !attachment.isMissing) {
           // 获取文件扩展名
-          const fileExtension = ExportService.getFileExtension(attachment.fileType, attachment.fileName);
+          const fileExtension = ExportService.getFileExtension(
+            attachment.fileType,
+            attachment.fileName
+          );
           const fileName = `${attachment.id}${fileExtension}`;
 
           // 将 Blob 转换为 ArrayBuffer
@@ -101,17 +107,24 @@ export class ExportService {
 
     zip.file('settings.json', JSON.stringify(settings, null, 2));
 
-    zip.file('metadata.json', JSON.stringify({
-      exportedAt: new Date().toISOString(),
-      version: '1.0',
-      counts: {
-        projects: projects.length,
-        folders: folders.length,
-        versions: versions.length,
-        snippets: snippets.length,
-        attachments: attachments.length,
-      },
-    }, null, 2));
+    zip.file(
+      'metadata.json',
+      JSON.stringify(
+        {
+          exportedAt: new Date().toISOString(),
+          version: '1.0',
+          counts: {
+            projects: projects.length,
+            folders: folders.length,
+            versions: versions.length,
+            snippets: snippets.length,
+            attachments: attachments.length,
+          },
+        },
+        null,
+        2
+      )
+    );
 
     const blob = await zip.generateAsync({ type: 'blob' });
     saveAs(blob, `prompt-studio-backup-${Date.now()}.zip`);

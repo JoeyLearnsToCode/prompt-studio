@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { webdavService, type WebDAVConfig } from '@/services/webdavService';
 import { exportService } from '@/services/exportService';
 import { useProjectStore } from '@/store/projectStore';
-import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
+import { MinimalButton } from '@/components/common/MinimalButton';
 import { ImportModeDialog } from '@/components/common/ImportModeDialog';
 import { Icons } from '@/components/icons/Icons';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
 import { useTranslation } from '@/i18n/I18nContext';
+
 const Settings: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslation();
@@ -29,13 +30,22 @@ const Settings: React.FC = () => {
   const [showImportModeDialog, setShowImportModeDialog] = useState(false);
   const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
   const [pendingRestorePath, setPendingRestorePath] = useState<string | null>(null);
+
+  // 校验配置是否完整
+  const isConfigValid = useMemo(() => {
+    return (
+      webdavConfig.url?.trim() !== '' &&
+      webdavConfig.username?.trim() !== '' &&
+      webdavConfig.password?.trim() !== ''
+    );
+  }, [webdavConfig]);
+
   useEffect(() => {
     // 从 localStorage 加载配置
     const config = storage.get<WebDAVConfig | null>(STORAGE_KEYS.WEBDAV_CONFIG, null);
     if (config) {
       setWebdavConfig(config);
       webdavService.configure(config);
-      loadBackups();
     }
   }, []);
 
@@ -47,6 +57,7 @@ const Settings: React.FC = () => {
   }, [webdavConfig]);
 
   const handleTestConnection = async () => {
+    if (!isConfigValid) return;
     setTesting(true);
     try {
       webdavService.configure(webdavConfig);
@@ -59,7 +70,9 @@ const Settings: React.FC = () => {
         alert(t('pages.settings.webdav.connectionFailed'));
       }
     } catch (error) {
-      alert(`${t('pages.settings.webdav.connectionFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
+      alert(
+        `${t('pages.settings.webdav.connectionFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`
+      );
       setIsConnected(false);
     } finally {
       setTesting(false);
@@ -76,10 +89,9 @@ const Settings: React.FC = () => {
   };
 
   const handleBackup = async () => {
-    if (!isConnected) {
-      alert(t('pages.settings.webdav.configureFirst'));
-      return;
-    }
+    if (!isConfigValid) return;
+    // 确保使用当前配置
+    webdavService.configure(webdavConfig);
 
     setLoading(true);
     try {
@@ -87,17 +99,18 @@ const Settings: React.FC = () => {
       alert(t('pages.settings.webdav.backupSuccess'));
       loadBackups();
     } catch (error) {
-      alert(`${t('pages.settings.webdav.backupFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
+      alert(
+        `${t('pages.settings.webdav.backupFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleOpenRestoreModal = async () => {
-    if (!isConnected) {
-      alert(t('pages.settings.webdav.configureFirst'));
-      return;
-    }
+    if (!isConfigValid) return;
+    // 确保使用当前配置
+    webdavService.configure(webdavConfig);
 
     setLoading(true);
     try {
@@ -105,7 +118,9 @@ const Settings: React.FC = () => {
       setBackups(list);
       setShowRestoreModal(true);
     } catch (error) {
-      alert(`${t('pages.settings.errors.loadBackupsFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
+      alert(
+        `${t('pages.settings.errors.loadBackupsFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`
+      );
     } finally {
       setLoading(false);
     }
@@ -132,7 +147,9 @@ const Settings: React.FC = () => {
       alert(t('pages.settings.webdav.restoreSuccess'));
       window.location.reload();
     } catch (error) {
-      alert(`${t('pages.settings.webdav.restoreFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
+      alert(
+        `${t('pages.settings.webdav.restoreFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`
+      );
     } finally {
       setLoading(false);
       setPendingRestorePath(null);
@@ -148,17 +165,21 @@ const Settings: React.FC = () => {
       alert(t('pages.settings.webdav.deleteSuccess'));
       // 更新备份列表和模态框中的备份列表
       loadBackups();
-      setBackups(prev => prev.filter(b => b.path !== remotePath));
+      setBackups((prev) => prev.filter((b) => b.path !== remotePath));
     } catch (error) {
-      alert(`${t('pages.settings.webdav.deleteFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
+      alert(
+        `${t('pages.settings.webdav.deleteFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`
+      );
     }
   };
 
-  const handleExportJSON = async () => {
+  const handleExportClick = async () => {
     try {
       await exportService.exportAllAsZip();
     } catch (error) {
-      alert(`${t('pages.settings.local.exportFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
+      alert(
+        `${t('pages.settings.local.exportFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`
+      );
     }
   };
 
@@ -196,7 +217,9 @@ const Settings: React.FC = () => {
 
         alert(t('pages.settings.local.importSuccess'));
       } catch (error) {
-        alert(`${t('pages.settings.local.importFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`);
+        alert(
+          `${t('pages.settings.local.importFailed')}: ${error instanceof Error ? error.message : t('pages.settings.errors.unknown')}`
+        );
       } finally {
         // 清理状态
         setShowImportModeDialog(false);
@@ -232,125 +255,159 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="min-h-dynamic-screen bg-surface text-surface-onSurface">
-      <header className="bg-primary text-onPrimary px-6 py-1 shadow-m3-1 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('pages.settings.title')}</h1>
-        <button
+    <div className="flex flex-col h-screen bg-background dark:bg-background-dark text-surface-onSurface overflow-hidden">
+      {/* 头部 */}
+      <header className="h-14 bg-primary text-white flex items-center justify-between px-6 shrink-0 shadow-md z-20">
+        <div className="flex items-center gap-2">
+          <Icons.Settings className="text-2xl" />
+          <h1 className="text-lg font-bold tracking-wide">{t('pages.settings.title')}</h1>
+        </div>
+        <MinimalButton
+          variant="ghost"
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 px-4 py-2 rounded-m3-medium hover:bg-onPrimary/20 transition-colors"
+          className="h-9 w-9 text-white/90 hover:text-white hover:bg-white/10"
+          title={t('common.back')}
         >
-          <Icons.LeftArrow className="h-5 w-5" />
-        </button>
+          <Icons.ArrowLeft className="h-6 w-6" />
+        </MinimalButton>
       </header>
 
-      <div className="p-6">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* 本地导入导出 */}
-          <section className="bg-surface-container rounded-m3-large p-6 shadow-m3-1">
-            <h2 className="text-xl font-bold mb-4">{t('pages.settings.local.title')}</h2>
-            <div className="space-y-4">
+      {/* 主内容区 */}
+      <div className="flex-1 flex overflow-hidden p-2 gap-2 justify-center">
+        <main className="flex-1 flex flex-col overflow-y-auto max-w-4xl p-4 md:p-6 gap-6">
+          {/* 本地导入导出卡片 */}
+          <section className="bg-surface dark:bg-surface-dark rounded-xl shadow-sm border border-border dark:border-border-dark p-6">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-3 bg-primary/10 rounded-lg text-primary shrink-0">
+                <span className="material-symbols-outlined text-2xl">folder_zip</span>
+              </div>
               <div>
-                <Button onClick={handleExportJSON} className="w-full sm:w-auto">
-                  <Icons.Package size={16} />
-                  <span className="ml-2">{t('pages.settings.local.exportZip')}</span>
-                </Button>
-                <p className="text-sm text-surface-onVariant mt-2">
-                  {t('pages.settings.local.exportDescription')}
+                <h2 className="text-lg font-bold text-surface-onSurface">
+                  {t('pages.settings.local.title')}
+                </h2>
+                <p className="text-sm text-surface-onVariant mt-1">
+                  {t('pages.settings.local.description')}
                 </p>
               </div>
-
-              <div>
-                <Button onClick={handleImportClick} className="w-full sm:w-auto">
-                  <Icons.Download size={16} />
-                  <span className="ml-2">{t('pages.settings.local.importZip')}</span>
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".zip"
-                  className="hidden"
-                  onChange={handleImportFile}
-                />
-              </div>
+            </div>
+            <div className="flex gap-3 w-full sm:w-auto justify-end">
+              <MinimalButton
+                variant="default"
+                onClick={handleExportClick}
+                className="px-4 py-2.5 text-sm gap-2"
+              >
+                <Icons.Download size={18} />
+                {t('pages.settings.local.exportZip')}
+              </MinimalButton>
+              <MinimalButton
+                variant="default"
+                onClick={handleImportClick}
+                className="px-4 py-2.5 text-sm gap-2"
+              >
+                <Icons.Upload size={18} />
+                {t('pages.settings.local.importZip')}
+              </MinimalButton>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".zip"
+                className="hidden"
+                onChange={handleImportFile}
+              />
             </div>
           </section>
 
-          {/* WebDAV 配置 */}
-          <section className="bg-surface-container rounded-m3-large p-6 shadow-m3-1">
-            <h2 className="text-xl font-bold mb-4">{t('pages.settings.webdav.title')}</h2>
-            <div className="space-y-4">
+          {/* WebDAV 配置卡片 */}
+          <section className="bg-surface dark:bg-surface-dark rounded-xl shadow-sm border border-border dark:border-border-dark p-6">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-3 bg-primary/10 rounded-lg text-primary shrink-0">
+                <span className="material-symbols-outlined text-2xl">cloud_sync</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-surface-onSurface">
+                  {t('pages.settings.webdav.title')}
+                </h2>
+                <p className="text-sm text-surface-onVariant mt-1">
+                  {t('pages.settings.webdav.description')}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4 max-w-2xl">
               <Input
                 label={t('pages.settings.webdav.serverUrl')}
                 placeholder="https://example.com/webdav"
                 value={webdavConfig.url}
-                onChange={(e) =>
-                  setWebdavConfig({ ...webdavConfig, url: e.target.value })
-                }
+                onChange={(e) => setWebdavConfig({ ...webdavConfig, url: e.target.value })}
+                className="bg-background dark:bg-zinc-900 border-border dark:border-border-dark focus:border-transparent focus:ring-2 focus:ring-primary"
               />
               <Input
                 label={t('pages.settings.webdav.username')}
                 placeholder="username"
                 value={webdavConfig.username}
-                onChange={(e) =>
-                  setWebdavConfig({ ...webdavConfig, username: e.target.value })
-                }
+                onChange={(e) => setWebdavConfig({ ...webdavConfig, username: e.target.value })}
+                className="bg-background dark:bg-zinc-900 border-border dark:border-border-dark focus:border-transparent focus:ring-2 focus:ring-primary"
               />
               <Input
                 label={t('pages.settings.webdav.password')}
                 type="password"
                 placeholder="password"
                 value={webdavConfig.password}
-                onChange={(e) =>
-                  setWebdavConfig({ ...webdavConfig, password: e.target.value })
-                }
+                onChange={(e) => setWebdavConfig({ ...webdavConfig, password: e.target.value })}
+                className="bg-background dark:bg-zinc-900 border-border dark:border-border-dark focus:border-transparent focus:ring-2 focus:ring-primary"
               />
+            </div>
 
-              <div className="flex gap-3">
-                <Button onClick={handleTestConnection} disabled={testing}>
-                  {testing ? t('pages.settings.webdav.testing') : t('pages.settings.webdav.testConnection')}
-                </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-border dark:border-border-dark">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <MinimalButton
+                  variant="default"
+                  onClick={handleTestConnection}
+                  disabled={testing || !isConfigValid}
+                  className="w-full sm:w-auto px-4 py-2.5 text-sm gap-2"
+                >
+                  <span className="material-symbols-outlined text-[18px]">wifi</span>
+                  {testing
+                    ? t('pages.settings.webdav.testing')
+                    : t('pages.settings.webdav.testConnection')}
+                </MinimalButton>
                 {isConnected && (
-                  <span className="flex items-center text-sm text-green-600">
-                    ✓ {t('pages.settings.webdav.connected')}
+                  <span className="flex items-center text-sm text-primary font-medium shrink-0">
+                    <span className="material-symbols-outlined text-lg mr-1">check_circle</span>
+                    {t('pages.settings.webdav.connected')}
                   </span>
                 )}
               </div>
 
-              <div className="pt-4 border-t border-surface-onVariant/20">
-                <div className="flex gap-3">
-                  <Button
-                    onClick={handleBackup}
-                    disabled={!isConnected || loading}
-                    className="w-full sm:w-auto"
-                  >
-                    {loading ? (
-                      t('pages.settings.webdav.backingUp')
-                    ) : (
-                      <>
-                        <Icons.Refresh size={16} />
-                        <span className="ml-2">{t('pages.settings.webdav.backupToWebdav')}</span>
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    onClick={handleOpenRestoreModal}
-                    disabled={!isConnected || loading}
-                    className="w-full sm:w-auto"
-                  >
-                    {loading ? (
-                      t('pages.settings.webdav.loading')
-                    ) : (
-                      <>
-                        <Icons.Download size={16} />
-                        <span className="ml-2">{t('pages.settings.webdav.restoreFromWebdav')}</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
+              <div className="flex gap-3 w-full sm:w-auto">
+                <MinimalButton
+                  variant="default"
+                  onClick={handleBackup}
+                  disabled={loading || !isConfigValid}
+                  className="flex-1 sm:flex-none px-4 py-2.5 text-sm gap-2"
+                >
+                  {loading ? (
+                    <span>{t('pages.settings.webdav.backingUp')}</span>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+                      <span>{t('pages.settings.webdav.backupToWebdav')}</span>
+                    </>
+                  )}
+                </MinimalButton>
+                <MinimalButton
+                  variant="default"
+                  onClick={handleOpenRestoreModal}
+                  disabled={loading || !isConfigValid}
+                  className="flex-1 sm:flex-none px-4 py-2.5 text-sm gap-2"
+                >
+                  <span className="material-symbols-outlined text-[18px]">cloud_download</span>
+                  <span>{t('pages.settings.webdav.restoreFromWebdav')}</span>
+                </MinimalButton>
               </div>
             </div>
           </section>
-        </div>
+        </main>
       </div>
 
       {/* 从 WebDAV 还原模态框 */}
@@ -370,30 +427,34 @@ const Settings: React.FC = () => {
               {backups.map((backup) => (
                 <div
                   key={backup.path}
-                  className="flex items-center justify-between p-4 bg-surface-containerHighest rounded-m3-medium hover:bg-surface-containerHigh transition-colors"
+                  className="flex items-center justify-between p-4 bg-surface-container-high dark:bg-zinc-800 rounded-lg hover:bg-surface-variant dark:hover:bg-zinc-700 transition-colors"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                  <div className="flex-1 min-w-0 mr-4">
+                    <p className="text-sm font-medium truncate text-surface-onSurface">
                       {backup.name}
                     </p>
                     <p className="text-xs text-surface-onVariant mt-1">
                       {formatDate(backup.lastMod)} • {formatFileSize(backup.size)}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => handleRestore(backup.path)}
-                    disabled={loading}
-                    className="ml-4"
-                  >
-                    {t('pages.settings.webdav.restore')}
-                  </Button>
-                  <Button
-                    onClick={() => handleDeleteBackup(backup.path)}
-                    disabled={loading}
-                    className="ml-4"
-                  >
-                    {t('pages.settings.webdav.delete')}
-                  </Button>
+                  <div className="flex gap-2 shrink-0">
+                    <MinimalButton
+                      variant="default"
+                      onClick={() => handleRestore(backup.path)}
+                      disabled={loading}
+                      className="px-3 py-1.5 text-xs text-primary border-primary/30 hover:bg-primary/5"
+                    >
+                      {t('pages.settings.webdav.restore')}
+                    </MinimalButton>
+                    <MinimalButton
+                      variant="danger"
+                      onClick={() => handleDeleteBackup(backup.path)}
+                      disabled={loading}
+                      className="px-3 py-1.5 text-xs"
+                    >
+                      {t('pages.settings.webdav.delete')}
+                    </MinimalButton>
+                  </div>
                 </div>
               ))}
             </div>

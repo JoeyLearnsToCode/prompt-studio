@@ -5,6 +5,7 @@
 
 import type { Version } from '@/models/Version';
 import { buildVersionTree, calculateTreeLayout, type VersionTreeNode } from '@/utils/tree';
+import { colors } from '@/styles/tokens';
 
 export interface CanvasNode {
   id: string;
@@ -30,18 +31,21 @@ export class CanvasRenderer {
   private selectedNodeId: string | null = null;
   private resizeTimer: number | null = null;
 
-  // M3 颜色主题 - 提高对比度
-  private colors = {
-    primary: '#a8c548',
-    primaryContainer: '#d9f799',
-    onPrimary: '#1a2400',
-    surface: '#fdfcf5',
-    surfaceVariant: '#e4e3d6',
-    onSurface: '#1b1c18',
-    onSurfaceVariant: '#2a2b24',
-    outline: '#5a5c52',
-    // 选中版本节点使用绿色 #76a866
-    selectedNode: '#76a866',
+  // 🟢 手动微调：修改此数值改变连线圆角的大小 (默认 12)
+  private cornerRadius = 12;
+
+  // Theme Colors - initialized with defaults, updated in updateThemeColors
+  private themeColors = {
+    primary: colors.primary.DEFAULT,
+    primaryContainer: colors.background.DEFAULT,
+    onPrimary: colors.primary.onPrimary,
+    surface: colors.surface.DEFAULT,
+    surfaceVariant: colors.surface.variant,
+    onSurface: colors.text.light.primary,
+    onSurfaceVariant: colors.text.light.secondary,
+    outline: colors.border.DEFAULT,
+    selectedNode: colors.primary.DEFAULT,
+    connection: colors.text.light.muted,
   };
 
   constructor(canvas: HTMLCanvasElement) {
@@ -50,110 +54,125 @@ export class CanvasRenderer {
     if (!ctx) throw new Error('无法获取 Canvas 2D 上下文');
     this.ctx = ctx;
 
+    // Check for dark mode to adjust surface colors
+    this.updateThemeColors();
     this.resizeCanvas();
   }
 
-  /**
-   * 调整画布大小以匹配容器（带防抖）
-   */
+  private updateThemeColors() {
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      this.themeColors = {
+        primary: colors.primary.DEFAULT,
+        primaryContainer: colors.surface.onSurface, // Using onSurface as container-like in dark logic for text
+        onPrimary: colors.primary.onPrimary,
+        surface: colors.surface.dark,
+        surfaceVariant: colors.border.dark,
+        onSurface: colors.text.dark.primary,
+        onSurfaceVariant: colors.text.dark.muted,
+        outline: colors.border.dark,
+        selectedNode: colors.primary.DEFAULT,
+        connection: colors.text.dark.muted,
+      };
+    } else {
+      // Light mode default
+      this.themeColors = {
+        primary: colors.primary.DEFAULT,
+        primaryContainer: colors.background.DEFAULT,
+        onPrimary: colors.primary.onPrimary,
+        surface: colors.surface.DEFAULT,
+        surfaceVariant: colors.surface.variant,
+        onSurface: colors.text.light.primary,
+        onSurfaceVariant: colors.text.light.secondary,
+        outline: colors.border.DEFAULT,
+        selectedNode: colors.primary.DEFAULT,
+        connection: colors.text.light.muted,
+      };
+    }
+  }
+
   resizeCanvas() {
-    // 如果已有定时器在运行，说明在防抖期间，不执行
     if (this.resizeTimer !== null) {
       return;
     }
-
-    // 执行实际的resize
     this.performResize();
-    
-    // 设置定时器，150ms内不允许再次执行
     this.resizeTimer = window.setTimeout(() => {
       this.resizeTimer = null;
     }, 150);
   }
 
-  /**
-   * 执行实际的 resize 操作
-   */
   private performResize() {
-    // 使用父元素的尺寸，而不是 canvas 自身的 getBoundingClientRect
+    const dpr = window.devicePixelRatio || 1;
     const parent = this.canvas.parentElement;
     if (!parent) return;
 
-    const width = parent.clientWidth;
-    const height = parent.clientHeight;
+    const rect = parent.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
 
-    // 直接使用逻辑像素,不考虑DPR
-    // Canvas会自动处理高分屏的像素缩放
-    this.canvas.width = width;
-    this.canvas.height = height;
-
-    // 设置显示尺寸
+    // 设置实际渲染尺寸（考虑设备像素比）
+    this.canvas.width = width * dpr;
+    this.canvas.height = height * dpr;
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
 
-    // 重新获取context以重置所有变换
     const ctx = this.canvas.getContext('2d');
     if (ctx) {
       this.ctx = ctx;
-      // 不再应用DPR缩放,让浏览器自动处理
+      // 重新获取 context 后重置 scale
+      this.ctx.scale(dpr, dpr);
     }
 
-    // 重新绘制
+    this.updateThemeColors(); // Re-check theme on resize/redraw
     this.draw();
   }
 
-  /**
-   * 渲染版本树
-   */
   renderTree(versions: Version[]) {
-    // 构建树形结构
     const roots = buildVersionTree(versions);
-    
-    // 定义节点尺寸和间距
+
     const nodeWidth = 200;
     const nodeHeight = 80;
-    const horizontalSpacing = 30;  // 紧凑一点的水平间距
-    const verticalSpacing = 80;     // 紧凑一点的垂直间距
-    
-    // 计算布局
+    const horizontalSpacing = 30;
+    const verticalSpacing = 80;
+
     this.nodes = [];
-    let offsetX = 50; // 初始偏移
-    
+    let offsetX = 50;
+
     roots.forEach((root) => {
-      // 使用新的布局算法，传入节点尺寸参数
-      const layout = calculateTreeLayout(root, nodeWidth, nodeHeight, horizontalSpacing, verticalSpacing);
+      const layout = calculateTreeLayout(
+        root,
+        nodeWidth,
+        nodeHeight,
+        horizontalSpacing,
+        verticalSpacing
+      );
       this.nodes.push(this.convertToCanvasNode(layout, offsetX));
-      
-      // 计算下一棵树的起始位置（当前树宽度 + 额外间距）
+
       const treeWidth = this.calculateSubtreeWidth(layout, nodeWidth, horizontalSpacing);
-      offsetX += treeWidth + 100; // 树之间额外100px间距
+      offsetX += treeWidth + 100;
     });
 
-    // 绘制
     this.draw();
   }
 
-  /**
-   * 计算子树宽度（用于多根树的水平排列）
-   */
-  private calculateSubtreeWidth(node: VersionTreeNode, nodeWidth: number, horizontalSpacing: number): number {
+  private calculateSubtreeWidth(
+    node: VersionTreeNode,
+    nodeWidth: number,
+    horizontalSpacing: number
+  ): number {
     if (node.children.length === 0) {
       return nodeWidth;
     }
-    const childrenWidths = node.children.map((child: VersionTreeNode) => 
+    const childrenWidths = node.children.map((child: VersionTreeNode) =>
       this.calculateSubtreeWidth(child, nodeWidth, horizontalSpacing)
     );
-    return childrenWidths.reduce((sum: number, w: number) => sum + w, 0) + 
-           (node.children.length - 1) * horizontalSpacing;
+    return (
+      childrenWidths.reduce((sum: number, w: number) => sum + w, 0) +
+      (node.children.length - 1) * horizontalSpacing
+    );
   }
 
-  /**
-   * 转换为画布节点
-   */
-  private convertToCanvasNode(
-    treeNode: any,
-    offsetX: number = 0
-  ): CanvasNode {
+  private convertToCanvasNode(treeNode: any, offsetX: number = 0): CanvasNode {
     const node: CanvasNode = {
       id: treeNode.id,
       x: treeNode.x + offsetX + 50,
@@ -173,33 +192,40 @@ export class CanvasRenderer {
     return node;
   }
 
-  /**
-   * 执行绘制
-   */
   private draw() {
     const { ctx, canvas } = this;
     const { x, y, scale } = this.transform;
 
-    // 清空画布 - canvas.width/height就是逻辑像素
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 获取实际渲染尺寸（考虑设备像素比）
+    const width = canvas.width / (window.devicePixelRatio || 1);
+    const height = canvas.height / (window.devicePixelRatio || 1);
 
-    // 应用变换
+    // 清空画布
+    ctx.clearRect(0, 0, width, height);
+
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(scale, scale);
 
-    // 绘制连线
+    // 1. 绘制连线 (递归绘制所有连线)
     this.nodes.forEach((node) => this.drawConnections(node));
 
-    // 绘制节点
-    this.nodes.forEach((node) => this.drawNode(node));
+    // 2. 绘制所有节点
+    // 获取所有扁平化节点以确保所有节点都被绘制
+    const allNodes = this.flattenNodes();
+
+    // 排序：将选中的节点放在最后绘制，使其处于最上层
+    allNodes.sort((a, b) => {
+      if (a.id === this.selectedNodeId) return 1;
+      if (b.id === this.selectedNodeId) return -1;
+      return 0;
+    });
+
+    allNodes.forEach((node) => this.drawNode(node));
 
     ctx.restore();
   }
 
-  /**
-   * 绘制连线 - 使用横平竖直的直角连接
-   */
   private drawConnections(node: CanvasNode) {
     const { ctx } = this;
 
@@ -210,97 +236,111 @@ export class CanvasRenderer {
       const childTopY = child.y;
 
       ctx.beginPath();
-      ctx.strokeStyle = this.colors.outline;
+      ctx.strokeStyle = this.themeColors.connection;
       ctx.lineWidth = 2;
 
-      if (node.children.length === 1) {
-        // 只有一个子节点时，使用垂直直线
+      // 如果父子节点的 X 坐标几乎相同（垂直对齐），直接画直线
+      if (Math.abs(parentCenterX - childCenterX) < 1) {
         ctx.moveTo(parentCenterX, parentBottomY);
         ctx.lineTo(parentCenterX, childTopY);
       } else {
-        // 多个子节点时，使用横平竖直的折线
-        // 1. 从父节点底部中心向下
+        // 否则画带圆角的折线 (Manhattan routing with rounded corners)
         const midY = parentBottomY + (childTopY - parentBottomY) / 2;
+
         ctx.moveTo(parentCenterX, parentBottomY);
-        ctx.lineTo(parentCenterX, midY);
-        
-        // 2. 水平连接到子节点中心X位置
-        ctx.lineTo(childCenterX, midY);
-        
-        // 3. 向下连接到子节点顶部
+
+        // 绘制第一个弯：从父节点底部向下，在 midY 处转向子节点水平方向
+        // arcTo 会自动从当前点画一条直线到切点，然后画圆弧
+        ctx.arcTo(parentCenterX, midY, childCenterX, midY, this.cornerRadius);
+
+        // 绘制第二个弯：从 midY 水平延伸，在子节点 X 轴处转向向下
+        ctx.arcTo(childCenterX, midY, childCenterX, childTopY, this.cornerRadius);
+
+        // 最后画直线到子节点顶部
         ctx.lineTo(childCenterX, childTopY);
       }
 
       ctx.stroke();
-
-      // 递归绘制子节点连线
       this.drawConnections(child);
     });
   }
 
-  /**
-   * 绘制节点
-   */
   private drawNode(node: CanvasNode) {
     const { ctx } = this;
     const isSelected = node.id === this.selectedNodeId;
 
-    // 背景
-    ctx.fillStyle = isSelected
-      ? this.colors.selectedNode
-      : this.colors.surface;
-    // 选中节点不显示边框，看起来无边框
-    // if (!isSelected) {
-    //   ctx.strokeStyle = this.colors.outline;
-    //   ctx.lineWidth = 1;
-    // }
-
-    this.roundRect(ctx, node.x, node.y, node.width, node.height, 12);
-    ctx.fill();
-    // 只有未选中的节点才绘制边框
-    // if (!isSelected) {
-    //   ctx.stroke();
-    // }
-
-    // 版本名称（如果有）
-    let currentY = node.y + 8;
-    if (node.version.name) {
-      ctx.fillStyle = this.colors.onSurface;
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textBaseline = 'top';
-      
-      // 限制名称长度并添加省略号
-      const displayName = node.version.name.length > 20 
-        ? node.version.name.substring(0, 20) + '...' 
-        : node.version.name;
-      
-      ctx.fillText(displayName, node.x + 8, currentY);
-      currentY += 22; // 增加行高，为版本名称预留空间
+    // Background
+    if (isSelected) {
+      ctx.fillStyle = this.themeColors.selectedNode;
+    } else {
+      ctx.fillStyle = this.themeColors.surface;
     }
 
-    // 文本内容（截断）
-    ctx.fillStyle = this.colors.onSurface;
+    // Shadow effect for unselected cards
+    if (!isSelected) {
+      ctx.shadowColor = colors.primary.selection;
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetY = 2;
+    } else {
+      // Sage green shadow, using primary color with opacity
+      ctx.shadowColor = colors.primary.selection;
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetY = 4;
+    }
+
+    this.roundRect(ctx, node.x, node.y, node.width, node.height, 8); // 8px radius
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Border for unselected nodes
+    if (!isSelected) {
+      ctx.strokeStyle = this.themeColors.outline;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Text Color
+    const textColor = isSelected ? this.themeColors.onPrimary : this.themeColors.onSurface;
+
+    // Version Name
+    let currentY = node.y + 16; // Padding top
+    if (node.version.name) {
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textBaseline = 'top';
+
+      const displayName =
+        node.version.name.length > 20
+          ? node.version.name.substring(0, 20) + '...'
+          : node.version.name;
+
+      ctx.fillText(displayName, node.x + 12, currentY);
+      currentY += 20;
+    }
+
+    // Content
+    ctx.fillStyle = textColor; // Muted if name exists
     ctx.font = '14px sans-serif';
     ctx.textBaseline = 'top';
 
-    // 先按换行符分割，保留原始行结构
-    const originalLines = node.version.content.split('\n').filter(line => line.trim() !== '');
-    
-    // 根据是否有版本名称调整显示的内容行数
-    const maxLines = node.version.name ? 3 : 4;
-    
+    const originalLines = node.version.content.split('\n').filter((line) => line.trim() !== '');
+    const maxLines = node.version.name ? 2 : 3;
     let currentLineIndex = 0;
-    const maxWidth = node.width - 16;
-    
-    // 处理每一行的显示
+    const maxWidth = node.width - 24; // Padding 12px * 2
+
     for (let i = 0; i < originalLines.length && currentLineIndex < maxLines; i++) {
       const line = originalLines[i];
+
       const isLastLine = i === originalLines.length - 1;
       const remainingLines = maxLines - currentLineIndex;
-      
+
       // 检查文本是否超出卡片宽度
       const metrics = ctx.measureText(line);
-      
+
       if (metrics.width > maxWidth) {
         // 如果是最后一行且还有剩余空间（至少2行），允许换行
         if (isLastLine && remainingLines >= 2) {
@@ -308,7 +348,7 @@ export class CanvasRenderer {
           const chars = line.split('');
           let tempLine = '';
           const wrappedLines: string[] = [];
-          
+
           for (const char of chars) {
             const testLine = tempLine + char;
             if (ctx.measureText(testLine).width > maxWidth) {
@@ -323,32 +363,38 @@ export class CanvasRenderer {
               tempLine = testLine;
             }
           }
-          
+
           if (tempLine) {
             wrappedLines.push(tempLine);
           }
-          
+
           // 显示换行后的内容
           const linesToShow = Math.min(wrappedLines.length, remainingLines);
           for (let j = 0; j < linesToShow; j++) {
             let displayText = wrappedLines[j];
-            
+
             // 如果是最后一行且还有更多内容，添加省略号
             if (j === linesToShow - 1 && wrappedLines.length > linesToShow) {
               let truncatedText = displayText;
-              while (ctx.measureText(truncatedText + '...').width > maxWidth && truncatedText.length > 0) {
+              while (
+                ctx.measureText(truncatedText + '...').width > maxWidth &&
+                truncatedText.length > 0
+              ) {
                 truncatedText = truncatedText.slice(0, -1);
               }
               displayText = truncatedText + '...';
             }
-            
+
             ctx.fillText(displayText, node.x + 8, currentY + currentLineIndex * 18);
             currentLineIndex++;
           }
         } else {
           // 其他情况，截断并添加省略号
           let truncatedText = line;
-          while (ctx.measureText(truncatedText + '...').width > maxWidth && truncatedText.length > 0) {
+          while (
+            ctx.measureText(truncatedText + '...').width > maxWidth &&
+            truncatedText.length > 0
+          ) {
             truncatedText = truncatedText.slice(0, -1);
           }
           ctx.fillText(truncatedText + '...', node.x + 8, currentY + currentLineIndex * 18);
@@ -360,9 +406,6 @@ export class CanvasRenderer {
         currentLineIndex++;
       }
     }
-
-    // 递归绘制子节点
-    node.children.forEach((child) => this.drawNode(child));
   }
 
   /**
@@ -389,57 +432,35 @@ export class CanvasRenderer {
     ctx.closePath();
   }
 
-
-
-  /**
-   * 设置变换
-   */
   setTransform(transform: Partial<CanvasTransform>) {
     this.transform = { ...this.transform, ...transform };
     this.draw();
   }
 
-  /**
-   * 缩放
-   */
   zoom(delta: number, centerX: number, centerY: number) {
     const newScale = Math.max(0.1, Math.min(3, this.transform.scale + delta));
-    
-    // 以鼠标位置为中心缩放
     const scaleDiff = newScale - this.transform.scale;
     this.transform.x -= centerX * scaleDiff;
     this.transform.y -= centerY * scaleDiff;
     this.transform.scale = newScale;
-
     this.draw();
   }
 
-  /**
-   * 平移
-   */
   pan(dx: number, dy: number) {
     this.transform.x += dx;
     this.transform.y += dy;
     this.draw();
   }
 
-  /**
-   * 选择节点
-   */
   selectNode(nodeId: string | null) {
     this.selectedNodeId = nodeId;
     this.draw();
   }
 
-  /**
-   * 点击检测
-   */
   hitTest(x: number, y: number): string | null {
-    // 转换坐标到画布空间
     const canvasX = (x - this.transform.x) / this.transform.scale;
     const canvasY = (y - this.transform.y) / this.transform.scale;
 
-    // 检测所有节点
     for (const node of this.flattenNodes()) {
       if (
         canvasX >= node.x &&
@@ -450,13 +471,9 @@ export class CanvasRenderer {
         return node.id;
       }
     }
-
     return null;
   }
 
-  /**
-   * 展平节点树
-   */
   private flattenNodes(): CanvasNode[] {
     const result: CanvasNode[] = [];
     const traverse = (node: CanvasNode) => {
@@ -467,46 +484,32 @@ export class CanvasRenderer {
     return result;
   }
 
-  /**
-   * 重置视图
-   */
   resetView() {
     this.transform = { x: 0, y: 0, scale: 1 };
     this.draw();
   }
 
-  /**
-   * 居中显示指定节点
-   */
   centerNode(nodeId: string) {
     const node = this.flattenNodes().find((n) => n.id === nodeId);
     if (!node) return;
-
     const centerX = this.canvas.width / 2;
     const centerY = this.canvas.height / 2;
-
     this.transform.x = centerX - (node.x + node.width / 2) * this.transform.scale;
     this.transform.y = centerY - (node.y + node.height / 2) * this.transform.scale;
-
     this.draw();
   }
 
-  /**
-   * 将节点定位到指定比例位置
-   * @param nodeId 节点ID
-   * @param xRatio 水平位置比例 (0-1)，0.5表示居中
-   * @param yRatio 垂直位置比例 (0-1)，0.5表示居中
-   */
   centerNodeAtPosition(nodeId: string, xRatio: number = 0.5, yRatio: number = 0.5) {
     const node = this.flattenNodes().find((n) => n.id === nodeId);
     if (!node) return;
+    // 使用逻辑尺寸计算，因为transform应用在scale之前
+    const width = this.canvas.width / (window.devicePixelRatio || 1);
+    const height = this.canvas.height / (window.devicePixelRatio || 1);
 
-    const targetX = this.canvas.width * xRatio;
-    const targetY = this.canvas.height * yRatio;
-
+    const targetX = width * xRatio;
+    const targetY = height * yRatio;
     this.transform.x = targetX - (node.x + node.width / 2) * this.transform.scale;
     this.transform.y = targetY - (node.y + node.height / 2) * this.transform.scale;
-
     this.draw();
   }
 }

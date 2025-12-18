@@ -7,7 +7,12 @@ import { db } from '@/db/schema';
 import JSZip from 'jszip';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
 import { normalize } from '@/utils/normalize';
-import type { ImportOptions, ImportResult, ImportProgress, ImportProgressCallback } from '@/types/import';
+import type {
+  ImportOptions,
+  ImportResult,
+  ImportProgress,
+  ImportProgressCallback,
+} from '@/types/import';
 
 /**
  * 统一的导入服务
@@ -22,7 +27,7 @@ export class ImportService {
     onProgress?: ImportProgressCallback
   ): Promise<ImportResult> {
     const zip = await JSZip.loadAsync(file);
-    
+
     // 读取所有数据文件
     const projectsFile = zip.file('projects.json');
     const foldersFile = zip.file('folders.json');
@@ -35,13 +40,17 @@ export class ImportService {
     const totalStages = 6; // projects, folders, versions, snippets, attachments, settings
     let currentStage = 0;
 
-    const updateProgress = (_stageValue: ImportResult['imported'][keyof ImportResult['imported']], stageName: ImportProgress['stage'], message: string) => {
+    const updateProgress = (
+      _stageValue: ImportResult['imported'][keyof ImportResult['imported']],
+      stageName: ImportProgress['stage'],
+      message: string
+    ) => {
       currentStage++;
       onProgress?.({
         current: currentStage,
         total: totalStages,
         stage: stageName,
-        message: `${message} (${currentStage}/${totalStages})`
+        message: `${message} (${currentStage}/${totalStages})`,
       });
     };
 
@@ -160,13 +169,21 @@ export class ImportService {
    * 清空所有数据
    */
   private async clearAllData(): Promise<void> {
-    await db.transaction('rw', db.projects, db.folders, db.versions, db.snippets, db.attachments, async () => {
-      await db.projects.clear();
-      await db.folders.clear();
-      await db.versions.clear();
-      await db.snippets.clear();
-      await db.attachments.clear();
-    });
+    await db.transaction(
+      'rw',
+      db.projects,
+      db.folders,
+      db.versions,
+      db.snippets,
+      db.attachments,
+      async () => {
+        await db.projects.clear();
+        await db.folders.clear();
+        await db.versions.clear();
+        await db.snippets.clear();
+        await db.attachments.clear();
+      }
+    );
   }
 
   /**
@@ -176,7 +193,7 @@ export class ImportService {
     if (mode === 'merge') {
       // 合并模式：根据 UUID 判断是否已存在
       const existingIds = new Set(await db.projects.toCollection().primaryKeys());
-      const newProjects = projects.filter(project => !existingIds.has(project.id));
+      const newProjects = projects.filter((project) => !existingIds.has(project.id));
       if (newProjects.length > 0) {
         await db.projects.bulkPut(newProjects);
       }
@@ -194,7 +211,7 @@ export class ImportService {
   private async importFolders(folders: any[], mode: 'merge' | 'overwrite'): Promise<number> {
     if (mode === 'merge') {
       const existingIds = new Set(await db.folders.toCollection().primaryKeys());
-      const newFolders = folders.filter(folder => !existingIds.has(folder.id));
+      const newFolders = folders.filter((folder) => !existingIds.has(folder.id));
       if (newFolders.length > 0) {
         await db.folders.bulkPut(newFolders);
       }
@@ -212,8 +229,8 @@ export class ImportService {
     if (mode === 'merge') {
       // 合并的粒度是版本
       const existingIds = new Set(await db.versions.toCollection().primaryKeys());
-      const newVersions = versions.filter(version => !existingIds.has(version.id));
-      
+      const newVersions = versions.filter((version) => !existingIds.has(version.id));
+
       if (newVersions.length > 0) {
         // 清理版本数据，移除运行时计算的字段，并添加 normalizedContent
         const cleanVersions = newVersions.map(({ normalizedContent, ...version }) => ({
@@ -240,7 +257,7 @@ export class ImportService {
   private async importSnippets(snippets: any[], mode: 'merge' | 'overwrite'): Promise<number> {
     if (mode === 'merge') {
       const existingIds = new Set(await db.snippets.toCollection().primaryKeys());
-      const newSnippets = snippets.filter(snippet => !existingIds.has(snippet.id));
+      const newSnippets = snippets.filter((snippet) => !existingIds.has(snippet.id));
       if (newSnippets.length > 0) {
         await db.snippets.bulkPut(newSnippets);
       }
@@ -279,8 +296,22 @@ export class ImportService {
         // 尝试从附件文件夹中查找对应的文件
         if (attachmentsFolder) {
           // 查找可能的文件名（根据附件ID和扩展名）
-          const fileExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
-            '.mp4', '.webm', '.mov', '.pdf', '.txt', '.html', '.json', '.bin'];
+          const fileExtensions = [
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.gif',
+            '.webp',
+            '.svg',
+            '.mp4',
+            '.webm',
+            '.mov',
+            '.pdf',
+            '.txt',
+            '.html',
+            '.json',
+            '.bin',
+          ];
 
           for (const ext of fileExtensions) {
             const fileName = `${attachment.id}${ext}`;
@@ -308,7 +339,7 @@ export class ImportService {
     if (mode === 'merge') {
       // 合并模式：只添加不存在的附件
       const existingIds = new Set(await db.attachments.toCollection().primaryKeys());
-      const newAttachments = processedAttachments.filter(att => !existingIds.has(att.id));
+      const newAttachments = processedAttachments.filter((att) => !existingIds.has(att.id));
       if (newAttachments.length > 0) {
         await db.attachments.bulkPut(newAttachments);
       }

@@ -101,7 +101,8 @@ export class WebDAVService {
       const editorHeightRatio = storage.get(STORAGE_KEYS.EDITOR_HEIGHT_RATIO, null);
       const sidebarCollapsed = storage.get(STORAGE_KEYS.SIDEBAR_COLLAPSED, null);
       if (canvasRatio !== null) settings[STORAGE_KEYS.CANVAS_RATIO] = canvasRatio;
-      if (editorHeightRatio !== null) settings[STORAGE_KEYS.EDITOR_HEIGHT_RATIO] = editorHeightRatio;
+      if (editorHeightRatio !== null)
+        settings[STORAGE_KEYS.EDITOR_HEIGHT_RATIO] = editorHeightRatio;
       if (sidebarCollapsed !== null) settings[STORAGE_KEYS.SIDEBAR_COLLAPSED] = sidebarCollapsed;
 
       zip.file('settings.json', JSON.stringify(settings, null, 2));
@@ -152,13 +153,15 @@ export class WebDAVService {
   /**
    * 列出所有备份文件
    */
-  async listBackups(): Promise<Array<{ name: string; path: string; size: number; lastMod: string }>> {
+  async listBackups(): Promise<
+    Array<{ name: string; path: string; size: number; lastMod: string }>
+  > {
     if (!this.client) {
       throw new Error('请先配置 WebDAV 连接');
     }
 
     try {
-      const dirPath = `/${WEBDAV_DIR}/`
+      const dirPath = `/${WEBDAV_DIR}/`;
       const exists = await this.client.exists(dirPath);
 
       if (!exists) {

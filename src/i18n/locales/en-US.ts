@@ -46,26 +46,31 @@ export const enUS: TranslationData = {
 
     settings: {
       title: 'Settings',
-      
-            local: {
-              title: 'Local Import/Export',
-              exportZip: 'Export as ZIP',
-              exportDescription: 'Export all projects and versions as a ZIP file',
-              importZip: 'Import from ZIP',
-              unsupportedFormat: 'Unsupported file format',
-              importSuccess: 'Import successful',
-              importFailed: 'Import failed',
-              exportFailed: 'Export failed',
-              importMode: {
-                selectMode: 'Select Import Mode',
-                mergeMode: 'Merge Import (Recommended)',
-                mergeModeDescription: 'Keep existing data and only import new data. Uses UUID to determine if data already exists.',
-                overwriteMode: 'Overwrite Import',
-                overwriteModeDescription: 'Clear existing data before importing. This action cannot be undone, please proceed with caution.',
-              },
-            },
+
+      local: {
+        title: 'Local Import/Export',
+        description:
+          'Manage your local data manually. You can export all projects and version history to a ZIP archive or restore your workspace from a previous backup.',
+        exportZip: 'Export as ZIP',
+        importZip: 'Import from ZIP',
+        unsupportedFormat: 'Unsupported file format',
+        importSuccess: 'Import successful',
+        importFailed: 'Import failed',
+        exportFailed: 'Export failed',
+        importMode: {
+          selectMode: 'Select Import Mode',
+          mergeMode: 'Merge Import (Recommended)',
+          mergeModeDescription:
+            'Keep existing data and only import new data. Uses UUID to determine if data already exists.',
+          overwriteMode: 'Overwrite Import',
+          overwriteModeDescription:
+            'Clear existing data before importing. This action cannot be undone, please proceed with caution.',
+        },
+      },
       webdav: {
         title: 'WebDAV Configuration',
+        description:
+          'Configure a remote WebDAV server to sync your prompt library across multiple devices.',
         serverUrl: 'Server URL',
         username: 'Username',
         password: 'Password',
@@ -83,7 +88,8 @@ export const enUS: TranslationData = {
         backupFailed: 'Backup failed',
         restoreSuccess: 'Restore successful',
         restoreFailed: 'Restore failed',
-        confirmRestore: 'Are you sure you want to restore this backup? Current data will be overwritten!',
+        confirmRestore:
+          'Are you sure you want to restore this backup? Current data will be overwritten!',
         restoreModalTitle: 'Select backup to restore',
         noBackups: 'No backups available',
         restore: 'Restore',
@@ -149,7 +155,8 @@ export const enUS: TranslationData = {
       exitCompare: 'Exit Compare',
       enterCompare: 'Click compare to enter comparison mode',
       deleteVersion: 'Delete this version',
-      confirmDelete: 'Are you sure you want to delete this version? Child versions will be connected to the parent version.',
+      confirmDelete:
+        'Are you sure you want to delete this version? Child versions will be connected to the parent version.',
       deleteFailed: 'Delete failed',
       zoomIn: 'Zoom In',
       zoomOut: 'Zoom Out',

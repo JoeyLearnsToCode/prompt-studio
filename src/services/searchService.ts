@@ -28,8 +28,8 @@ export function searchVersions(versions: Version[], query: string): SearchResult
 
   const lowerQuery = query.toLowerCase();
   const matches = versions
-    .filter(v => v.content.toLowerCase().includes(lowerQuery))
-    .map(v => v.id);
+    .filter((v) => v.content.toLowerCase().includes(lowerQuery))
+    .map((v) => v.id);
 
   return { matches, total: matches.length };
 }
@@ -50,11 +50,11 @@ export function highlightMatches(text: string, query: string): string {
   while (index !== -1) {
     // 添加匹配前的文本
     parts.push(escapeHtml(text.substring(lastIndex, index)));
-    
+
     // 添加高亮的匹配文本
     const matchedText = text.substring(index, index + query.length);
     parts.push(`<mark class="bg-yellow-200">${escapeHtml(matchedText)}</mark>`);
-    
+
     lastIndex = index + query.length;
     index = lowerText.indexOf(lowerQuery, lastIndex);
   }

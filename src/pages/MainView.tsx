@@ -12,7 +12,6 @@ import type { Version } from '@/models/Version';
 import { MinimalButton } from '@/components/common/MinimalButton';
 import VersionCanvas from '@/components/canvas/VersionCanvas';
 import { AttachmentGallery } from '@/components/version/AttachmentGallery';
-import { VersionMetaCard } from '@/components/version/VersionMetaCard';
 import { CompareModal } from '@/components/version/CompareModal';
 
 import { DuplicateDialog } from '@/components/common/DuplicateDialog';
@@ -20,14 +19,6 @@ import { ResizableSplitter } from '@/components/common/ResizableSplitter';
 import { VerticalResizableSplitter } from '@/components/common/VerticalResizableSplitter';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { Icons } from '@/components/icons/Icons';
-
-const SaveIcon = () => (
-  <Icons.Save className="w-5 h-5" />
-);
-
-const SaveNewIcon = () => (
-  <Icons.SaveNew className="w-5 h-5" />
-);
 
 const MainView: React.FC = () => {
   const navigate = useNavigate();
@@ -43,7 +34,7 @@ const MainView: React.FC = () => {
     compareState,
     compareMode,
   } = useVersionStore();
-  
+
   // 布局偏好设置
   const {
     layoutPreference,
@@ -60,21 +51,13 @@ const MainView: React.FC = () => {
   const [versionName, setVersionName] = useState('');
   const [canSaveInPlace, setCanSaveInPlace] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  
-  // 编辑区容器的 ref，用于垂直分隔条计算
+
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const mainSplitContainerRef = useRef<HTMLDivElement>(null);
-  
-  // 编辑器的 ref，用于聚焦
   const editorRef = useRef<PromptEditorRef>(null);
-  
-  // 版本名称输入框的 ref，用于焦点切换
   const versionNameInputRef = useRef<HTMLInputElement>(null);
-
-  // 标题栏容器 ref，用于响应式计算
   const toolbarRef = useRef<HTMLDivElement>(null);
 
-  // 重复提醒对话框状态
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [duplicateVersion, setDuplicateVersion] = useState<Version | null>(null);
   const [pendingSaveData, setPendingSaveData] = useState<{
@@ -83,67 +66,56 @@ const MainView: React.FC = () => {
     parentId: string | null;
   } | null>(null);
 
-  // 附件区域拖拽状态
   const [isDraggingAttachments, setIsDraggingAttachments] = useState(false);
 
-  // 面板折叠状态 (不持久化)
-  // 宽屏 (>= 1024px) 默认展开，窄屏 (< 1024px) 默认折叠
-  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(() => window.innerWidth < 1024);
-  const [isBottomPanelCollapsed, setIsBottomPanelCollapsed] = useState(() => window.innerWidth < 1024);
+  // 面板折叠状态
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(
+    () => window.innerWidth < 1024
+  );
+  const [isBottomPanelCollapsed, setIsBottomPanelCollapsed] = useState(
+    () => window.innerWidth < 1024
+  );
 
-  // 处理版本树中的节点点击，考虑对比模式
+  // 处理版本树中的节点点击
   const handleVersionNodeClick = (versionId: string) => {
     if (compareMode && compareState.sourceVersionId && versionId !== compareState.sourceVersionId) {
-      // 在对比模式下，点击不同版本则进行对比
-      // 不改变当前选中的版本，保持对比前的状态
       useVersionStore.getState().setCompareTarget(versionId);
     } else {
-      // 非对比模式或点击同一版本，则正常切换版本
       setCurrentVersion(versionId);
     }
   };
 
-  // 加载项目的版本
   useEffect(() => {
     if (currentProjectId) {
-      // 切换项目时，先清空当前版本ID
       setCurrentVersion(null);
       loadVersions(currentProjectId);
-      
-      // 聚焦到编辑器
       setTimeout(() => {
         editorRef.current?.focus();
-      }, 200); // 稍微延迟一点时间，确保版本加载完成
+      }, 200);
     }
   }, [currentProjectId, loadVersions, setCurrentVersion]);
 
-  // 页面加载时的临时展开逻辑
   useEffect(() => {
-    // 仅在页面首次加载且没有选中项目时执行
     if (!currentProjectId && !sidebarTemporarilyExpanded) {
-      // 如果LocalStorage中侧边栏是折叠状态，临时展开它
       if (sidebarCollapsed) {
         setTemporarilyExpanded(true);
       }
     }
   }, [currentProjectId, sidebarCollapsed, sidebarTemporarilyExpanded, setTemporarilyExpanded]);
 
-  // 项目选择后的自动折叠逻辑
   useEffect(() => {
-    // 当用户选择了项目且之前是临时展开状态时，取消临时展开
     if (currentProjectId && sidebarTemporarilyExpanded) {
       setTemporarilyExpanded(false);
     }
   }, [currentProjectId, sidebarTemporarilyExpanded, setTemporarilyExpanded]);
 
-  // 更新编辑器内容和附件，自动选择最近更新的版本
   useEffect(() => {
     if (currentProjectId && versions.length > 0) {
-      // 如果没有选中版本，或当前选中的版本不属于当前项目，自动选择最近更新的版本
-      const currentVersion = currentVersionId ? versions.find(v => v.id === currentVersionId) : null;
+      const currentVersion = currentVersionId
+        ? versions.find((v) => v.id === currentVersionId)
+        : null;
       if (!currentVersionId || !currentVersion || currentVersion.projectId !== currentProjectId) {
-        const projectVersions = versions.filter(v => v.projectId === currentProjectId);
-        // 按updatedAt降序排序，获取最近更新的版本
+        const projectVersions = versions.filter((v) => v.projectId === currentProjectId);
         const sortedVersions = [...projectVersions].sort((a, b) => b.updatedAt - a.updatedAt);
         if (sortedVersions.length > 0) {
           setCurrentVersion(sortedVersions[0].id);
@@ -152,21 +124,14 @@ const MainView: React.FC = () => {
     }
   }, [currentProjectId, versions, currentVersionId, setCurrentVersion]);
 
-  // 加载当前版本内容
   useEffect(() => {
     if (currentVersionId && currentProjectId) {
       const version = versions.find((v) => v.id === currentVersionId);
       if (version) {
         setEditorContent(version.content);
-        setVersionName(version.name || ''); // 加载版本名称
-        
-        // User Story 4: 所有版本都可以原地保存
+        setVersionName(version.name || '');
         setCanSaveInPlace(true);
-
-        // 加载附件
         loadAttachments(currentVersionId);
-        
-        // 聚焦到编辑器
         setTimeout(() => {
           editorRef.current?.focus();
         }, 100);
@@ -176,8 +141,6 @@ const MainView: React.FC = () => {
       setVersionName('');
       setAttachments([]);
       setCanSaveInPlace(false);
-      
-      // 聚焦到编辑器
       setTimeout(() => {
         editorRef.current?.focus();
       }, 100);
@@ -198,13 +161,12 @@ const MainView: React.FC = () => {
       alert(t('pages.mainView.errors.selectProjectFirst'));
       return;
     }
-
     try {
       const versionId = await createVersion(
         currentProjectId,
         editorContent,
         currentVersionId,
-        true, // 跳过重复检测
+        true,
         versionName
       );
       setCurrentVersion(versionId);
@@ -215,23 +177,17 @@ const MainView: React.FC = () => {
   };
 
   const handleConfirmDuplicateCreate = async () => {
-    // 此函数已不再使用，因为移除了重复检测功能
-    // 保留以防万一
     if (!pendingSaveData) return;
-
     try {
-      // 强制创建(跳过重复检测)
       const versionId = await createVersion(
         pendingSaveData.projectId,
         pendingSaveData.content,
         pendingSaveData.parentId,
-        true, // 跳过重复检测
+        true,
         versionName
       );
       setCurrentVersion(versionId);
       await loadVersions(pendingSaveData.projectId);
-      
-      // 清理状态
       setShowDuplicateDialog(false);
       setDuplicateVersion(null);
       setPendingSaveData(null);
@@ -251,8 +207,6 @@ const MainView: React.FC = () => {
       alert(t('pages.mainView.errors.selectVersionFirst'));
       return;
     }
-
-    // User Story 4: 允许所有版本原地保存，不需要任何提示
     try {
       await updateVersionInPlace(currentVersionId, editorContent, versionName);
       await loadVersions(currentProjectId!);
@@ -276,19 +230,14 @@ const MainView: React.FC = () => {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-
-      // 验证文件类型
       if (!validTypes.includes(file.type)) {
         alert(`${t('components.attachmentGallery.unsupportedType')}: ${file.type}`);
         continue;
       }
-
-      // 验证文件大小（50MB）
       if (file.size > 50 * 1024 * 1024) {
         alert(`${t('components.attachmentGallery.fileTooLarge')}: ${file.name}`);
         continue;
       }
-
       try {
         await attachmentManager.uploadAttachment(currentVersionId, file);
       } catch (error) {
@@ -317,61 +266,74 @@ const MainView: React.FC = () => {
   };
 
   return (
-    <div className="h-dynamic-screen flex flex-col bg-surface">
-      {/* 顶部标题栏 */}
-      <header className="bg-primary text-onPrimary px-6 py-1 shadow-m3-1 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Prompt Studio</h1>
+    <div className="h-dynamic-screen flex flex-col bg-background dark:bg-background-dark text-surface-onSurface transition-colors duration-200">
+      {/* 顶部标题栏 - Updated Style */}
+      <header className="h-14 bg-primary text-white px-6 shrink-0 shadow-md z-20 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <img src="/icon-192.svg" className="h-8 w-8" alt="logo" />
+          <h1 className="text-lg font-bold tracking-wide hidden sm:inline">Prompt Studio</h1>
+        </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+
           <a
             href="https://github.com/JoeyLearnsToCode/prompt-studio"
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-full hover:bg-onPrimary/20 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg transition-colors duration-200 font-medium h-9 w-9 bg-transparent text-white/90 hover:bg-white/10 hover:text-white"
             aria-label="GitHub Repository"
           >
-            <Icons.GitHub className="h-6 w-6" />
+            <Icons.GitHub className="h-5 w-5" />
           </a>
-          <button
+
+          <MinimalButton
+            variant="ghost"
             onClick={() => navigate('/settings')}
-            className="p-2 rounded-full hover:bg-onPrimary/20 transition-colors"
+            className="h-9 w-9 text-white/90 hover:text-white hover:bg-white/10"
             aria-label={t('common.settings')}
           >
-          <Icons.Settings className="h-6 w-6" />
-          </button>
+            <Icons.Settings className="h-5 w-5" />
+          </MinimalButton>
         </div>
       </header>
 
-      {/* 主要内容区域 */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* 主要内容区域 - Updated Layout with Gap and Padding */}
+      <div className="flex-1 flex overflow-hidden p-2 gap-2">
         {/* 左侧边栏 */}
         <Sidebar />
 
-        {/* 主要内容包装器，用于隔离左侧边栏，确保分隔条比例计算正确 */}
+        {/* 中央和右侧区域包装器 */}
         <div className="flex-1 flex overflow-hidden w-0 min-w-0" ref={mainSplitContainerRef}>
-        {/* 中央编辑区 */}
-        <div 
-          className="flex flex-col"
-            style={{ width: isRightPanelCollapsed ? '100%' : `${layoutPreference.canvasPanelWidthRatio * 100}%` }}
+          {/* 中央编辑区 */}
+          <div
+            className="flex flex-col gap-2"
+            style={{
+              width: isRightPanelCollapsed
+                ? '100%'
+                : `${layoutPreference.canvasPanelWidthRatio * 100}%`,
+            }}
           >
-            {sidebarCollapsed && !sidebarTemporarilyExpanded && (!currentProjectId || !currentVersionId) && (
-              <div className="px-4 py-3">
-                <SidebarToggle />
-              </div>
-            )}
-
-            {/* 版本名称输入框 */}
+            {/* Version Name Toolbar - Card Style */}
             {currentProjectId && currentVersionId && (
-              <div ref={toolbarRef} className="toolbar px-4 py-3 bg-surface-variant border-b border-surface-onVariant/20 @container">
-                <div className="flex items-center gap-2 h-10">
-                  {sidebarCollapsed && !sidebarTemporarilyExpanded && (<div className="flex-shrink-0"><SidebarToggle /></div>)}
+              <div
+                ref={toolbarRef}
+                className="bg-surface dark:bg-surface-dark rounded-xl px-3 shadow-card border border-border dark:border-border-dark flex items-center justify-between flex-wrap gap-2 h-16 shrink-0 z-10 @container"
+              >
+                <div className="flex items-center gap-1 flex-1 min-w-0">
+                  {sidebarCollapsed && !sidebarTemporarilyExpanded && (
+                    <div className="flex-shrink-0">
+                      <SidebarToggle className="text-sm" />
+                    </div>
+                  )}
                   <label
                     htmlFor="version-name"
                     className="text-sm font-medium text-surface-onVariant whitespace-nowrap overflow-hidden text-ellipsis min-w-0"
                     style={{ flexShrink: 3 }}
                     title={t('pages.mainView.versionName')}
                   >
-                    <span className="hidden @sm:inline">{t('pages.mainView.versionName') + ':'}</span>
+                    <span className="hidden @sm:inline">
+                      {t('pages.mainView.versionName') + ':'}
+                    </span>
                   </label>
                   <input
                     ref={versionNameInputRef}
@@ -405,110 +367,128 @@ const MainView: React.FC = () => {
                       }
                     }}
                     placeholder={t('pages.mainView.versionNamePlaceholder')}
-                    className="flex-1 px-2 py-2 text-sm bg-surface border border-surface-onVariant/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary min-w-[10px]"
+                    className="flex-1 px-2 py-2 text-sm bg-background dark:bg-background-dark border border-border dark:border-border-dark rounded-md px-3 py-1.5 text-sm text-surface-onSurface focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow min-w-[10px]"
                     style={{ flexShrink: 1 }}
                   />
+                </div>
 
-                  {/* 保存按钮 */}
+                <div className="flex items-center gap-2">
                   <MinimalButton
+                    variant="default"
                     onClick={handleSaveInPlace}
                     disabled={!canSaveInPlace || !currentProjectId}
                     title={`${t('components.toolbar.saveInPlace')} (Ctrl+S / Ctrl+Enter)`}
-                    className="whitespace-nowrap flex-shrink-0 px-2 py-1 text-sm"
+                    className="whitespace-nowrap flex-shrink-0 px-3 py-1.5 text-sm"
                   >
-                    <span className="inline @xs:hidden"><SaveIcon /></span> <span className="hidden @xs:inline">{t('components.toolbar.saveInPlace')}</span>
+                    <span className="inline @xs:hidden">
+                      <Icons.Save />
+                    </span>
+                    <span className="hidden @xs:inline">{t('components.toolbar.saveInPlace')}</span>
                   </MinimalButton>
-
                   <MinimalButton
+                    variant="default"
                     onClick={handleSave}
                     disabled={!currentProjectId}
                     title={`${t('components.toolbar.saveNew')} (Ctrl+Shift+S / Ctrl+Shift+Enter)`}
-                    className="whitespace-nowrap flex-shrink-0 px-2 py-1 text-sm"
+                    className="whitespace-nowrap flex-shrink-0 px-3 py-1.5 text-sm"
                   >
-                    <span className="inline @xs:hidden"><SaveNewIcon /></span> <span className="hidden @xs:inline">{t('components.toolbar.saveNew')}</span>
+                    <span className="inline @xs:hidden">
+                      <Icons.SaveNew />
+                    </span>
+                    <span className="hidden @xs:inline">{t('components.toolbar.saveNew')}</span>
                   </MinimalButton>
                 </div>
               </div>
             )}
 
-          <div className="flex-1 flex flex-col overflow-hidden" ref={editorContainerRef}>
-            {currentProjectId ? (
-              <>
-                <div 
-                  className="overflow-hidden"
-                    style={{ height: isBottomPanelCollapsed ? '100%' : `${layoutPreference.editorHeightRatio * 100}%` }}
-                >
-                  <PromptEditor
-                    ref={editorRef}
-                    value={editorContent}
-                    onChange={setEditorContent}
-                    onSave={handleSave}
-                    onSaveInPlace={handleSaveInPlace}
-                    onFocusVersionName={() => versionNameInputRef.current?.focus()}
-                  />
-                </div>
-                
-                {/* 垂直分隔条 */}
-                {currentVersionId && (
-                  <VerticalResizableSplitter
-                    ratio={layoutPreference.editorHeightRatio}
-                    onRatioChange={setEditorHeightRatio}
-                    onDragStart={startDragging}
-                    onDragEnd={stopDragging}
-                    minRatio={0.3}
-                    maxRatio={0.9}
-                    containerRef={editorContainerRef}
+            {/* Editor & Attachment Container - Vertical Layout */}
+            <div className="flex-1 flex flex-col overflow-hidden" ref={editorContainerRef}>
+              {currentProjectId ? (
+                <>
+                  <div
+                    className="overflow-hidden bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col relative"
+                    style={{
+                      height: isBottomPanelCollapsed
+                        ? '100%'
+                        : `${layoutPreference.editorHeightRatio * 100}%`,
+                    }}
+                  >
+                    {/* Line numbers fake gutter handled by Monaco, but we ensure wrapper is clean */}
+                    <div className="flex-1 overflow-hidden p-0">
+                      <PromptEditor
+                        ref={editorRef}
+                        value={editorContent}
+                        onChange={setEditorContent}
+                        onSave={handleSave}
+                        onSaveInPlace={handleSaveInPlace}
+                        onFocusVersionName={() => versionNameInputRef.current?.focus()}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Vertical Splitter */}
+                  {currentVersionId && (
+                    <VerticalResizableSplitter
+                      ratio={layoutPreference.editorHeightRatio}
+                      onRatioChange={setEditorHeightRatio}
+                      onDragStart={startDragging}
+                      onDragEnd={stopDragging}
+                      minRatio={0.3}
+                      maxRatio={0.9}
+                      containerRef={editorContainerRef}
                       isCollapsed={isBottomPanelCollapsed}
                       onCollapse={() => setIsBottomPanelCollapsed(!isBottomPanelCollapsed)}
-                  />
-                )}
-                
-                {/* 附件区域 */}
-                {currentVersionId && (
-                  <div 
-                    className={`p-4 overflow-y-auto transition-colors duration-200 ${isDraggingAttachments
-                      ? 'bg-primary-container/30 border-2 border-dashed border-primary'
-                      : 'bg-surface-container-low'
-                      }`}
-                      style={{
-                        height: isBottomPanelCollapsed ? '0px' : `${(1 - layoutPreference.editorHeightRatio) * 100}%`,
-                        display: isBottomPanelCollapsed ? 'none' : 'block'
-                      }}
-                    onDrop={handleAttachmentDrop}
-                    onDragOver={handleAttachmentDragOver}
-                    onDragLeave={handleAttachmentDragLeave}
-                  >
-                    <h3 className="text-sm font-semibold mb-3">{t('pages.mainView.attachments')}</h3>
-                    <AttachmentGallery
-                      versionId={currentVersionId}
-                      attachments={attachments}
-                      onAttachmentsChange={() => loadAttachments(currentVersionId)}
-                      readonly={false}
-                      onUpload={handleUploadFiles}
-                      extraCard={
-                        <VersionMetaCard
-                          versionId={currentVersionId}
-                          score={versions.find(v => v.id === currentVersionId)?.score}
-                          notes={versions.find(v => v.id === currentVersionId)?.notes}
-                          readonly={false}
-                        />
-                      }
                     />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="h-full flex items-center justify-center text-surface-onVariant">
-                <div className="text-center">
-                  <p className="text-xl mb-2">👈 {t('pages.mainView.noProject')}</p>
-                  <p className="text-sm">{t('pages.mainView.noProjectHint')}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+                  )}
 
-          {/* 可拖动分隔符 */}
+                  {/* Attachments Area */}
+                  {currentVersionId && (
+                    <div
+                      className={`
+                        bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark p-4 flex flex-col
+                        ${isDraggingAttachments ? 'ring-2 ring-primary bg-primary/5' : ''}
+                      `}
+                      style={{
+                        height: isBottomPanelCollapsed
+                          ? '0px'
+                          : `${(1 - layoutPreference.editorHeightRatio) * 100}%`,
+                        display: isBottomPanelCollapsed ? 'none' : 'flex',
+                      }}
+                      onDrop={handleAttachmentDrop}
+                      onDragOver={handleAttachmentDragOver}
+                      onDragLeave={handleAttachmentDragLeave}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <Icons.Attachment size={16} className="text-surface-onVariant" />
+                        <h3 className="text-xs tracking-wider font-bold text-surface-onVariant uppercase">
+                          {t('pages.mainView.attachments')}
+                        </h3>
+                      </div>
+
+                      <div className="flex-1 overflow-y-auto">
+                        <AttachmentGallery
+                          versionId={currentVersionId}
+                          attachments={attachments}
+                          onAttachmentsChange={() => loadAttachments(currentVersionId)}
+                          readonly={false}
+                          onUpload={handleUploadFiles}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="h-full flex items-center justify-center text-surface-onVariant bg-surface dark:bg-surface-dark rounded-xl border border-border dark:border-border-dark">
+                  <div className="text-center">
+                    <p className="text-xl mb-2">👈 {t('pages.mainView.noProject')}</p>
+                    <p className="text-sm">{t('pages.mainView.noProjectHint')}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Horizontal Splitter */}
           <ResizableSplitter
             ratio={layoutPreference.canvasPanelWidthRatio}
             onRatioChange={setCanvasRatio}
@@ -521,33 +501,33 @@ const MainView: React.FC = () => {
             onCollapse={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
           />
 
-        {/* 右侧画布区 - 版本树可视化 */}
-        <div 
-          className="border-l border-surface-onVariant/20 overflow-hidden"
+          {/* Right Canvas Area - Card Style */}
+          <div
+            className="overflow-hidden bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col relative"
             style={{
-              width: isRightPanelCollapsed ? '0px' : `${(1 - layoutPreference.canvasPanelWidthRatio) * 100}%`,
-              display: isRightPanelCollapsed ? 'none' : 'block'
+              width: isRightPanelCollapsed
+                ? '0px'
+                : `${(1 - layoutPreference.canvasPanelWidthRatio) * 100}%`,
+              display: isRightPanelCollapsed ? 'none' : 'flex',
             }}
-        >
-          <VersionCanvas
-            projectId={currentProjectId}
-            onNodeClick={handleVersionNodeClick}
-            hasProject={!!currentProjectId}
-            isCollapsed={isRightPanelCollapsed}
-          />
-        </div>
+          >
+            <VersionCanvas
+              projectId={currentProjectId}
+              onNodeClick={handleVersionNodeClick}
+              hasProject={!!currentProjectId}
+              isCollapsed={isRightPanelCollapsed}
+            />
+          </div>
         </div>
       </div>
 
-      {/* 版本对比模态框 */}
       <CompareModal
         isOpen={compareState.isOpen}
-        sourceVersion={versions.find(v => v.id === compareState.sourceVersionId) || null}
-        targetVersion={versions.find(v => v.id === compareState.targetVersionId) || null}
+        sourceVersion={versions.find((v) => v.id === compareState.sourceVersionId) || null}
+        targetVersion={versions.find((v) => v.id === compareState.targetVersionId) || null}
         onClose={() => useVersionStore.getState().closeCompare()}
       />
 
-      {/* 重复内容提醒对话框 */}
       <DuplicateDialog
         isOpen={showDuplicateDialog}
         duplicateVersion={duplicateVersion}

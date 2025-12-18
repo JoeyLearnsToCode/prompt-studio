@@ -35,7 +35,7 @@ export class FolderManager {
   async deleteFolder(id: string): Promise<void> {
     // 1. 获取所有子文件夹
     const children = await db.folders.where('parentId').equals(id).toArray();
-    
+
     // 2. 递归删除子文件夹
     for (const child of children) {
       await this.deleteFolder(child.id);
@@ -95,7 +95,10 @@ export class FolderManager {
    * 获取根文件夹
    */
   async getRootFolders(): Promise<Folder[]> {
-    return await db.folders.where('parentId').equals(null as any).toArray();
+    return await db.folders
+      .where('parentId')
+      .equals(null as any)
+      .toArray();
   }
 
   /**

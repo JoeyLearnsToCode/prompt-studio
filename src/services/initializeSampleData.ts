@@ -16,8 +16,8 @@ import type { Locale } from '@/i18n/types';
  */
 async function isNewUser(): Promise<boolean> {
   // 检查是否首次打开
-  const hasOpenedBefore = Object.values(STORAGE_KEYS).some(key => 
-    storage.get(key, null) !== null
+  const hasOpenedBefore = Object.values(STORAGE_KEYS).some(
+    (key) => storage.get(key, null) !== null
   );
   if (hasOpenedBefore) {
     return false; // 已经打开过
@@ -36,10 +36,10 @@ async function createSampleProject(): Promise<string> {
   // 获取当前语言的翻译
   const locale: Locale = initializeLanguage();
   const t = translations[locale];
-  
+
   // 创建示例项目（无文件夹）
   const project = await projectManager.createProject(t.sampleData.projectName, null as any);
-  
+
   // 创建根版本
   const rootVersion = await versionManager.createVersion(
     project.id,
@@ -48,7 +48,7 @@ async function createSampleProject(): Promise<string> {
     undefined, // score
     t.sampleData.versions.root.name // name
   );
-  
+
   // 创建根分支1
   await versionManager.createVersion(
     project.id,
@@ -78,13 +78,13 @@ export async function initializeSampleData(): Promise<string | null> {
   try {
     if (await isNewUser()) {
       console.log('检测到全新用户，正在创建示例项目...');
-      
+
       const projectId = await createSampleProject();
       console.log('示例项目创建完成');
-      
+
       return projectId;
     }
-    
+
     return null;
   } catch (error) {
     console.error('创建示例项目失败:', error);

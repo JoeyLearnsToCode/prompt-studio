@@ -24,7 +24,7 @@ export function validateLayoutRatio(ratio: number): number {
   if (typeof ratio !== 'number' || isNaN(ratio)) {
     return DEFAULT_LAYOUT.canvasPanelWidthRatio;
   }
-  
+
   // 限制范围: 0.2 - 0.8
   return Math.max(0.2, Math.min(0.8, ratio));
 }
@@ -36,7 +36,7 @@ export function validateEditorHeightRatio(ratio: number): number {
   if (typeof ratio !== 'number' || isNaN(ratio)) {
     return DEFAULT_LAYOUT.editorHeightRatio;
   }
-  
+
   // 限制范围: 0.3 - 0.9
   return Math.max(0.3, Math.min(0.9, ratio));
 }
@@ -47,8 +47,14 @@ export const layoutManager = {
    */
   loadPreference(): LayoutPreference {
     const ratio = storage.get(STORAGE_KEYS.CANVAS_RATIO, DEFAULT_LAYOUT.canvasPanelWidthRatio);
-    const editorRatio = storage.get(STORAGE_KEYS.EDITOR_HEIGHT_RATIO, DEFAULT_LAYOUT.editorHeightRatio);
-    const sidebarCollapsed = storage.get(STORAGE_KEYS.SIDEBAR_COLLAPSED, DEFAULT_LAYOUT.sidebarCollapsed);
+    const editorRatio = storage.get(
+      STORAGE_KEYS.EDITOR_HEIGHT_RATIO,
+      DEFAULT_LAYOUT.editorHeightRatio
+    );
+    const sidebarCollapsed = storage.get(
+      STORAGE_KEYS.SIDEBAR_COLLAPSED,
+      DEFAULT_LAYOUT.sidebarCollapsed
+    );
 
     return {
       canvasPanelWidthRatio: validateLayoutRatio(ratio),

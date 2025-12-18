@@ -79,13 +79,12 @@ export const useUiStore = create<UiState>((set, get) => ({
 
   canvasScale: 1,
   canvasPosition: { x: 0, y: 0 },
-  setCanvasTransform: (scale, position) =>
-    set({ canvasScale: scale, canvasPosition: position }),
+  setCanvasTransform: (scale, position) => set({ canvasScale: scale, canvasPosition: position }),
   resetCanvasTransform: () => set({ canvasScale: 1, canvasPosition: { x: 0, y: 0 } }),
 
   layoutPreference: layoutManager.loadPreference(),
   isDraggingSplitter: false,
-  
+
   setCanvasRatio: (ratio) => {
     set((state) => ({
       layoutPreference: {
@@ -115,7 +114,7 @@ export const useUiStore = create<UiState>((set, get) => ({
 
   loadLayoutPreference: () => {
     const preference = layoutManager.loadPreference();
-    set({ 
+    set({
       layoutPreference: preference,
       sidebarCollapsed: preference.sidebarCollapsed ?? false,
     });
@@ -135,12 +134,10 @@ export const useUiStore = create<UiState>((set, get) => ({
       diffModalOpen: true,
       diffVersionIds: { a: versionA, b: versionB },
     }),
-  closeDiffModal: () =>
-    set({ diffModalOpen: false, diffVersionIds: { a: null, b: null } }),
+  closeDiffModal: () => set({ diffModalOpen: false, diffVersionIds: { a: null, b: null } }),
 
   snippetLibraryOpen: false,
-  toggleSnippetLibrary: () =>
-    set((state) => ({ snippetLibraryOpen: !state.snippetLibraryOpen })),
+  toggleSnippetLibrary: () => set((state) => ({ snippetLibraryOpen: !state.snippetLibraryOpen })),
 
   loading: false,
   setLoading: (loading) => set({ loading }),

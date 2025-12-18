@@ -17,7 +17,7 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const { loadProjects, setCurrentProject, loadFolders } = useProjectStore();
   const { loadVersions } = useVersionStore();
-  
+
   // 使用 ref 确保初始化只执行一次（防止 React 18 严格模式下的双重调用）
   const hasInitialized = useRef(false);
 
@@ -31,7 +31,7 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     const initialize = async () => {
       // 初始化示例数据
       const sampleProjectId = await initializeSampleData();
-      
+
       // 如果创建了示例项目，自动加载和选择它
       if (sampleProjectId) {
         await loadFolders();
@@ -39,10 +39,10 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         setCurrentProject(sampleProjectId);
         await loadVersions(sampleProjectId);
       }
-      
+
       if (storage.get(STORAGE_KEYS.FIRST_OPEN_TIME, null) === null) {
-          // 记录首次打开时间
-          storage.set(STORAGE_KEYS.FIRST_OPEN_TIME, Date.now());
+        // 记录首次打开时间
+        storage.set(STORAGE_KEYS.FIRST_OPEN_TIME, Date.now());
       }
 
       setIsInitialized(true);

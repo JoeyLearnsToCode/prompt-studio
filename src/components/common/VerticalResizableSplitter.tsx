@@ -2,41 +2,18 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Icons } from '@/components/icons/Icons';
 
 interface VerticalResizableSplitterProps {
-  /** 当前高度比例(0-1) */
   ratio: number;
-  
-  /** 比例变化回调 */
   onRatioChange: (newRatio: number) => void;
-  
-  /** 拖动开始回调 */
   onDragStart?: () => void;
-  
-  /** 拖动结束回调 */
   onDragEnd?: () => void;
-  
-  /** 最小比例 */
   minRatio?: number;
-  
-  /** 最大比例 */
   maxRatio?: number;
-  
-  /** 可选：自定义样式类名 */
   className?: string;
-  
-  /** 容器ref，用于计算相对位置 */
   containerRef: React.RefObject<HTMLElement>;
-
-  /** 是否已折叠 */
   isCollapsed?: boolean;
-
-  /** 折叠状态切换回调 */
   onCollapse?: () => void;
 }
 
-/**
- * 垂直方向的可拖动分隔符组件
- * 用于调整上下两个面板的高度比例
- */
 export const VerticalResizableSplitter: React.FC<VerticalResizableSplitterProps> = ({
   ratio: _ratio,
   onRatioChange,
@@ -52,87 +29,91 @@ export const VerticalResizableSplitter: React.FC<VerticalResizableSplitterProps>
   const [isDragging, setIsDragging] = useState(false);
   const rafRef = useRef<number | null>(null);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    onDragStart?.();
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+      onDragStart?.();
 
-    const container = containerRef.current;
-    if (!container) return;
+      const container = containerRef.current;
+      if (!container) return;
 
-    const containerRect = container.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
 
-    const handleMouseMove = (e: MouseEvent) => {
-      // 使用requestAnimationFrame确保60fps流畅度
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      const handleMouseMove = (e: MouseEvent) => {
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+        }
 
-      rafRef.current = requestAnimationFrame(() => {
-        const relativeY = e.clientY - containerRect.top;
-        const newRatio = relativeY / containerRect.height;
-        const clampedRatio = Math.max(minRatio, Math.min(maxRatio, newRatio));
-        onRatioChange(clampedRatio);
-      });
-    };
+        rafRef.current = requestAnimationFrame(() => {
+          const relativeY = e.clientY - containerRect.top;
+          const newRatio = relativeY / containerRect.height;
+          const clampedRatio = Math.max(minRatio, Math.min(maxRatio, newRatio));
+          onRatioChange(clampedRatio);
+        });
+      };
 
-    const handleMouseUp = () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-      
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      setIsDragging(false);
-      onDragEnd?.();
-    };
+      const handleMouseUp = () => {
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = null;
+        }
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, [minRatio, maxRatio, onRatioChange, onDragStart, onDragEnd, containerRef]);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        setIsDragging(false);
+        onDragEnd?.();
+      };
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    onDragStart?.();
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [minRatio, maxRatio, onRatioChange, onDragStart, onDragEnd, containerRef]
+  );
 
-    const container = containerRef.current;
-    if (!container) return;
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+      onDragStart?.();
 
-    const containerRect = container.getBoundingClientRect();
+      const container = containerRef.current;
+      if (!container) return;
 
-    const handleTouchMove = (e: TouchEvent) => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      const containerRect = container.getBoundingClientRect();
 
-      rafRef.current = requestAnimationFrame(() => {
-        const touch = e.touches[0];
-        const relativeY = touch.clientY - containerRect.top;
-        const newRatio = relativeY / containerRect.height;
-        const clampedRatio = Math.max(minRatio, Math.min(maxRatio, newRatio));
-        onRatioChange(clampedRatio);
-      });
-    };
+      const handleTouchMove = (e: TouchEvent) => {
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+        }
 
-    const handleTouchEnd = () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-      
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-      setIsDragging(false);
-      onDragEnd?.();
-    };
+        rafRef.current = requestAnimationFrame(() => {
+          const touch = e.touches[0];
+          const relativeY = touch.clientY - containerRect.top;
+          const newRatio = relativeY / containerRect.height;
+          const clampedRatio = Math.max(minRatio, Math.min(maxRatio, newRatio));
+          onRatioChange(clampedRatio);
+        });
+      };
 
-    document.addEventListener('touchmove', handleTouchMove);
-    document.addEventListener('touchend', handleTouchEnd);
-  }, [minRatio, maxRatio, onRatioChange, onDragStart, onDragEnd, containerRef]);
+      const handleTouchEnd = () => {
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = null;
+        }
 
-  // 组件卸载时清理RAF
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+        setIsDragging(false);
+        onDragEnd?.();
+      };
+
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleTouchEnd);
+    },
+    [minRatio, maxRatio, onRatioChange, onDragStart, onDragEnd, containerRef]
+  );
+
   useEffect(() => {
     return () => {
       if (rafRef.current !== null) {
@@ -143,27 +124,24 @@ export const VerticalResizableSplitter: React.FC<VerticalResizableSplitterProps>
 
   return (
     <div
-      className={`relative flex-shrink-0 h-1 bg-surface-variant hover:bg-primary transition-colors duration-200 cursor-row-resize 
-        select-none flex items-center justify-center group z-10 ${isDragging ? 'bg-primary' : ''} ${className}`}
+      className={`relative flex-shrink-0 ${isCollapsed ? 'h-0' : 'h-2'} flex items-center justify-center group z-10 cursor-row-resize select-none bg-transparent ${className}`}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
-      style={{
-        cursor: 'row-resize',
-      }}
     >
-      {/* 扩大点击热区 */}
-      <div
-        className="absolute inset-x-0 -top-2 -bottom-2"
-        style={{
-          cursor: 'row-resize',
-        }}
-      />
+      {/* Pill Handle Style */}
+      {!isCollapsed && (
+        <div
+          className={`h-1 w-8 rounded-full transition-colors duration-200 ${
+            isDragging ? 'bg-primary' : 'bg-border dark:bg-border-dark group-hover:bg-primary'
+          }`}
+        />
+      )}
 
-      {/* 折叠/展开按钮 */}
+      {/* Collapse/Expand Button */}
       {onCollapse && (
         <button
-          className={`absolute z-20 w-6 h-6 rounded-md bg-surface/80 border shadow-sm flex items-center justify-center 
-            text-onSurface transition-opacity duration-200 hover:bg-surface focus:opacity-100 active:scale-95
+          className={`absolute z-20 w-6 h-6 rounded-md bg-surface/90 border border-border shadow-sm flex items-center justify-center text-surface-onSurface transition-opacity duration-200 hover:bg-surface-variant focus:opacity-100 active:scale-95
+            left-1/3
             ${isCollapsed ? 'opacity-100 mb-10' : 'opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100'}`}
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
@@ -171,7 +149,7 @@ export const VerticalResizableSplitter: React.FC<VerticalResizableSplitterProps>
             e.stopPropagation();
             onCollapse();
           }}
-          aria-label={isCollapsed ? "Expand" : "Collapse"}
+          aria-label={isCollapsed ? 'Expand' : 'Collapse'}
         >
           {isCollapsed ? <Icons.UpArrow /> : <Icons.DownArrow />}
         </button>

@@ -1,32 +1,40 @@
-import React, { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import { useTranslation } from '@/i18n/I18nContext';
 import { Icons } from '@/components/icons/Icons';
+import { MinimalButton } from '@/components/common/MinimalButton';
 
 interface SearchBarProps {
   /** 搜索关键词 */
   query: string;
-  
+
   /** 当前结果索引(0-based) */
   currentIndex: number;
-  
+
   /** 总匹配数 */
   total: number;
-  
+
   /** 搜索关键词变化回调 */
   onQueryChange: (query: string) => void;
-  
+
   /** 跳转到下一个结果 */
   onNext: () => void;
-  
+
   /** 跳转到上一个结果 */
   onPrev: () => void;
-  
+
   /** 清空搜索 */
   onClear: () => void;
-  
+
   /** 关闭搜索框 */
   onClose: () => void;
-  
+
   /** 可选:占位文本 */
   placeholder?: string;
 }
@@ -48,7 +56,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
     onClose,
     placeholder = t('components.canvas.searchPlaceholder'),
   } = props;
-  
+
   const [localQuery, setLocalQuery] = useState(query);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -85,19 +93,22 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
     focusInput();
   }, [focusInput]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (e.shiftKey) {
-        onPrev();
-      } else {
-        onNext();
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          onPrev();
+        } else {
+          onNext();
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose(); // ESC键现在关闭搜索框
       }
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      onClose(); // ESC键现在关闭搜索框
-    }
-  }, [onNext, onPrev, onClose]);
+    },
+    [onNext, onPrev, onClose]
+  );
 
   const hasResults = total > 0;
   const canNavigate = total > 1;
@@ -127,48 +138,52 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
       )}
 
       {/* 上一个结果按钮 */}
-      <button
+      <MinimalButton
+        variant="ghost"
         onClick={onPrev}
         disabled={!canNavigate}
-        className="p-1.5 rounded-full hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        className="p-1.5 rounded-full"
         aria-label={t('components.canvas.prevResult')}
         title={t('components.canvas.prevResult')}
       >
-        <Icons.UpArrow className="w-4 h-4 text-surface-onVariant" />
-      </button>
+        <Icons.UpArrow className="w-4 h-4" />
+      </MinimalButton>
 
       {/* 下一个结果按钮 */}
-      <button
+      <MinimalButton
+        variant="ghost"
         onClick={onNext}
         disabled={!canNavigate}
-        className="p-1.5 rounded-full hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        className="p-1.5 rounded-full"
         aria-label={t('components.canvas.nextResult')}
         title={t('components.canvas.nextResult')}
       >
-        <Icons.DownArrow className="w-4 h-4 text-surface-onVariant" />
-      </button>
+        <Icons.DownArrow className="w-4 h-4" />
+      </MinimalButton>
 
       {/* 清空按钮 */}
       {query && (
-        <button
+        <MinimalButton
+          variant="ghost"
           onClick={onClear}
-          className="p-1.5 rounded-full hover:bg-surface transition-colors"
+          className="p-1.5 rounded-full hover:text-error/60"
           aria-label={t('components.canvas.clearSearch')}
           title={t('components.canvas.clearSearch')}
         >
-          <Icons.Clear className="w-4 h-4 text-surface-onVariant" />
-        </button>
+          <Icons.Clear className="w-4 h-4" />
+        </MinimalButton>
       )}
 
       {/* 关闭搜索框按钮 */}
-      <button
+      <MinimalButton
+        variant="ghost"
         onClick={onClose}
-        className="p-1.5 rounded-full hover:bg-surface transition-colors"
+        className="p-1.5 rounded-full hover:text-error"
         aria-label={t('components.canvas.closeSearch')}
         title={t('components.canvas.closeSearch')}
       >
-        <Icons.Close className="w-4 h-4 text-surface-onVariant" />
-      </button>
+        <Icons.Close className="w-4 h-4" />
+      </MinimalButton>
     </div>
   );
 });

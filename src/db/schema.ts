@@ -16,7 +16,7 @@ export class PromptStudioDB extends Dexie {
   constructor() {
     super('PromptStudioDB');
 
-    this.version(1).stores({
+    (this as any).version(1).stores({
       // 主键, 索引字段1, 索引字段2, ...
       folders: 'id, parentId, createdAt',
       projects: 'id, folderId, updatedAt, createdAt',
@@ -26,7 +26,7 @@ export class PromptStudioDB extends Dexie {
     });
 
     // 版本2：添加版本名称支持
-    this.version(2).stores({
+    (this as any).version(2).stores({
       folders: 'id, parentId, createdAt',
       projects: 'id, folderId, updatedAt, createdAt',
       versions: 'id, projectId, parentId, contentHash, updatedAt, createdAt, name',
@@ -35,7 +35,7 @@ export class PromptStudioDB extends Dexie {
     });
 
     // 版本3：添加版本备注支持（score字段已在Version接口中定义，无需索引）
-    this.version(3).stores({
+    (this as any).version(3).stores({
       folders: 'id, parentId, createdAt',
       projects: 'id, folderId, updatedAt, createdAt',
       versions: 'id, projectId, parentId, contentHash, updatedAt, createdAt, name',

@@ -22,7 +22,7 @@ export const storage = {
     try {
       const saved = localStorage.getItem(key);
       if (!saved) return defaultValue;
-      
+
       return JSON.parse(saved) as T;
     } catch (error) {
       console.error(`Failed to read from localStorage: ${key}`, error);
@@ -50,7 +50,7 @@ export const storage = {
     } catch (error) {
       console.error('Failed to clear localStorage', error);
     }
-  }
+  },
 };
 
 /**

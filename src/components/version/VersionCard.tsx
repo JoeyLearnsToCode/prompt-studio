@@ -17,7 +17,7 @@ export const VersionCard: React.FC<VersionCardProps> = ({
   onClick,
 }) => {
   const t = useTranslation();
-  
+
   const handleClick = () => {
     onClick?.(version);
   };
@@ -25,15 +25,15 @@ export const VersionCard: React.FC<VersionCardProps> = ({
   // 提取前两行作为预览
   const getPreview = (content: string): string => {
     if (!content) return t('components.versionCard.emptyContent');
-    
-    const lines = content.split('\n').filter(line => line.trim());
+
+    const lines = content.split('\n').filter((line) => line.trim());
     const preview = lines.slice(0, 2).join('\n');
-    
+
     // 限制长度为200个字符
     if (preview.length > 200) {
       return preview.substring(0, 200) + '...';
     }
-    
+
     return preview;
   };
 
@@ -52,10 +52,10 @@ export const VersionCard: React.FC<VersionCardProps> = ({
   // 渲染星级评分
   const renderStars = (score?: number) => {
     if (!score) return null;
-    
+
     return (
       <div className="flex gap-0.5 mt-2">
-        {[1, 2, 3, 4, 5].map(star => (
+        {[1, 2, 3, 4, 5].map((star) => (
           <Icons.Star
             key={star}
             data-testid={`star-${star}`}
@@ -96,9 +96,7 @@ export const VersionCard: React.FC<VersionCardProps> = ({
       {renderStars(version.score)}
 
       {/* 创建时间 */}
-      <div className="mt-3 text-xs text-on-surface-variant">
-        {formatTime(version.createdAt)}
-      </div>
+      <div className="mt-3 text-xs text-on-surface-variant">{formatTime(version.createdAt)}</div>
 
       {/* 更新时间（如果不同于创建时间） */}
       {version.updatedAt !== version.createdAt && (

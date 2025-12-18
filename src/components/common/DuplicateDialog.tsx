@@ -6,6 +6,7 @@
 import { useEffect } from 'react';
 import type { Version } from '@/models/Version';
 import { Icons } from '@/components/icons/Icons';
+import { MinimalButton } from './MinimalButton';
 
 export interface DuplicateDialogProps {
   /** 对话框是否打开 */
@@ -76,17 +77,11 @@ export function DuplicateDialog({
           <div className="bg-gray-100 rounded-xl p-4 border border-gray-200">
             <p className="text-sm mb-1">
               <span className="font-semibold text-gray-900">版本 ID:</span>{' '}
-              <span className="text-gray-700 font-mono">
-                {duplicateVersion.id.slice(0, 8)}
-              </span>
+              <span className="text-gray-700 font-mono">{duplicateVersion.id.slice(0, 8)}</span>
             </p>
-            <p className="text-sm text-gray-600">
-              创建于 {formatDate(duplicateVersion.createdAt)}
-            </p>
+            <p className="text-sm text-gray-600">创建于 {formatDate(duplicateVersion.createdAt)}</p>
             {duplicateVersion.score !== undefined && (
-              <p className="text-sm text-gray-600 mt-1">
-                评分: {duplicateVersion.score}/5
-              </p>
+              <p className="text-sm text-gray-600 mt-1">评分: {duplicateVersion.score}/5</p>
             )}
           </div>
 
@@ -95,18 +90,12 @@ export function DuplicateDialog({
 
         {/* 按钮 */}
         <div className="flex gap-3 justify-end">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium"
-          >
+          <MinimalButton variant="default" onClick={onCancel} className="px-4 py-2">
             取消
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
-          >
+          </MinimalButton>
+          <MinimalButton variant="default" onClick={onConfirm} className="px-4 py-2">
             仍然创建
-          </button>
+          </MinimalButton>
         </div>
       </div>
     </div>

@@ -6,10 +6,10 @@
 import type { VersionTreeNode } from './tree';
 
 export interface LayoutConfig {
-  levelHeight: number;    // 层级间距（垂直）
-  siblingWidth: number;   // 兄弟节点间距（水平）
-  nodeWidth: number;      // 节点宽度
-  nodeHeight: number;     // 节点高度
+  levelHeight: number; // 层级间距（垂直）
+  siblingWidth: number; // 兄弟节点间距（水平）
+  nodeWidth: number; // 节点宽度
+  nodeHeight: number; // 节点高度
 }
 
 export const defaultLayoutConfig: LayoutConfig = {
@@ -144,14 +144,14 @@ export function centerLayout(
   canvasHeight: number
 ): VersionTreeNode[] {
   const bounds = getTreeBounds(roots);
-  
+
   const offsetX = (canvasWidth - bounds.width) / 2 - bounds.minX;
   const offsetY = (canvasHeight - bounds.height) / 2 - bounds.minY;
 
   const applyOffset = (node: VersionTreeNode) => {
     node.x += offsetX;
     node.y += offsetY;
-    
+
     for (const child of node.children) {
       applyOffset(child);
     }

@@ -46,26 +46,28 @@ export const zhCN: TranslationData = {
 
     settings: {
       title: '设置',
-      
-            local: {
-              title: '本地导入导出',
-              exportZip: '导出为 ZIP',
-              exportDescription: '将所有项目和版本导出为 ZIP 文件',
-              importZip: '从 ZIP 导入',
-              unsupportedFormat: '不支持的文件格式',
-              importSuccess: '导入成功',
-              importFailed: '导入失败',
-              exportFailed: '导出失败',
-              importMode: {
-                selectMode: '选择导入模式',
-                mergeMode: '合并导入（推荐）',
-                mergeModeDescription: '保留现有数据，只导入新数据。根据 UUID 判断数据是否存在。',
-                overwriteMode: '覆盖导入',
-                overwriteModeDescription: '清空现有数据后导入。此操作不可撤销，请谨慎选择。',
-              },
-            },
+
+      local: {
+        title: '本地导入导出',
+        description:
+          '管理您的本地数据。您可以将所有项目和版本历史导出为 ZIP 归档，或从以前的备份恢复工作区。',
+        exportZip: '导出为 ZIP',
+        importZip: '从 ZIP 导入',
+        unsupportedFormat: '不支持的文件格式',
+        importSuccess: '导入成功',
+        importFailed: '导入失败',
+        exportFailed: '导出失败',
+        importMode: {
+          selectMode: '选择导入模式',
+          mergeMode: '合并导入（推荐）',
+          mergeModeDescription: '保留现有数据，只导入新数据。根据 UUID 判断数据是否存在。',
+          overwriteMode: '覆盖导入',
+          overwriteModeDescription: '清空现有数据后导入。此操作不可撤销，请谨慎选择。',
+        },
+      },
       webdav: {
         title: 'WebDAV 配置',
+        description: '配置远程 WebDAV 服务器，以便在多个设备之间同步您的提示词库。',
         serverUrl: '服务器地址',
         username: '用户名',
         password: '密码',

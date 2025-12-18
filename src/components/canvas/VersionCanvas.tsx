@@ -22,7 +22,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   isCollapsed = false,
 }) => {
   const t = useTranslation();
-  
+
   // 对比模式下的处理函数
   const handleCompare = () => {
     if (compareMode) {
@@ -36,7 +36,14 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   const interactionRef = useRef<CanvasInteraction | null>(null);
   const onNodeClickRef = useRef(onNodeClick);
 
-  const { versions, currentVersionId, deleteVersion, compareMode, toggleCompareMode, compareState } = useVersionStore();
+  const {
+    versions,
+    currentVersionId,
+    deleteVersion,
+    compareMode,
+    toggleCompareMode,
+    compareState,
+  } = useVersionStore();
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
   const [searchVisible, setSearchVisible] = useState(false); // 控制搜索框的显示状态
   const searchInputRef = useRef<HTMLInputElement>(null); // 搜索框引用，用于聚焦
@@ -70,7 +77,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     // 只在canvas有焦点或鼠标在canvas区域时监听
     if (projectId) {
       document.addEventListener('keydown', handleKeyDown);
-      
+
       return () => {
         document.removeEventListener('keydown', handleKeyDown);
       };
@@ -93,30 +100,30 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     if (!canvasRef.current || !projectId) return;
 
     const renderer = new CanvasRenderer(canvasRef.current);
-    
+
     // 包装 onNodeClick 以更新选中状态
     const handleNodeClick = (versionId: string) => {
       // 如果在对比模式，且点击的不是源版本，则不改变选中状态
-      if (compareMode && compareState.sourceVersionId && versionId !== compareState.sourceVersionId) {
+      if (
+        compareMode &&
+        compareState.sourceVersionId &&
+        versionId !== compareState.sourceVersionId
+      ) {
         // 在对比模式下点击不同版本，只触发对比，不改变选中状态
         if (onNodeClickRef.current) {
           onNodeClickRef.current(versionId);
         }
         return;
       }
-      
+
       // 非对比模式或对比模式下点击源版本，更新选中状态
       setSelectedVersionId(versionId);
       if (onNodeClickRef.current) {
         onNodeClickRef.current(versionId);
       }
     };
-    
-    const interaction = new CanvasInteraction(
-      renderer,
-      canvasRef.current,
-      handleNodeClick
-    );
+
+    const interaction = new CanvasInteraction(renderer, canvasRef.current, handleNodeClick);
 
     rendererRef.current = renderer;
     interactionRef.current = interaction;
@@ -125,7 +132,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     const handleCanvasFocus = () => {
       setCanvasFocused(true);
     };
-    
+
     // Canvas失去焦点事件
     const handleCanvasBlur = () => {
       setCanvasFocused(false);
@@ -135,7 +142,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     const handleResize = () => {
       renderer.resizeCanvas();
     };
-    
+
     // 添加事件监听器
     canvasRef.current.addEventListener('focus', handleCanvasFocus);
     canvasRef.current.addEventListener('blur', handleCanvasBlur);
@@ -145,7 +152,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     const resizeObserver = new ResizeObserver(() => {
       renderer.resizeCanvas();
     });
-    
+
     // 监听 canvas 的父容器
     if (canvasRef.current.parentElement) {
       resizeObserver.observe(canvasRef.current.parentElement);
@@ -193,10 +200,10 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   // 渲染版本树并自动定位到选中的版本
   useEffect(() => {
     if (!rendererRef.current || !projectId || isCollapsed) return;
-    
+
     const projectVersions = versions.filter((v) => v.projectId === projectId);
     rendererRef.current.renderTree(projectVersions);
-    
+
     // 如果有选中的版本，自动定位并确保该版本靠近canvas下方
     if (currentVersionId) {
       // 延迟执行确保渲染完成后再定位
@@ -226,10 +233,10 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
 
   const handleResetView = () => {
     if (!rendererRef.current) return;
-    
+
     // 重置缩放和平移
     rendererRef.current.resetView();
-    
+
     // 如果有当前版本，定位到canvas正中间
     if (currentVersionId) {
       // 使用 setTimeout 确保 resetView 完成后再定位
@@ -259,15 +266,10 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
 
   const handleDeleteVersion = async () => {
     if (!selectedVersionId) return;
-    
+
     if (confirm(t('components.canvas.confirmDelete'))) {
       try {
         await deleteVersion(selectedVersionId);
-        // 不再手动置空 selectedVersionId，因为：
-        // 1. deleteVersion 会更新 store 中的 currentVersionId 为 null
-        // 2. MainView 会检测到 null 并自动选择最新版本
-        // 3. 上面的 useEffect 会监听到 currentVersionId 变化并更新 selectedVersionId
-        // 如果在这里手动置空，会覆盖掉步骤 3 中已经更新的正确值（因为 await 之后的代码最后执行）
       } catch (error) {
         alert(`${t('components.canvas.deleteFailed')}: ${error}`);
       }
@@ -279,12 +281,10 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     handleClear(); // 同时清空搜索内容
   };
 
-  
-
   if (!projectId) {
     return (
       <div
-        className="h-full flex items-center justify-center bg-surface-variant text-surface-onVariant"
+        className="h-full flex items-center justify-center bg-surface dark:bg-surface-dark text-surface-onVariant"
         data-testid="version-canvas"
       >
         <p>{t('components.canvas.selectProject')}</p>
@@ -293,12 +293,22 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-surface-variant" data-testid="version-canvas">
-      {/* 顶部控制区域 - 固定高度，不与canvas重叠 */}
-      <div className="px-4 py-3 bg-surface-variant">
-        {/* 搜索栏 - 只在searchVisible为true时显示 */}
+    <div
+      className="w-full h-full relative bg-surface dark:bg-surface-dark @container"
+      data-testid="version-canvas"
+    >
+      {/* Canvas Layer - 铺满整个容器 */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full block touch-none"
+        tabIndex={0} // 使canvas可以获得焦点
+      />
+
+      {/* Top Left Control Overlay - 浮动层，不遮挡Canvas */}
+      <div className="absolute top-4 left-4 z-999 flex flex-col gap-3 pointer-events-none max-w-[80%]">
+        {/* Search Bar - 仅内容响应鼠标事件 */}
         {searchVisible && (
-          <div className="max-w-md mb-3">
+          <div className="pointer-events-auto shadow-lg rounded-lg">
             <SearchBar
               ref={searchInputRef}
               query={query}
@@ -313,65 +323,67 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
           </div>
         )}
 
-        {/* 版本操作按钮 */}
+        {/* Action Buttons - 仅内容响应鼠标事件 */}
         {selectedVersionId && (
-          <div className="flex gap-2 h-10 items-center @container">
+          <div className="flex gap-2 pointer-events-auto">
             <MinimalButton
               onClick={handleCompare}
               disabled={!hasProject || !currentVersionId}
-              title={compareMode ? t('components.canvas.exitCompare') : t('components.canvas.enterCompare')}
-              className={`px-2 py-1 text-sm ${compareMode ? "bg-primary-container border-primary" : ""}`}
+              variant="default"
+              title={
+                compareMode
+                  ? t('components.canvas.exitCompare')
+                  : t('components.canvas.enterCompare')
+              }
+              className={`px-3 py-1.5 text-sm shadow-sm flex items-center gap-1.5 transition-all duration-200 ${compareMode && '[&]:bg-primary [&]:hover:bg-primary-hover'}`}
             >
-              <Icons.Compare size={16} className='inline @xs:hidden' /> <span className='hidden @xs:inline'>{compareMode ? t('components.canvas.exitCompare') : t('components.canvas.compare')}</span>
+              <Icons.Compare size={16} className="inline @xs:hidden" />{' '}
+              <span className="hidden @xs:inline">
+                {compareMode ? t('components.canvas.exitCompare') : t('components.canvas.compare')}
+              </span>
             </MinimalButton>
             <MinimalButton
               onClick={handleDeleteVersion}
               title={t('components.canvas.deleteVersion')}
-              className="px-2 py-1 text-sm"
+              variant="danger"
+              className="px-3 py-1.5 text-sm shadow-sm flex items-center gap-1.5"
             >
-              <Icons.Trash size={16} className='inline @xs:hidden' /> <span className='hidden @xs:inline'>{t('common.delete')}</span>
+              <Icons.Trash size={16} className="inline @xs:hidden" />{' '}
+              <span className="hidden @xs:inline">{t('common.delete')}</span>
             </MinimalButton>
           </div>
         )}
       </div>
 
-      {/* Canvas容器 - 占据剩余空间，不与上方控制区域重叠 */}
-      <div className="flex-1 relative overflow-hidden @container">
-        <canvas
-          ref={canvasRef}
-          className="w-full h-full"
-          style={{ display: 'block' }}
-          tabIndex={0} // 使canvas可以获得焦点
-        />
-
-        {/* 画布控制按钮 - 浮动在canvas上，但位置固定在右下角 */}
-        <div className="absolute bottom-4 right-4 flex flex-col @xs:flex-row gap-2 z-10">
+      {/* Bottom Right Control Overlay - Floating Group Style */}
+      <div className="absolute bottom-4 right-4 z-999 pointer-events-none">
+        <div className="pointer-events-auto flex flex-col @xs:flex-row gap-1 p-1 bg-surface-variant dark:bg-zinc-800 rounded-xl shadow-card border border-transparent backdrop-blur-sm">
           <MinimalButton
-            variant="secondary"
+            variant="ghost"
             onClick={handleZoomIn}
             title={t('components.canvas.zoomIn')}
             aria-label={t('components.canvas.zoomIn')}
-            className="w-8 h-8 px-2 py-1 text-sm"
+            className="w-8 h-8 p-0 flex items-center justify-center rounded-lg"
           >
-            <Icons.SearchPlus size={16} />
+            <Icons.SearchPlus size={18} />
           </MinimalButton>
           <MinimalButton
-            variant="secondary"
+            variant="ghost"
             onClick={handleZoomOut}
             title={t('components.canvas.zoomOut')}
             aria-label={t('components.canvas.zoomOut')}
-            className="w-8 h-8 px-2 py-1 text-sm"
+            className="w-8 h-8 p-0 flex items-center justify-center rounded-lg"
           >
-            <Icons.SearchMinus size={16} />
+            <Icons.SearchMinus size={18} />
           </MinimalButton>
           <MinimalButton
-            variant="secondary"
+            variant="ghost"
             onClick={handleResetView}
             title={t('components.canvas.resetView')}
             aria-label={t('components.canvas.resetView')}
-            className="w-8 h-8 px-2 py-1 text-sm"
+            className="w-8 h-8 p-0 flex items-center justify-center rounded-lg"
           >
-            <Icons.Refresh size={16} />
+            <Icons.Refresh size={18} />
           </MinimalButton>
         </div>
       </div>

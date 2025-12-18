@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Prompt Studio</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#749E68", // Sage Green from reference
+                        "primary-hover": "#638a58",
+                        "background-light": "#F0F2EB", // Soft muted beige/grey
+                        "background-dark": "#18181b", // Zinc 950
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#27272a", // Zinc 800
+                        "border-light": "#e4e4e7",
+                        "border-dark": "#3f3f46",
+                        "text-main-light": "#27272a",
+                        "text-main-dark": "#f4f4f5",
+                        "text-muted-light": "#71717a",
+                        "text-muted-dark": "#a1a1aa",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4d4d8;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #52525b;
+        }
+        .tree-line-vertical {
+            width: 2px;
+            background-color: #a1a1aa;
+        }
+        .tree-line-horizontal {
+            height: 2px;
+            background-color: #a1a1aa;
+        }
+        .material-symbols-outlined {
+            font-size: 20px;
+        }
+    </style>
+
+    <!-- React Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark font-display h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-white transition-colors duration-200">
+    <div id="root" class="h-full flex flex-col"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate } = ReactRouterDOM;
+
+        // --- Shared Components ---
+
+        const ThemeToggle = () => {
+            const toggleTheme = () => {
+                document.documentElement.classList.toggle('dark');
+            };
+
+            return (
+                <button 
+                    className="h-9 w-9 hover:bg-primary-hover rounded-md transition-colors ml-2 flex items-center justify-center" 
+                    onClick={toggleTheme}
+                >
+                    <span className="material-symbols-outlined">contrast</span>
+                </button>
+            );
+        };
+
+        // --- Pages ---
+
+        const MainPage = () => {
+            const navigate = useNavigate();
+
+            return (
+                <div className="flex flex-col h-full overflow-hidden">
+                    {/* Header */}
+                    <header className="h-14 bg-primary text-white flex items-center justify-between px-6 shrink-0 shadow-md z-20">
+                        <div className="flex items-center gap-2">
+                            <img src="public/icon-192.svg" className="h-8 w-8" alt="logo" />
+                            <h1 className="text-lg font-bold tracking-wide">Prompt Studio</h1>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button className="h-9 px-3 hover:bg-primary-hover rounded-md transition-colors flex items-center gap-2 text-sm font-medium">
+                                <span className="material-symbols-outlined">language</span>
+                                <span className="hidden sm:inline">中文</span>
+                            </button>
+                            <button className="h-9 w-9 hover:bg-primary-hover rounded-md transition-colors flex items-center justify-center">
+                                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.419-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path>
+                                </svg>
+                            </button>
+                            <ThemeToggle />
+                            <button 
+                                className="h-9 w-9 hover:bg-primary-hover rounded-md transition-colors flex items-center justify-center"
+                                onClick={() => navigate('/settings')}
+                            >
+                                <span className="material-symbols-outlined">settings</span>
+                            </button>
+                        </div>
+                    </header>
+
+                    <div className="flex-1 flex overflow-hidden p-2 gap-2">
+                        {/* Sidebar Left */}
+                        <aside className="w-64 flex flex-col gap-2 shrink-0">
+                            <div className="bg-surface-light dark:bg-surface-dark rounded-xl px-4 shadow-sm border border-border-light dark:border-border-dark flex items-center justify-between h-16 shrink-0">
+                                <h2 className="font-bold text-text-main-light dark:text-text-main-dark">Projects</h2>
+                                <div className="flex gap-1">
+                                    <button className="text-text-muted-light hover:text-primary transition-colors">
+                                        <span className="material-symbols-outlined">menu_open</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex-1 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-y-auto p-2">
+                                <div className="flex gap-2 mb-4 p-2">
+                                    <button className="flex-1 flex justify-center items-center gap-2 py-2 bg-background-light dark:bg-zinc-700 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-600 transition text-sm font-medium">
+                                        <span className="material-symbols-outlined text-base">folder_open</span>
+                                    </button>
+                                    <button className="flex-1 flex justify-center items-center gap-2 py-2 bg-background-light dark:bg-zinc-700 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-600 transition text-sm font-medium">
+                                        <span className="material-symbols-outlined text-base">note_add</span>
+                                    </button>
+                                </div>
+                                <nav className="space-y-0.5 text-sm">
+                                    <div className="group flex items-center justify-between px-3 py-2 rounded-lg text-text-muted-light dark:text-text-muted-dark hover:bg-background-light dark:hover:bg-zinc-700/50 cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-lg">folder</span>
+                                            <span>Thinking</span>
+                                        </div>
+                                        <span className="text-xs opacity-50">2</span>
+                                    </div>
+                                    <div className="group flex items-center justify-between px-3 py-2 rounded-lg text-text-muted-light dark:text-text-muted-dark hover:bg-background-light dark:hover:bg-zinc-700/50 cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-lg">folder</span>
+                                            <span>Banana Pro</span>
+                                        </div>
+                                        <span className="text-xs opacity-50">18</span>
+                                    </div>
+                                    <div className="group flex items-center justify-between px-3 py-2 rounded-lg text-text-muted-light dark:text-text-muted-dark hover:bg-background-light dark:hover:bg-zinc-700/50 cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-lg">folder_open</span>
+                                            <span>Demo Folder</span>
+                                        </div>
+                                        <span className="text-xs opacity-50">1</span>
+                                    </div>
+                                    <div className="ml-2 mt-1 relative">
+                                        <div className="absolute left-0 top-0 bottom-0 w-px bg-border-light dark:bg-border-dark -ml-2"></div>
+                                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium cursor-pointer border-l-2 border-primary">
+                                            <div className="flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-lg">description</span>
+                                                <span>Demo Project</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 group flex items-center justify-between px-3 py-2 rounded-lg text-text-muted-light dark:text-text-muted-dark hover:bg-background-light dark:hover:bg-zinc-700/50 cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-lg">folder</span>
+                                            <span>Dreamina</span>
+                                        </div>
+                                        <span className="text-xs opacity-50">6</span>
+                                    </div>
+                                    <div className="group flex items-center justify-between px-3 py-2 rounded-lg text-text-muted-light dark:text-text-muted-dark hover:bg-background-light dark:hover:bg-zinc-700/50 cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-lg">folder</span>
+                                            <span>Grok Analysis</span>
+                                        </div>
+                                        <span className="text-xs opacity-50">11</span>
+                                    </div>
+                                    <div className="group flex items-center justify-between px-3 py-2 rounded-lg text-text-muted-light dark:text-text-muted-dark hover:bg-background-light dark:hover:bg-zinc-700/50 cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-lg">folder</span>
+                                            <span>Sora</span>
+                                        </div>
+                                        <span className="text-xs opacity-50">2</span>
+                                    </div>
+                                </nav>
+                            </div>
+                        </aside>
+
+                        {/* Main Content Area */}
+                        <main className="flex-1 flex min-w-0">
+                            <div className="flex-1 flex flex-col gap-2">
+                                <div className="bg-surface-light dark:bg-surface-dark rounded-xl px-3 shadow-sm border border-border-light dark:border-border-dark flex items-center justify-between flex-wrap gap-2 h-16 shrink-0">
+                                    <div className="flex items-center gap-3 flex-1">
+                                        <label className="text-sm font-medium text-text-muted-light dark:text-text-muted-dark whitespace-nowrap">Version Name:</label>
+                                        <input 
+                                            className="flex-1 max-w-md bg-background-light dark:bg-zinc-900 border border-border-light dark:border-border-dark rounded-md px-3 py-1.5 text-sm text-text-main-light dark:text-text-main-dark focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow" 
+                                            type="text" 
+                                            defaultValue="demo version 2"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button className="px-3 py-1.5 bg-background-light dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 text-text-main-light dark:text-text-main-dark rounded-md text-sm font-medium transition-colors">Save</button>
+                                        <button className="px-3 py-1.5 bg-background-light dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 text-text-main-light dark:text-text-main-dark rounded-md text-sm font-medium transition-colors">Save as New</button>
+                                        <div className="h-4 w-px bg-border-light dark:bg-border-dark mx-1"></div>
+                                    </div>
+                                </div>
+                                <div className="flex-1 flex flex-col overflow-hidden">
+                                    <div className="flex-1 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark flex flex-col overflow-hidden">
+                                        <div className="flex flex-1 overflow-hidden">
+                                            <div className="w-10 bg-background-light/50 dark:bg-zinc-800/50 border-r border-border-light dark:border-border-dark pt-4 text-right pr-2 text-xs text-text-muted-light dark:text-text-muted-dark font-mono select-none">
+                                                1<br/>2<br/>3<br/>4
+                                            </div>
+                                            <textarea 
+                                                className="flex-1 bg-transparent border-none p-4 font-mono text-sm leading-6 resize-none focus:ring-0 outline-none text-text-main-light dark:text-text-main-dark w-full h-full" 
+                                                spellCheck="false"
+                                                defaultValue={`some contents here...
+Start typing your prompt structure here. The editor supports standard Markdown highlighting and parameter injection.`}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex-shrink-0 w-full h-2 flex items-center justify-center cursor-row-resize bg-background-light dark:bg-background-dark group">
+                                        <div className="h-1 w-8 bg-border-light dark:bg-border-dark rounded-full flex items-center justify-center group-hover:bg-primary transition-colors">
+                                            <span className="material-symbols-outlined text-xs text-text-muted-light dark:text-text-muted-dark opacity-0 group-hover:opacity-100 transition-opacity">drag_handle</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex-shrink-0 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-4 flex flex-col min-h-[12rem]">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span className="material-symbols-outlined text-sm text-text-muted-light">attachment</span>
+                                            <h3 className="text-xs tracking-wider font-bold text-text-muted-light dark:text-text-muted-dark">Attachments</h3>
+                                        </div>
+                                        <div className="flex gap-4 h-full">
+                                            <div className="w-40 border-2 border-dashed border-border-light dark:border-border-dark rounded-lg flex flex-col items-center justify-center text-center p-2 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
+                                                <span className="material-symbols-outlined text-3xl text-text-muted-light group-hover:text-primary mb-2">cloud_upload</span>
+                                                <p className="text-xs text-text-muted-light dark:text-text-muted-dark">Click to upload<br/>Max 50MB</p>
+                                            </div>
+                                            <div className="w-40 border border-border-light dark:border-border-dark bg-background-light/30 dark:bg-zinc-800/30 rounded-lg flex flex-col items-center justify-center text-center p-2 cursor-pointer hover:border-primary transition-all">
+                                                <span className="material-symbols-outlined text-3xl text-text-muted-light mb-2">info</span>
+                                                <p className="text-sm font-medium text-text-main-light dark:text-text-main-dark">Score</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Resizer Mock */}
+                            <div className="flex-shrink-0 w-2 flex items-center justify-center cursor-col-resize bg-background-light dark:bg-background-dark group">
+                                <div className="w-1 h-8 bg-border-light dark:bg-border-dark rounded-full flex items-center justify-center group-hover:bg-primary transition-colors">
+                                    <span className="material-symbols-outlined text-xs text-text-muted-light dark:text-text-muted-dark opacity-0 group-hover:opacity-100 transition-opacity rotate-90">drag_handle</span>
+                                </div>
+                            </div>
+
+                            {/* Sidebar Right - Version History */}
+                            <aside className="w-90 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark flex flex-col overflow-hidden relative">
+                                <div className="px-4 border-b border-border-light dark:border-border-dark flex justify-between items-center h-16 shrink-0">
+                                    <h2 className="font-bold text-text-main-light dark:text-text-main-dark">Version History</h2>
+                                    <div className="flex items-center gap-2">
+                                        <button className="p-1.5 text-text-muted-light hover:text-primary transition-colors" title="Compare">
+                                            <span className="material-symbols-outlined text-xl">compare_arrows</span>
+                                        </button>
+                                        <button className="p-1.5 text-text-muted-light hover:text-red-500 transition-colors" title="Delete">
+                                            <span className="material-symbols-outlined text-xl">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-auto p-8 relative flex flex-col items-center">
+                                    <div className="flex flex-col items-center w-full">
+                                        <div className="bg-surface-light dark:bg-zinc-700 border border-border-light dark:border-zinc-600 p-3 rounded-lg shadow-sm w-48 text-center cursor-pointer hover:shadow-md transition-all z-10 relative group">
+                                            <div className="text-xs text-text-muted-light dark:text-text-muted-dark mb-1">2 hours ago</div>
+                                            <h4 className="font-bold text-sm text-text-main-light dark:text-text-main-dark">demo version 1</h4>
+                                        </div>
+                                        <div className="h-8 tree-line-vertical"></div>
+                                        <div className="w-52 flex justify-between relative">
+                                            <div className="absolute left-0 top-0 w-[51%] h-[2px] bg-gray-400 dark:bg-gray-600"></div>
+                                            <div className="absolute right-0 top-0 w-[50%] h-[2px] bg-gray-400 dark:bg-gray-600"></div>
+                                            <div className="absolute left-0 top-0 h-6 w-[2px] bg-gray-400 dark:bg-gray-600"></div>
+                                            <div className="absolute right-0 top-0 h-6 w-[2px] bg-gray-400 dark:bg-gray-600"></div>
+                                        </div>
+                                        <div className="flex justify-between w-[22rem] mt-6">
+                                            <div className="w-40 flex flex-col items-center">
+                                                <div className="bg-primary text-white p-3 rounded-lg shadow-md w-full text-left cursor-pointer z-10 relative ring-4 ring-primary/20">
+                                                    <h4 className="font-bold text-sm mb-1">demo version 2</h4>
+                                                    <p className="text-xs opacity-90 truncate">some contents here...</p>
+                                                    <span className="absolute -top-2 -right-2 bg-white dark:bg-zinc-800 text-primary rounded-full p-0.5 shadow-sm">
+                                                        <span className="material-symbols-outlined text-sm block">check</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="w-40 flex flex-col items-center">
+                                                <div className="bg-surface-light dark:bg-zinc-700 border border-border-light dark:border-zinc-600 p-3 rounded-lg shadow-sm w-full text-left cursor-pointer hover:shadow-md hover:border-primary/50 transition-all z-10">
+                                                    <h4 className="font-bold text-sm text-text-main-light dark:text-text-main-dark mb-1">demo version 3</h4>
+                                                    <p className="text-xs text-text-muted-light dark:text-text-muted-dark truncate">Alternative phrasing...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="absolute bottom-4 right-4 flex gap-1 bg-surface-light dark:bg-zinc-800 p-1 rounded-lg shadow-md border border-border-light dark:border-border-dark">
+                                    <button className="p-1 hover:bg-background-light dark:hover:bg-zinc-700 rounded text-text-muted-light">
+                                        <span className="material-symbols-outlined text-lg">add</span>
+                                    </button>
+                                    <button className="p-1 hover:bg-background-light dark:hover:bg-zinc-700 rounded text-text-muted-light">
+                                        <span className="material-symbols-outlined text-lg">remove</span>
+                                    </button>
+                                    <button className="p-1 hover:bg-background-light dark:hover:bg-zinc-700 rounded text-text-muted-light">
+                                        <span className="material-symbols-outlined text-lg">restart_alt</span>
+                                    </button>
+                                </div>
+                            </aside>
+                        </main>
+                    </div>
+                </div>
+            );
+        };
+
+        const SettingsPage = () => {
+            const navigate = useNavigate();
+
+            return (
+                <div className="flex flex-col h-full overflow-hidden">
+                    {/* Header */}
+                    <header className="h-14 bg-primary text-white flex items-center justify-between px-6 shrink-0 shadow-md z-20">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-2xl">settings</span>
+                            <h1 className="text-lg font-bold tracking-wide">Settings</h1>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button 
+                                className="h-9 w-9 hover:bg-primary-hover rounded-md transition-colors flex items-center justify-center ml-2" 
+                                title="Back"
+                                onClick={() => navigate('/')}
+                            >
+                                <span className="material-symbols-outlined">arrow_back</span>
+                            </button>
+                        </div>
+                    </header>
+                    
+                    <div className="flex-1 flex overflow-hidden p-2 gap-2 justify-center">
+                        <main className="flex-1 flex flex-col overflow-y-auto max-w-4xl p-4 md:p-6 gap-6">
+                            {/* Section 1: Local Import & Export */}
+                            <section className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6">
+                                <div className="flex items-start gap-4 mb-6">
+                                    <div className="p-3 bg-primary/10 rounded-lg text-primary shrink-0">
+                                        <span className="material-symbols-outlined text-2xl">folder_zip</span>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">Local Import &amp; Export</h2>
+                                        <p className="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Manage your local data manually. You can export all projects and version history to a ZIP archive or restore your workspace from a previous backup.</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-4 justify-end">
+                                    <button className="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                                        <span className="material-symbols-outlined">download</span>
+                                        Export to ZIP
+                                    </button>
+                                    <button className="bg-background-light dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 text-text-main-light dark:text-text-main-dark px-4 py-2.5 rounded-md text-sm font-medium transition-colors border border-border-light dark:border-border-dark flex items-center gap-2">
+                                        <span className="material-symbols-outlined">upload</span>
+                                        Import from ZIP
+                                    </button>
+                                </div>
+                            </section>
+
+                            {/* Section 2: WebDAV Configuration */}
+                            <section className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6">
+                                <div className="flex items-start gap-4 mb-6">
+                                    <div className="p-3 bg-primary/10 rounded-lg text-primary shrink-0">
+                                        <span className="material-symbols-outlined text-2xl">cloud_sync</span>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-text-main-light dark:text-text-main-dark">WebDAV Configuration</h2>
+                                        <p className="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Configure a remote WebDAV server to sync your prompt library across multiple devices.</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-4 max-w-2xl">
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-text-main-light dark:text-text-main-dark">Server Address</label>
+                                        <input 
+                                            className="w-full bg-background-light dark:bg-zinc-900 border border-border-light dark:border-border-dark rounded-md px-3 py-2 text-sm text-text-main-light dark:text-text-main-dark focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow" 
+                                            placeholder="https://example.com/webdav" 
+                                            type="text"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-text-main-light dark:text-text-main-dark">Username</label>
+                                        <input 
+                                            className="w-full bg-background-light dark:bg-zinc-900 border border-border-light dark:border-border-dark rounded-md px-3 py-2 text-sm text-text-main-light dark:text-text-main-dark focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow" 
+                                            placeholder="username" 
+                                            type="text"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-text-main-light dark:text-text-main-dark">Password</label>
+                                        <input 
+                                            className="w-full bg-background-light dark:bg-zinc-900 border border-border-light dark:border-border-dark rounded-md px-3 py-2 text-sm text-text-main-light dark:text-text-main-dark focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow" 
+                                            placeholder="••••••••" 
+                                            type="password"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-border-light dark:border-border-dark">
+                                    <button className="w-full sm:w-auto bg-background-light dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 text-text-main-light dark:text-text-main-dark px-4 py-2.5 rounded-md text-sm font-medium transition-colors border border-border-light dark:border-border-dark flex items-center justify-center gap-2">
+                                        <span className="material-symbols-outlined">wifi</span>
+                                        Test Connection
+                                    </button>
+                                    <div className="flex gap-3 w-full sm:w-auto">
+                                        <button className="flex-1 sm:flex-none bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                            <span className="material-symbols-outlined">cloud_upload</span>
+                                            Backup to WebDAV
+                                        </button>
+                                        <button className="flex-1 sm:flex-none bg-background-light dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 text-text-main-light dark:text-text-main-dark px-4 py-2.5 rounded-md text-sm font-medium transition-colors border border-border-light dark:border-border-dark flex items-center justify-center gap-2">
+                                            <span className="material-symbols-outlined">cloud_download</span>
+                                            Restore from WebDAV
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
+                        </main>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            return (
+                <MemoryRouter>
+                    <Routes>
+                        <Route path="/" element={<MainPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                    </Routes>
+                </MemoryRouter>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

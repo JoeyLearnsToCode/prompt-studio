@@ -23,9 +23,9 @@ export const versionManager = {
     return await db.versions.get(id);
   },
 
-/**
- * 创建新版本
- */
+  /**
+   * 创建新版本
+   */
   async createVersion(
     projectId: string,
     content: string,
@@ -58,9 +58,9 @@ export const versionManager = {
     return version;
   },
 
-/**
- * 原地更新版本（仅叶子节点）
- */
+  /**
+   * 原地更新版本（仅叶子节点）
+   */
   async updateVersionInPlace(id: string, content: string): Promise<void> {
     const version = await db.versions.get(id);
     if (!version) {
@@ -125,11 +125,11 @@ export const versionManager = {
   async checkDuplicate(content: string, projectId?: string): Promise<Version | null> {
     const contentHash = computeContentHash(content);
     const query = db.versions.where('contentHash').equals(contentHash);
-    
+
     if (projectId) {
-      return (await query.and(v => v.projectId === projectId).first()) || null;
+      return (await query.and((v) => v.projectId === projectId).first()) || null;
     }
-    
+
     return (await query.first()) || null;
   },
 
@@ -152,13 +152,10 @@ export const versionManager = {
    * 获取项目中最新更新的版本
    */
   async getLatestVersion(projectId: string): Promise<Version | null> {
-    const versions = await db.versions
-      .where('projectId')
-      .equals(projectId)
-      .toArray();
-    
+    const versions = await db.versions.where('projectId').equals(projectId).toArray();
+
     if (versions.length === 0) return null;
-    
+
     return versions.reduce((latest, current) =>
       current.updatedAt > latest.updatedAt ? current : latest
     );
