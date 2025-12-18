@@ -54,13 +54,13 @@ Prompt Studio 是一个**本地优先**的 AI 提示词版本管理与编辑工�
 ### 📸 应用预览
 
 #### 主界面
-![主界面](./assets/MAIN%20UI.png)
+![主界面](./assets/main-zh.png)
 
 #### 差异对比
 ![差异对比](./assets/DIFF%20UI.png)
 
 #### 设置界面
-![设置界面](./assets/SETTINGS%20UI.png)
+![设置界面](./assets/settings-zh.png)
 
 ### 🚀 快速开始
 
@@ -175,13 +175,13 @@ We believe:
 ### 📸 Application Preview
 
 #### Main Interface
-![Main Interface](./assets/MAIN%20UI.png)
+![Main Interface](./assets/main-en.png)
 
 #### Diff View
 ![Diff View](./assets/DIFF%20UI.png)
 
 #### Settings
-![Settings](./assets/SETTINGS%20UI.png)
+![Settings](./assets/settings-en.png)
 
 ### 🚀 Quick Start
 
