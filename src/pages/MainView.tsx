@@ -319,7 +319,7 @@ const MainView: React.FC = () => {
             {currentProjectId && currentVersionId && (
               <div
                 ref={toolbarRef}
-                className="bg-surface dark:bg-surface-dark rounded-xl px-3 shadow-card border border-border dark:border-border-dark flex items-center justify-between flex-wrap gap-2 h-16 shrink-0 z-10 @container"
+                className="bg-surface dark:bg-surface-dark rounded-xl px-3 shadow-card border border-border dark:border-border-dark flex items-center justify-between flex-wrap gap-2 min-h-[4rem] shrink-0 z-10 @container"
               >
                 <div className="flex items-center gap-1 flex-1 min-w-0">
                   {sidebarCollapsed && !sidebarTemporarilyExpanded && (
