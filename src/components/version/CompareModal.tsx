@@ -242,6 +242,7 @@ export function CompareModal({
                 renderLineHighlight: 'none',
                 overviewRulerLanes: 0,
                 overviewRulerBorder: false,
+                wordSeparators: "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?、，。；（）·！￥…—+【】：",
               }}
             />
           )}
