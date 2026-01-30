@@ -236,7 +236,7 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(
           }}
         />
         {isTouchDevice && (
-          <div className="absolute right-5 top-[60%] flex flex-col gap-3 p-2 bg-white/20 backdrop-blur-md rounded-2xl shadow-xl z-50">
+          <div className="absolute right-5 bottom-[10%] flex flex-col gap-3 p-2 bg-white/20 backdrop-blur-md rounded-2xl shadow-xl z-50">
             <button
               onClick={handleSelectAll}
               className="p-3 text-gray-600 bg-white/40 rounded-xl transition-all active:scale-95 shadow-sm"
