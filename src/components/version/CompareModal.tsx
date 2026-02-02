@@ -3,16 +3,27 @@
  * 使用 @monaco-editor/react 实现并排Diff视图
  */
 
-import { useEffect } from 'react';
-import { DiffEditor, DiffOnMount } from '@monaco-editor/react';
-import type { Version } from '@/models/Version';
-import { diffService } from '@/services/diffService';
+import { MinimalButton } from '@/components/common/MinimalButton';
 import { Icons } from '@/components/icons/Icons';
 import { useTranslation } from '@/i18n/I18nContext';
-import { useSettingsStore } from '@/store/settingsStore';
+import type { Version } from '@/models/Version';
+import { diffService } from '@/services/diffService';
+import { useVersionStore } from '@/store/versionStore';
 import { useI18nStore } from '@/store/i18nStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { colors } from '@/styles/tokens';
-import { MinimalButton } from '@/components/common/MinimalButton';
+import { DiffEditor, DiffOnMount } from '@monaco-editor/react';
+import { editor } from 'monaco-editor';
+import { useEffect, useRef, useState } from 'react';
+
+/** 保存失败的提示函数 */
+const showError = (message: string) => {
+  if (typeof window !== 'undefined' && (window as any).toast?.error) {
+    (window as any).toast.error(message);
+  } else {
+    alert(message);
+  }
+};
 
 export interface CompareModalProps {
   /** 模态框是否打开 */
@@ -29,6 +40,9 @@ export interface CompareModalProps {
 
   /** 可选:自定义标题 */
   title?: string;
+
+  /** 保存成功后的回调 */
+  onSave?: () => void;
 }
 
 export function CompareModal({
@@ -37,11 +51,16 @@ export function CompareModal({
   targetVersion,
   onClose,
   title,
+  onSave,
 }: CompareModalProps) {
   const t = useTranslation();
   const { editorFontSize, editorLineHeight } = useSettingsStore();
   const currentLocale = useI18nStore((state) => state.currentLocale);
   const modalTitle = title || t('components.compareModal.title');
+
+  // 使用 ref 保存编辑器实例，避免重渲染
+  const editorRef = useRef<{ originalEditor: editor.IStandaloneCodeEditor; modifiedEditor: editor.IStandaloneCodeEditor } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // 计算相似度
   const similarity =
@@ -75,7 +94,13 @@ export function CompareModal({
     });
   };
 
-  const handleEditorDidMount: DiffOnMount = (_editor, monaco) => {
+  const handleEditorDidMount: DiffOnMount = (editor, monaco) => {
+    // 保存编辑器实例引用
+    editorRef.current = {
+      originalEditor: editor.getOriginalEditor(),
+      modifiedEditor: editor.getModifiedEditor(),
+    };
+
     // 动态检测暗黑模式，确保 Diff 编辑器主题与主编辑器一致
     const isDark = document.documentElement.classList.contains('dark');
     // Using explicit values from tokens.js
@@ -105,6 +130,42 @@ export function CompareModal({
       },
     });
     monaco.editor.setTheme('prompt-studio-diff-theme');
+  };
+
+  // 保存源版本
+  const handleSaveSource = async () => {
+    if (!sourceVersion || !editorRef.current) return;
+
+    const contentToSave = editorRef.current.originalEditor.getValue();
+    try {
+      setIsSaving(true);
+      const { updateVersionInPlace } = useVersionStore.getState();
+      await updateVersionInPlace(sourceVersion.id, contentToSave);
+      onSave?.();
+    } catch (error) {
+      showError(t('errors.saveFailed'));
+      console.error('Failed to save source version:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // 保存目标版本
+  const handleSaveTarget = async () => {
+    if (!targetVersion || !editorRef.current) return;
+
+    const contentToSave = editorRef.current.modifiedEditor.getValue();
+    try {
+      setIsSaving(true);
+      const { updateVersionInPlace } = useVersionStore.getState();
+      await updateVersionInPlace(targetVersion.id, contentToSave);
+      onSave?.();
+    } catch (error) {
+      showError(t('errors.saveFailed'));
+      console.error('Failed to save target version:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -155,11 +216,24 @@ export function CompareModal({
                   {sourceVersion.name || `版本 ${sourceVersion.id.slice(0, 8)}`}
                 </h3>
                 <div className="text-xs text-surface-onVariant dark:text-surface-onVariantDark mt-1 space-y-1">
-                  <div>
-                    {t('components.versionCard.createdAt')}: {formatDate(sourceVersion.createdAt)}
+                  <div className="flex items-center justify-between">
+                    <span>
+                      {t('components.versionCard.createdAt')}: {formatDate(sourceVersion.createdAt)}
+                    </span>
+                    <MinimalButton
+                      variant="default"
+                      onClick={handleSaveSource}
+                      disabled={isSaving}
+                      className="mr-10 p-1.5"
+                      aria-label={t('common.save')}
+                    >
+                      <Icons.Save className="w-4 h-4" />
+                    </MinimalButton>
                   </div>
-                  <div>
-                    {t('components.versionCard.updatedAt')}: {formatDate(sourceVersion.updatedAt)}
+                  <div className="flex items-center justify-between">
+                    <span>
+                      {t('components.versionCard.updatedAt')}: {formatDate(sourceVersion.updatedAt)}
+                    </span>
                   </div>
                   {sourceVersion.score !== undefined && sourceVersion.score > 0 && (
                     <div className="flex items-center gap-1">
@@ -184,11 +258,24 @@ export function CompareModal({
                   {targetVersion.name || `版本 ${targetVersion.id.slice(0, 8)}`}
                 </h3>
                 <div className="text-xs text-surface-onVariant dark:text-surface-onVariantDark mt-1 space-y-1">
-                  <div>
-                    {t('components.versionCard.createdAt')}: {formatDate(targetVersion.createdAt)}
+                  <div className="flex items-center justify-between">
+                    <span>
+                      {t('components.versionCard.createdAt')}: {formatDate(targetVersion.createdAt)}
+                    </span>
+                    <MinimalButton
+                      variant="default"
+                      onClick={handleSaveTarget}
+                      disabled={isSaving}
+                      className="mr-10 p-1.5"
+                      aria-label={t('common.save')}
+                    >
+                      <Icons.Save className="w-4 h-4" />
+                    </MinimalButton>
                   </div>
-                  <div>
-                    {t('components.versionCard.updatedAt')}: {formatDate(targetVersion.updatedAt)}
+                  <div className="flex items-center justify-between">
+                    <span>
+                      {t('components.versionCard.updatedAt')}: {formatDate(targetVersion.updatedAt)}
+                    </span>
                   </div>
                   {targetVersion.score !== undefined && targetVersion.score > 0 && (
                     <div className="flex items-center gap-1">
@@ -226,7 +313,8 @@ export function CompareModal({
               keepCurrentModifiedModel={true}
               keepCurrentOriginalModel={true}
               options={{
-                readOnly: true,
+                readOnly: false,
+                originalEditable: true,
                 fontSize: editorFontSize,
                 lineHeight: Math.round(editorFontSize * editorLineHeight),
                 fontFamily: 'ui-monospace, monospace',
@@ -242,7 +330,7 @@ export function CompareModal({
                 renderLineHighlight: 'none',
                 overviewRulerLanes: 0,
                 overviewRulerBorder: false,
-                wordSeparators: "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?、，。；（）·！￥…—+【】：",
+                wordSeparators: "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?、，。；（）·！￥…—+【】：《》",
               }}
             />
           )}

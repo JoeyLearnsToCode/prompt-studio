@@ -59,7 +59,7 @@ src/
 |   |   |-- Sidebar.tsx: 侧边栏组件
 |   |-- version/: 版本相关组件
 |   |   |-- AttachmentGallery.tsx: 附件画廊组件，支持图片/视频上传、预览、下载
-|   |   |-- CompareModal.tsx: 版本比较模态框组件
+|   |   |-- CompareModal.tsx: 版本比较模态框组件，支持编辑
 |   |   |-- VersionCard.tsx: 版本卡片组件
 |   |   |-- VersionMetaCard.tsx: 版本元数据（评分、备注）卡片组件
 |-- i18n/: 国际化相关
@@ -96,18 +96,16 @@ src/
 |   |-- importService.ts: 统一的导入服务，支持从 WebDAV 和 ZIP 文件导入，提供合并和覆盖两种模式
 |   |-- initializeSampleData.ts: 示例数据初始化服务，为全新用户创建示例项目
 |   |-- layoutManager.ts: 布局管理服务，管理画布宽度和编辑器高度比例
-|   |-- projectManager.ts: 项目管理服务
 |   |-- searchService.ts: 搜索功能服务
 |   |-- snippetManager.ts: 代码片段管理服务
-|   |-- versionManager.ts: 版本管理服务
 |   |-- webdavService.ts: WebDAV同步服务，支持与远程服务器同步数据
 |-- store/: 状态管理
 |   |-- i18nStore.ts: 国际化状态管理
-|   |-- projectStore.ts: 项目状态管理
+|   |-- projectStore.ts: 项目状态管理，包含所有项目管理功能
 |   |-- searchStore.ts: 搜索状态管理
 |   |-- settingsStore.ts: 设置状态管理
 |   |-- uiStore.ts: UI状态管理，包括布局偏好、折叠状态等
-|   |-- versionStore.ts: 版本状态管理
+|   |-- versionStore.ts: 版本状态管理，包含所有版本管理功能
 |-- styles/: 样式文件
 |   |-- globals.css: 全局样式文件，包含Material Design 3主题和Tailwind CSS配置
 |-- test/: 测试相关
@@ -140,9 +138,7 @@ tests/
 |   |-- hash.test.ts: 哈希函数单元测试
 |   |-- importService.test.ts: 导入服务单元测试
 |   |-- normalize.test.ts: 标准化函数单元测试
-|   |-- projectManager.test.ts: 项目管理器单元测试
 |   |-- tree.test.ts: 树形结构操作单元测试
-|   |-- versionManager.test.ts: 版本管理器单元测试
 ```
 
 ## docs: 文档目录

@@ -35,6 +35,11 @@ interface VersionState {
   setCompareTarget: (targetVersionId: string) => void;
   closeCompare: () => void;
   toggleCompareMode: (sourceVersionId?: string | null) => void;
+  getVersion: (id: string) => Promise<Version | undefined>;
+  getVersionsByProject: (projectId: string) => Promise<Version[]>;
+  getChildren: (versionId: string) => Promise<Version[]>;
+  isLeafNode: (versionId: string) => Promise<boolean>;
+  getLatestVersion: (projectId: string) => Promise<Version | null>;
 }
 
 export const useVersionStore = create<VersionState>((set, get) => ({
@@ -58,6 +63,18 @@ export const useVersionStore = create<VersionState>((set, get) => ({
   },
 
   createVersion: async (projectId, content, parentId, skipDuplicateCheck = false, name) => {
+    // 校验：如果尝试创建根版本（parentId为null）且项目已有根版本，则拒绝
+    if (parentId === null) {
+      const existingRootVersion = await db.versions
+        .where('projectId')
+        .equals(projectId)
+        .and((v) => v.parentId === null)
+        .first();
+      if (existingRootVersion) {
+        throw new Error('每个项目只能有一个根版本，请更新现有根版本或创建子版本');
+      }
+    }
+
     const contentHash = computeContentHash(content);
 
     // 重复检测(除非明确跳过)
@@ -278,5 +295,34 @@ export const useVersionStore = create<VersionState>((set, get) => ({
         });
       }
     }
+  },
+
+  getVersion: async (id) => {
+    return await db.versions.get(id);
+  },
+
+  getVersionsByProject: async (projectId) => {
+    const versions = await db.versions.where('projectId').equals(projectId).toArray();
+    return versions.map((v) => ({
+      ...v,
+      normalizedContent: normalize(v.content),
+    }));
+  },
+
+  getChildren: async (versionId) => {
+    return await db.versions.where('parentId').equals(versionId).toArray();
+  },
+
+  isLeafNode: async (versionId) => {
+    const childrenCount = await db.versions.where('parentId').equals(versionId).count();
+    return childrenCount === 0;
+  },
+
+  getLatestVersion: async (projectId) => {
+    const versions = await db.versions.where('projectId').equals(projectId).toArray();
+    if (versions.length === 0) return null;
+    return versions.reduce((latest, current) =>
+      current.updatedAt > latest.updatedAt ? current : latest
+    );
   },
 }));

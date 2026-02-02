@@ -232,7 +232,7 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(
             overviewRulerLanes: 0,
             overviewRulerBorder: false,
             occurrencesHighlight: 'off',
-            wordSeparators: "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?、，。；（）·！￥…—+【】：",
+            wordSeparators: "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?、，。；（）·！￥…—+【】：《》",
           }}
         />
         {isTouchDevice && (

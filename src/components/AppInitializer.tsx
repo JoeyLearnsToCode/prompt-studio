@@ -59,6 +59,26 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     await loadVersions(projectId);
   }, [setCurrentProject, expandFolderPathToProject, loadVersions]);
 
+  // 监听 hashchange 事件以处理浏览器前进/后退
+  useEffect(() => {
+    const handleHashChange = async () => {
+      const urlProjectId = getProjectIdFromUrl();
+      if (urlProjectId) {
+        // 验证项目是否存在
+        const project = await db.projects.get(urlProjectId);
+        if (project) {
+          await handleOpenProjectFromUrl(urlProjectId);
+        } else {
+          alert(t('errors.projectNotFound'));
+          window.location.hash = '';
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [handleOpenProjectFromUrl, t]);
+
   useEffect(() => {
     // 如果已经初始化过，直接返回
     if (hasInitialized.current) {

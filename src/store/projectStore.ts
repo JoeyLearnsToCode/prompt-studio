@@ -24,6 +24,9 @@ interface ProjectState {
   setCurrentProject: (id: string | null) => void;
   moveProject: (projectId: string, folderId: string) => Promise<void>;
   expandFolderPathToProject: (projectId: string) => Promise<void>;
+  getProject: (id: string) => Promise<Project | undefined>;
+  getProjectsByFolder: (folderId: string) => Promise<Project[]>;
+  getRecentProjects: (limit?: number) => Promise<Project[]>;
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
@@ -175,6 +178,19 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         p.id === projectId ? { ...p, folderId: dbFolderId, updatedAt: Date.now() } : p
       ),
     }));
+  },
+
+  getProject: async (id) => {
+    return await db.projects.get(id);
+  },
+
+  getProjectsByFolder: async (folderId) => {
+    const query = db.projects.where('folderId').equals(folderId);
+    return await query.toArray();
+  },
+
+  getRecentProjects: async (limit = 10) => {
+    return await db.projects.orderBy('updatedAt').reverse().limit(limit).toArray();
   },
 
   expandFolderPathToProject: async (projectId) => {

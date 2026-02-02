@@ -4,8 +4,8 @@
  */
 
 import { db } from '@/db/schema';
-import { projectManager } from './projectManager';
-import { versionManager } from './versionManager';
+import { useProjectStore } from '@/store/projectStore';
+import { useVersionStore } from '@/store/versionStore';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
 import { translations } from '@/i18n/locales';
 import { initializeLanguage } from '@/i18n/detectLanguage';
@@ -37,37 +37,42 @@ async function createSampleProject(): Promise<string> {
   const locale: Locale = initializeLanguage();
   const t = translations[locale];
 
-  // 创建示例项目（无文件夹）
-  const project = await projectManager.createProject(t.sampleData.projectName, null as any);
+  // 使用 store 创建示例项目（无文件夹）
+  // 注意：createProject 会自动创建一个空的根版本
+  const { createProject } = useProjectStore.getState();
+  const projectId = await createProject(t.sampleData.projectName, 'root');
 
-  // 创建根版本
-  const rootVersion = await versionManager.createVersion(
-    project.id,
-    t.sampleData.versions.root.content,
-    null,
-    undefined, // score
-    t.sampleData.versions.root.name // name
-  );
+  // 获取自动创建的根版本
+  const versions = await db.versions.where('projectId').equals(projectId).toArray();
+  const rootVersion = versions.find((v) => v.parentId === null);
+  if (!rootVersion) {
+    throw new Error('Failed to get root version');
+  }
 
-  // 创建根分支1
-  await versionManager.createVersion(
-    project.id,
+  // 更新根版本的内容和名称
+  const { updateVersionInPlace } = useVersionStore.getState();
+  await updateVersionInPlace(rootVersion.id, t.sampleData.versions.root.content, t.sampleData.versions.root.name);
+
+  // 使用 store 创建根分支1（作为根版本的子版本）
+  const { createVersion } = useVersionStore.getState();
+  await createVersion(
+    projectId,
     t.sampleData.versions.branch1.content,
     rootVersion.id,
-    undefined, // score
-    t.sampleData.versions.branch1.name // name
+    false, // skipDuplicateCheck
+    t.sampleData.versions.branch1.name
   );
 
-  // 创建根分支2
-  await versionManager.createVersion(
-    project.id,
+  // 使用 store 创建根分支2（作为根版本的子版本）
+  await createVersion(
+    projectId,
     t.sampleData.versions.branch2.content,
     rootVersion.id,
-    undefined, // score
-    t.sampleData.versions.branch2.name // name
+    false, // skipDuplicateCheck
+    t.sampleData.versions.branch2.name
   );
 
-  return project.id;
+  return projectId;
 }
 
 /**
