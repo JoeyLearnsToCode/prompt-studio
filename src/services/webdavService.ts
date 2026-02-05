@@ -10,6 +10,7 @@ import { importService } from './importService';
 import { ImportOptions, ImportProgressCallback } from '@/types/import';
 import { useI18nStore } from '@/store/i18nStore';
 import { translations } from '@/i18n/locales';
+import { zipGenOptions } from './exportService';
 
 export interface WebDAVConfig {
   url: string;
@@ -145,7 +146,7 @@ export class WebDAVService {
       );
 
       // 2. 生成 ZIP
-      const blob = await zip.generateAsync({ type: 'blob' });
+      const blob = await zip.generateAsync(zipGenOptions);
 
       // 3. 上传到 WebDAV
       const filename = `prompt-studio-backup-${Date.now()}.zip`;

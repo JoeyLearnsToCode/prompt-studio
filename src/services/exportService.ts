@@ -3,11 +3,13 @@
  */
 
 import { db } from '@/db/schema';
-import JSZip from 'jszip';
+import JSZip, { type JSZipGeneratorOptions } from 'jszip';
 import { saveAs } from 'file-saver';
 import { storage, STORAGE_KEYS } from '@/utils/storage';
 import { importService } from './importService';
 import type { ImportOptions, ImportProgressCallback } from '@/types/import';
+
+export const zipGenOptions: JSZipGeneratorOptions<'blob'> = { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 5 } };
 
 export class ExportService {
   /**
@@ -126,7 +128,7 @@ export class ExportService {
       )
     );
 
-    const blob = await zip.generateAsync({ type: 'blob' });
+    const blob = await zip.generateAsync(zipGenOptions);
     saveAs(blob, `prompt-studio-backup-${Date.now()}.zip`);
   }
 
