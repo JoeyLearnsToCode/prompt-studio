@@ -136,6 +136,7 @@ export const zhCN: TranslationData = {
       folderName: '文件夹名称',
       expandSidebar: '展开侧边栏',
       collapseSidebar: '折叠侧边栏',
+      searchPlaceholder: '搜索项目与版本...',
     },
 
     canvas: {

@@ -187,6 +187,7 @@ export interface TranslationData {
       folderName: string;
       expandSidebar: string;
       collapseSidebar: string;
+      searchPlaceholder: string;
     };
 
     /** 版本画布 */

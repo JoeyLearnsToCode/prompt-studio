@@ -1,10 +1,12 @@
-import React, { HTMLAttributes, useEffect } from 'react';
+import React, { HTMLAttributes, useEffect, useRef, useState } from 'react';
 import { useProjectStore } from '@/store/projectStore';
 import { useUiStore } from '@/store/uiStore';
 import { Icons } from '@/components/icons/Icons';
 import { FolderTree } from './FolderTree';
+import { GlobalSearchBar } from './GlobalSearchBar';
 import { useTranslation } from '@/i18n/I18nContext';
 import { MinimalButton } from '@/components/common/MinimalButton';
+import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 
 export const Sidebar: React.FC = () => {
   const t = useTranslation();
@@ -12,10 +14,61 @@ export const Sidebar: React.FC = () => {
   const { loadFolders, loadProjects, createFolder, createProject, selectProject } =
     useProjectStore();
 
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [sidebarFocused, setSidebarFocused] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    query,
+    currentIndex,
+    total,
+    isActive: searchActive,
+    handleQueryChange,
+    handleNext,
+    handlePrev,
+    handleClear,
+    getCurrentMatchId,
+  } = useGlobalSearch();
+
+  const { selectProject: selectProjectAction, expandFolderPathToProject } = useProjectStore();
+
   useEffect(() => {
     loadFolders();
     loadProjects();
   }, [loadFolders, loadProjects]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f' && sidebarFocused) {
+        e.preventDefault();
+        if (searchVisible) {
+          searchInputRef.current?.focus();
+          searchInputRef.current?.select();
+        } else {
+          setSearchVisible(true);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [sidebarFocused, searchVisible]);
+
+  useEffect(() => {
+    if (!searchActive) return;
+
+    const projectId = getCurrentMatchId();
+    if (!projectId) return;
+
+    selectProjectAction(projectId, { updateUrl: true });
+    expandFolderPathToProject(projectId);
+  }, [searchActive, currentIndex, getCurrentMatchId, selectProjectAction, expandFolderPathToProject]);
+
+  const handleCloseSearch = () => {
+    setSearchVisible(false);
+    handleClear();
+  };
 
   const handleCreateFolder = async () => {
     const folderName = prompt(t('components.sidebar.folderName'));
@@ -41,7 +94,17 @@ export const Sidebar: React.FC = () => {
   }
 
   return (
-    <aside className="w-64 min-w-[200px] flex flex-col gap-2 shrink-0">
+    <aside
+      ref={sidebarRef}
+      className="w-64 min-w-[200px] flex flex-col gap-2 shrink-0"
+      tabIndex={-1}
+      onFocus={() => setSidebarFocused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          setSidebarFocused(false);
+        }
+      }}
+    >
       {/* Sidebar Header Card */}
       <div className="bg-surface dark:bg-surface-dark rounded-xl px-4 shadow-card border border-border dark:border-border-dark flex items-center justify-between h-16 shrink-0">
         <h2 className="font-bold text-surface-onSurface dark:text-surface-onSurfaceDark">
@@ -71,6 +134,23 @@ export const Sidebar: React.FC = () => {
             <Icons.FilePlus size={20} />
           </MinimalButton>
         </div>
+
+        {/* Global Search Bar */}
+        {searchVisible && (
+          <div className="px-1 pb-1">
+            <GlobalSearchBar
+              ref={searchInputRef}
+              query={query}
+              currentIndex={currentIndex}
+              total={total}
+              onQueryChange={handleQueryChange}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              onClear={handleClear}
+              onClose={handleCloseSearch}
+            />
+          </div>
+        )}
 
         {/* Tree */}
         <div className="flex-1">

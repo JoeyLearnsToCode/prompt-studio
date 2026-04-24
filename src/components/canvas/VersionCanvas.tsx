@@ -72,7 +72,12 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
       // 检查是否按下了Ctrl+F (or Cmd+F on Mac) 且canvas有焦点
       if ((e.ctrlKey || e.metaKey) && e.key === 'f' && canvasFocused) {
         e.preventDefault();
-        setSearchVisible(true);
+        if (searchVisible) {
+          searchInputRef.current?.focus();
+          searchInputRef.current?.select();
+        } else {
+          setSearchVisible(true);
+        }
       }
     };
 
@@ -84,7 +89,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
         document.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [projectId, canvasFocused]);
+  }, [projectId, canvasFocused, searchVisible]);
 
   // 当搜索框显示时，聚焦到输入框
   useEffect(() => {

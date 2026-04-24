@@ -140,6 +140,7 @@ export const enUS: TranslationData = {
       folderName: 'Folder Name',
       expandSidebar: 'Expand Sidebar',
       collapseSidebar: 'Collapse Sidebar',
+      searchPlaceholder: 'Search projects & versions...',
     },
 
     canvas: {

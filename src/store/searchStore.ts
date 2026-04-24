@@ -1,18 +1,24 @@
 import { create } from 'zustand';
+import Fuse from 'fuse.js';
 import type { Version } from '@/models/Version';
+import type { Project } from '@/models/Project';
 
 export interface SearchState {
-  query: string; // 搜索关键词
-  matches: string[]; // 匹配的版本ID列表
-  currentIndex: number; // 当前聚焦的匹配结果索引(0-based)
-  total: number; // 匹配总数
-  isActive: boolean; // 搜索是否激活
+  query: string;
+  matches: string[];
+  currentIndex: number;
+  total: number;
+  isActive: boolean;
 }
 
 interface SearchStore extends SearchState {
-  // Actions
   setQuery: (query: string) => void;
-  executeSearch: (versions: Version[], query: string) => void;
+  executeVersionSearch: (versions: Version[], query: string) => void;
+  executeGlobalSearch: (
+    projects: Project[],
+    versions: Version[],
+    query: string
+  ) => void;
   nextMatch: () => void;
   prevMatch: () => void;
   clearSearch: () => void;
@@ -27,23 +33,69 @@ const initialState: SearchState = {
   isActive: false,
 };
 
-export const useSearchStore = create<SearchStore>((set, get) => ({
+export const useSearchStore = create<SearchStore>((set) => ({
   ...initialState,
 
   setQuery: (query) => {
     set({ query });
   },
 
-  executeSearch: (versions, query) => {
+  executeVersionSearch: (versions, query) => {
     if (!query.trim()) {
       set(initialState);
       return;
     }
 
-    const lowerQuery = query.toLowerCase();
-    const matches = versions
-      .filter((v) => v.content.toLowerCase().includes(lowerQuery))
-      .map((v) => v.id);
+    const fuse = new Fuse(versions, {
+      keys: ['name', 'content'],
+      threshold: 0.4,
+      ignoreLocation: true,
+      shouldSort: true,
+    });
+
+    const results = fuse.search(query);
+    const matches = results.map((r) => r.item.id);
+
+    set({
+      query,
+      matches,
+      total: matches.length,
+      currentIndex: matches.length > 0 ? 0 : -1,
+      isActive: true,
+    });
+  },
+
+  executeGlobalSearch: (projects, versions, query) => {
+    if (!query.trim()) {
+      set(initialState);
+      return;
+    }
+
+    const projectItems = projects.map((p) => ({
+      id: p.id,
+      type: 'project' as const,
+      name: p.name,
+      content: '',
+    }));
+
+    const versionItems = versions.map((v) => ({
+      id: v.id,
+      type: 'version' as const,
+      name: v.name ?? '',
+      content: v.content,
+    }));
+
+    const allItems = [...projectItems, ...versionItems];
+
+    const fuse = new Fuse(allItems, {
+      keys: ['name', 'content'],
+      threshold: 0.4,
+      ignoreLocation: true,
+      shouldSort: true,
+    });
+
+    const results = fuse.search(query);
+    const matches = results.map((r) => r.item.id);
 
     set({
       query,
@@ -55,20 +107,18 @@ export const useSearchStore = create<SearchStore>((set, get) => ({
   },
 
   nextMatch: () => {
-    const { matches, currentIndex } = get();
-    if (matches.length === 0) return;
-
-    set({
-      currentIndex: (currentIndex + 1) % matches.length,
+    set((state) => {
+      if (state.matches.length === 0) return state;
+      return { currentIndex: (state.currentIndex + 1) % state.matches.length };
     });
   },
 
   prevMatch: () => {
-    const { matches, currentIndex } = get();
-    if (matches.length === 0) return;
-
-    set({
-      currentIndex: (currentIndex - 1 + matches.length) % matches.length,
+    set((state) => {
+      if (state.matches.length === 0) return state;
+      return {
+        currentIndex: (state.currentIndex - 1 + state.matches.length) % state.matches.length,
+      };
     });
   },
 
@@ -77,9 +127,9 @@ export const useSearchStore = create<SearchStore>((set, get) => ({
   },
 
   focusMatch: (index) => {
-    const { matches } = get();
-    if (index < 0 || index >= matches.length) return;
-
-    set({ currentIndex: index });
+    set((state) => {
+      if (index < 0 || index >= state.matches.length) return state;
+      return { currentIndex: index };
+    });
   },
 }));
