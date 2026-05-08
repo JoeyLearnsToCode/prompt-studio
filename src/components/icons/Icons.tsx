@@ -200,6 +200,11 @@ export const CopyIcon: React.FC<IconProps> = (props) => (
   <MaterialSymbol name="content_copy" {...props} />
 );
 
+// 模糊搜索图标
+export const FuzzySearchIcon: React.FC<IconProps> = ({ fill = false, ...props }) => (
+  <MaterialSymbol name="blur_on" fill={fill} {...props} />
+);
+
 // GitHub图标 - 保留 SVG，因为 Material Symbols 没有品牌图标
 export const GitHubIcon: React.FC<IconProps> = ({ size = 16, className = '', ...props }) => (
   <svg
@@ -255,6 +260,7 @@ export const Icons = {
   TextSelect: TextSelectIcon,
   RowSelect: RowSelectIcon,
   Copy: CopyIcon,
+  FuzzySearch: FuzzySearchIcon,
   ArrowUp: UpArrowIcon,
   ArrowDown: DownArrowIcon,
   ArrowLeft: LeftArrowIcon,

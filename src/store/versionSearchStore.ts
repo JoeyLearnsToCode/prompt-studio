@@ -8,6 +8,7 @@ export interface VersionSearchState {
   currentIndex: number;
   total: number;
   isActive: boolean;
+  fuzzy: boolean;
 }
 
 interface VersionSearchStore extends VersionSearchState {
@@ -17,6 +18,7 @@ interface VersionSearchStore extends VersionSearchState {
   prevMatch: () => void;
   clearSearch: () => void;
   focusMatch: (index: number) => void;
+  toggleFuzzy: () => void;
 }
 
 const initialState: VersionSearchState = {
@@ -25,6 +27,7 @@ const initialState: VersionSearchState = {
   currentIndex: -1,
   total: 0,
   isActive: false,
+  fuzzy: false,
 };
 
 export const useVersionSearchStore = create<VersionSearchStore>((set) => ({
@@ -36,26 +39,43 @@ export const useVersionSearchStore = create<VersionSearchStore>((set) => ({
 
   executeSearch: (versions, query) => {
     if (!query.trim()) {
-      set(initialState);
+      set((state) => ({ ...initialState, fuzzy: state.fuzzy }));
       return;
     }
 
-    const fuse = new Fuse(versions, {
-      keys: ['name', 'content'],
-      threshold: 0.4,
-      ignoreLocation: true,
-      shouldSort: true,
-    });
+    set((state) => {
+      if (state.fuzzy) {
+        const fuse = new Fuse(versions, {
+          keys: ['name', 'content'],
+          threshold: 0.4,
+          ignoreLocation: true,
+          shouldSort: true,
+        });
 
-    const results = fuse.search(query);
-    const matches = results.map((r) => r.item.id);
+        const results = fuse.search(query);
+        const matches = results.map((r) => r.item.id);
 
-    set({
-      query,
-      matches,
-      total: matches.length,
-      currentIndex: matches.length > 0 ? 0 : -1,
-      isActive: true,
+        return {
+          query,
+          matches,
+          total: matches.length,
+          currentIndex: matches.length > 0 ? 0 : -1,
+          isActive: true,
+        };
+      } else {
+        const lowerQuery = query.toLowerCase();
+        const matches = versions
+          .filter((v) => (v.name?.toLowerCase()?.includes(lowerQuery) ?? false) || v.content.toLowerCase().includes(lowerQuery))
+          .map((v) => v.id);
+
+        return {
+          query,
+          matches,
+          total: matches.length,
+          currentIndex: matches.length > 0 ? 0 : -1,
+          isActive: true,
+        };
+      }
     });
   },
 
@@ -76,7 +96,7 @@ export const useVersionSearchStore = create<VersionSearchStore>((set) => ({
   },
 
   clearSearch: () => {
-    set(initialState);
+    set((state) => ({ ...initialState, fuzzy: state.fuzzy }));
   },
 
   focusMatch: (index) => {
@@ -84,5 +104,9 @@ export const useVersionSearchStore = create<VersionSearchStore>((set) => ({
       if (index < 0 || index >= state.matches.length) return state;
       return { currentIndex: index };
     });
+  },
+
+  toggleFuzzy: () => {
+    set((state) => ({ fuzzy: !state.fuzzy }));
   },
 }));

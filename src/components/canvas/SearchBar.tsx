@@ -8,7 +8,6 @@ import React, {
 } from 'react';
 import { useTranslation } from '@/i18n/I18nContext';
 import { Icons } from '@/components/icons/Icons';
-import { MinimalButton } from '@/components/common/MinimalButton';
 
 interface SearchBarProps {
   /** 搜索关键词 */
@@ -37,6 +36,12 @@ interface SearchBarProps {
 
   /** 可选:占位文本 */
   placeholder?: string;
+
+  /** 是否开启模糊搜索 */
+  fuzzy?: boolean;
+
+  /** 切换模糊搜索 */
+  onToggleFuzzy?: () => void;
 }
 
 /**
@@ -55,6 +60,8 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
     onClear,
     onClose,
     placeholder = t('components.canvas.searchPlaceholder'),
+    fuzzy = false,
+    onToggleFuzzy,
   } = props;
 
   const [localQuery, setLocalQuery] = useState(query);
@@ -115,7 +122,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
 
   return (
     // 修复：暗色模式下使用 surface-container-high-dark 提高容器对比度
-    <div className="flex items-center gap-2 px-3 py-2 bg-surface-variant dark:bg-surface-containerHighDark rounded-lg shadow-sm">
+    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-variant dark:bg-surface-containerHighDark rounded-lg shadow-sm">
       {/* 搜索图标 */}
       <Icons.Search className="w-5 h-5 text-surface-onVariant dark:text-surface-onVariantDark flex-shrink-0" />
 
@@ -132,60 +139,65 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
         aria-label={t('components.canvas.search')}
       />
 
-      {/* 结果计数 */}
+      {/* 右侧控件：统一 inline-flex items-center 对齐 */}
       {hasResults && (
-        <span className="text-sm text-surface-onVariant dark:text-surface-onVariantDark font-medium flex-shrink-0">
+        <span className="text-xs text-surface-onVariant dark:text-surface-onVariantDark font-medium flex-shrink-0 leading-none">
           {currentIndex + 1}/{total}
         </span>
       )}
 
-      {/* 上一个结果按钮 */}
-      <MinimalButton
-        variant="ghost"
-        onClick={onPrev}
-        disabled={!canNavigate}
-        className="p-1.5 rounded-full"
-        aria-label={t('components.canvas.prevResult')}
-        title={t('components.canvas.prevResult')}
-      >
-        <Icons.UpArrow className="w-4 h-4" />
-      </MinimalButton>
+      {onToggleFuzzy && (
+        <button
+          onClick={onToggleFuzzy}
+          className={`p-0.5 rounded transition-colors duration-200 inline-flex items-center justify-center ${fuzzy ? 'text-primary dark:text-primary' : 'text-surface-onVariant dark:text-surface-onVariantDark hover:text-primary dark:hover:text-primary'}`}
+          aria-label={fuzzy ? t('components.canvas.fuzzySearchOn') : t('components.canvas.fuzzySearchOff')}
+          title={fuzzy ? t('components.canvas.fuzzySearchOn') : t('components.canvas.fuzzySearchOff')}
+        >
+          <Icons.FuzzySearch className="w-4 h-4" fill={fuzzy} />
+        </button>
+      )}
 
-      {/* 下一个结果按钮 */}
-      <MinimalButton
-        variant="ghost"
-        onClick={onNext}
-        disabled={!canNavigate}
-        className="p-1.5 rounded-full"
-        aria-label={t('components.canvas.nextResult')}
-        title={t('components.canvas.nextResult')}
-      >
-        <Icons.DownArrow className="w-4 h-4" />
-      </MinimalButton>
+      {/* 上/下导航 - 垂直紧凑组 */}
+      <div className="flex flex-col flex-shrink-0">
+        <button
+          onClick={onPrev}
+          disabled={!canNavigate}
+          className="p-0 rounded text-surface-onVariant dark:text-surface-onVariantDark hover:text-primary dark:hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
+          aria-label={t('components.canvas.prevResult')}
+          title={t('components.canvas.prevResult')}
+        >
+          <Icons.UpArrow className="w-3.5 h-3.5" />
+        </button>
+        <button
+          onClick={onNext}
+          disabled={!canNavigate}
+          className="p-0 rounded text-surface-onVariant dark:text-surface-onVariantDark hover:text-primary dark:hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
+          aria-label={t('components.canvas.nextResult')}
+          title={t('components.canvas.nextResult')}
+        >
+          <Icons.DownArrow className="w-3.5 h-3.5" />
+        </button>
+      </div>
 
-      {/* 清空按钮 */}
       {query && (
-        <MinimalButton
-          variant="ghost"
+        <button
           onClick={onClear}
-          className="p-1.5 rounded-full hover:text-error/60"
+          className="p-0.5 rounded text-surface-onVariant dark:text-surface-onVariantDark hover:text-error/60 inline-flex items-center justify-center"
           aria-label={t('components.canvas.clearSearch')}
           title={t('components.canvas.clearSearch')}
         >
           <Icons.Clear className="w-4 h-4" />
-        </MinimalButton>
+        </button>
       )}
 
-      {/* 关闭搜索框按钮 */}
-      <MinimalButton
-        variant="ghost"
+      <button
         onClick={onClose}
-        className="p-1.5 rounded-full hover:text-error"
+        className="p-0.5 rounded text-surface-onVariant dark:text-surface-onVariantDark hover:text-error inline-flex items-center justify-center"
         aria-label={t('components.canvas.closeSearch')}
         title={t('components.canvas.closeSearch')}
       >
         <Icons.Close className="w-4 h-4" />
-      </MinimalButton>
+      </button>
     </div>
   );
 });

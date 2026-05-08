@@ -152,6 +152,8 @@ export const enUS: TranslationData = {
       nextResult: 'Next result (Enter)',
       clearSearch: 'Clear search',
       closeSearch: 'Close search (ESC)',
+      fuzzySearchOn: 'Fuzzy search on',
+      fuzzySearchOff: 'Fuzzy search off, click to enable',
       compare: 'Compare',
       exitCompare: 'Exit Compare',
       enterCompare: 'Click compare to enter comparison mode',

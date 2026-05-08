@@ -9,6 +9,7 @@ export interface GlobalSearchState {
   currentIndex: number;
   total: number;
   isActive: boolean;
+  fuzzy: boolean;
 }
 
 interface GlobalSearchStore extends GlobalSearchState {
@@ -18,6 +19,7 @@ interface GlobalSearchStore extends GlobalSearchState {
   prevMatch: () => void;
   clearSearch: () => void;
   focusMatch: (index: number) => void;
+  toggleFuzzy: () => void;
 }
 
 const initialState: GlobalSearchState = {
@@ -26,6 +28,7 @@ const initialState: GlobalSearchState = {
   currentIndex: -1,
   total: 0,
   isActive: false,
+  fuzzy: false,
 };
 
 export const useGlobalSearchStore = create<GlobalSearchStore>((set) => ({
@@ -37,45 +40,70 @@ export const useGlobalSearchStore = create<GlobalSearchStore>((set) => ({
 
   executeSearch: (projects, versions, query) => {
     if (!query.trim()) {
-      set(initialState);
+      set((state) => ({ ...initialState, fuzzy: state.fuzzy }));
       return;
     }
 
-    const fuse = new Fuse(versions, {
-      keys: ['name', 'content'],
-      threshold: 0.4,
-      ignoreLocation: true,
-      shouldSort: true,
-    });
+    set((state) => {
+      if (state.fuzzy) {
+        const fuse = new Fuse(versions, {
+          keys: ['name', 'content'],
+          threshold: 0.4,
+          ignoreLocation: true,
+          shouldSort: true,
+        });
 
-    const versionHits = new Set<string>();
-    for (const r of fuse.search(query)) {
-      versionHits.add(r.item.projectId);
-    }
+        const versionHits = new Set<string>();
+        for (const r of fuse.search(query)) {
+          versionHits.add(r.item.projectId);
+        }
 
-    const projectFuse = new Fuse(projects, {
-      keys: ['name'],
-      threshold: 0.4,
-      ignoreLocation: true,
-      shouldSort: true,
-    });
+        const projectFuse = new Fuse(projects, {
+          keys: ['name'],
+          threshold: 0.4,
+          ignoreLocation: true,
+          shouldSort: true,
+        });
 
-    const matchedProjectIds = new Set<string>();
-    for (const r of projectFuse.search(query)) {
-      matchedProjectIds.add(r.item.id);
-    }
+        const matchedProjectIds = new Set<string>();
+        for (const r of projectFuse.search(query)) {
+          matchedProjectIds.add(r.item.id);
+        }
 
-    const allMatchedProjectIds = new Set([...matchedProjectIds, ...versionHits]);
+        const allMatchedProjectIds = new Set([...matchedProjectIds, ...versionHits]);
+        const matchedProjects = projects.filter((p) => allMatchedProjectIds.has(p.id));
+        const matches = matchedProjects.map((p) => p.id);
 
-    const matchedProjects = projects.filter((p) => allMatchedProjectIds.has(p.id));
-    const matches = matchedProjects.map((p) => p.id);
+        return {
+          query,
+          matches,
+          total: matches.length,
+          currentIndex: matches.length > 0 ? 0 : -1,
+          isActive: true,
+        };
+      } else {
+        const lowerQuery = query.toLowerCase();
+        const matchedProjectIds = new Set<string>();
+        for (const p of projects) {
+          if (p.name.toLowerCase().includes(lowerQuery)) {
+            matchedProjectIds.add(p.id);
+          }
+        }
+        for (const v of versions) {
+          if ((v.name?.toLowerCase()?.includes(lowerQuery) ?? false) || v.content.toLowerCase().includes(lowerQuery)) {
+            matchedProjectIds.add(v.projectId);
+          }
+        }
+        const matches = projects.filter((p) => matchedProjectIds.has(p.id)).map((p) => p.id);
 
-    set({
-      query,
-      matches,
-      total: matches.length,
-      currentIndex: matches.length > 0 ? 0 : -1,
-      isActive: true,
+        return {
+          query,
+          matches,
+          total: matches.length,
+          currentIndex: matches.length > 0 ? 0 : -1,
+          isActive: true,
+        };
+      }
     });
   },
 
@@ -96,7 +124,7 @@ export const useGlobalSearchStore = create<GlobalSearchStore>((set) => ({
   },
 
   clearSearch: () => {
-    set(initialState);
+    set((state) => ({ ...initialState, fuzzy: state.fuzzy }));
   },
 
   focusMatch: (index) => {
@@ -104,5 +132,9 @@ export const useGlobalSearchStore = create<GlobalSearchStore>((set) => ({
       if (index < 0 || index >= state.matches.length) return state;
       return { currentIndex: index };
     });
+  },
+
+  toggleFuzzy: () => {
+    set((state) => ({ fuzzy: !state.fuzzy }));
   },
 }));

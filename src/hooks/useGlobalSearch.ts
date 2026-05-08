@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGlobalSearchStore } from '@/store/globalSearchStore';
 import { useProjectStore } from '@/store/projectStore';
 import { useVersionStore } from '@/store/versionStore';
@@ -12,11 +12,13 @@ export const useGlobalSearch = () => {
     currentIndex,
     total,
     isActive,
+    fuzzy,
     setQuery,
     executeSearch,
     nextMatch,
     prevMatch,
     clearSearch,
+    toggleFuzzy,
   } = useGlobalSearchStore();
 
   const { projects } = useProjectStore();
@@ -30,6 +32,15 @@ export const useGlobalSearch = () => {
       .then((v) => setAllVersions(v))
       .catch(() => {});
   }, [isActive]);
+
+  const prevFuzzy = useRef(fuzzy);
+  useEffect(() => {
+    if (prevFuzzy.current !== fuzzy && query.trim()) {
+      const versionsToSearch = allVersions.length > 0 ? allVersions : versions;
+      executeSearch(projects, versionsToSearch, query);
+    }
+    prevFuzzy.current = fuzzy;
+  }, [fuzzy, query, projects, versions, allVersions, executeSearch]);
 
   const handleQueryChange = useCallback(
     (newQuery: string) => {
@@ -57,10 +68,12 @@ export const useGlobalSearch = () => {
     currentIndex,
     total,
     isActive,
+    fuzzy,
     handleQueryChange,
     handleNext: nextMatch,
     handlePrev: prevMatch,
     handleClear,
     getCurrentMatchId,
+    handleToggleFuzzy: toggleFuzzy,
   };
 };

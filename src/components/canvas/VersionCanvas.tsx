@@ -56,11 +56,13 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
     currentIndex,
     total,
     isActive: searchActive,
+    fuzzy: versionSearchFuzzy,
     handleQueryChange,
     handleNext,
     handlePrev,
     handleClear,
     getCurrentMatchId,
+    handleToggleFuzzy,
   } = useVersionSearch();
 
   // Canvas焦点状态跟踪
@@ -381,6 +383,8 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
               onPrev={handlePrev}
               onClear={handleClear}
               onClose={handleCloseSearch}
+              fuzzy={versionSearchFuzzy}
+              onToggleFuzzy={handleToggleFuzzy}
             />
           </div>
         )}

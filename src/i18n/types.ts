@@ -200,6 +200,8 @@ export interface TranslationData {
       nextResult: string;
       clearSearch: string;
       closeSearch: string;
+      fuzzySearchOn: string;
+      fuzzySearchOff: string;
       compare: string;
       exitCompare: string;
       enterCompare: string;

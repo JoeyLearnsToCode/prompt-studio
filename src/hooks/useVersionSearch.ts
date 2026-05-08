@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useVersionSearchStore } from '@/store/versionSearchStore';
 import { useVersionStore } from '@/store/versionStore';
 
@@ -9,14 +9,24 @@ export const useVersionSearch = () => {
     currentIndex,
     total,
     isActive,
+    fuzzy,
     setQuery,
     executeSearch,
     nextMatch,
     prevMatch,
     clearSearch,
+    toggleFuzzy,
   } = useVersionSearchStore();
 
   const { versions } = useVersionStore();
+
+  const prevFuzzy = useRef(fuzzy);
+  useEffect(() => {
+    if (prevFuzzy.current !== fuzzy && query.trim()) {
+      executeSearch(versions, query);
+    }
+    prevFuzzy.current = fuzzy;
+  }, [fuzzy, query, versions, executeSearch]);
 
   const handleQueryChange = useCallback(
     (newQuery: string) => {
@@ -57,6 +67,7 @@ export const useVersionSearch = () => {
     currentIndex,
     total,
     isActive,
+    fuzzy,
     handleQueryChange,
     handleNext: nextMatch,
     handlePrev: prevMatch,
@@ -64,5 +75,6 @@ export const useVersionSearch = () => {
     getCurrentMatchId,
     isVersionMatched,
     isCurrentMatch,
+    handleToggleFuzzy: toggleFuzzy,
   };
 };

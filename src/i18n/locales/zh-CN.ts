@@ -148,6 +148,8 @@ export const zhCN: TranslationData = {
       nextResult: '下一个结果 (Enter)',
       clearSearch: '清空搜索',
       closeSearch: '关闭搜索 (ESC)',
+      fuzzySearchOn: '模糊搜索已开启',
+      fuzzySearchOff: '模糊搜索已关闭，点击开启',
       compare: '对比',
       exitCompare: '退出对比',
       enterCompare: '点击对比进入对比选择模式',

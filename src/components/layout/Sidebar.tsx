@@ -24,11 +24,13 @@ export const Sidebar: React.FC = () => {
     currentIndex,
     total,
     isActive: searchActive,
+    fuzzy: globalSearchFuzzy,
     handleQueryChange,
     handleNext,
     handlePrev,
     handleClear,
     getCurrentMatchId,
+    handleToggleFuzzy,
   } = useGlobalSearch();
 
   const { selectProject: selectProjectAction, expandFolderPathToProject } = useProjectStore();
@@ -148,6 +150,8 @@ export const Sidebar: React.FC = () => {
               onPrev={handlePrev}
               onClear={handleClear}
               onClose={handleCloseSearch}
+              fuzzy={globalSearchFuzzy}
+              onToggleFuzzy={handleToggleFuzzy}
             />
           </div>
         )}
