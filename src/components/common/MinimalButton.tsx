@@ -9,8 +9,16 @@ interface MinimalButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const MinimalButton = forwardRef<HTMLButtonElement, MinimalButtonProps>(
   ({ variant = 'default', children, className = '', ...props }, ref) => {
+    // 手感：按下 90ms（跟手），松开走 160ms 的软着陆 —— 按压缩放必须被过渡覆盖，否则是硬切
+    // 焦点环取代 focus:outline-none，键盘可达性不能被视觉统一牺牲
     const baseClasses =
-      'inline-flex items-center justify-center rounded-lg transition-colors duration-200 font-medium focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-95';
+      'inline-flex items-center justify-center rounded-lg font-medium outline-none ' +
+      'transition-[transform,background-color,color,border-color,box-shadow,opacity] ' +
+      'duration-fast ease-out-expo ' +
+      'active:duration-instant active:scale-[0.97] ' +
+      'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ' +
+      'focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-1 ' +
+      'focus-visible:ring-offset-background dark:focus-visible:ring-offset-background-dark';
 
     const variantClasses = {
       // 默认按钮: 实心灰/米色, 无边框.

@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useProjectStore } from '@/store/projectStore';
 import { useUiStore } from '@/store/uiStore';
+import { duration, ease } from '@/styles/motion';
 import type { Folder } from '@/models/Folder';
 import type { Project } from '@/models/Project';
 import { ContextMenu, type ContextMenuItem } from '@/components/common/ContextMenu';
@@ -84,13 +86,16 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   // - Hover: Light background hover
   return (
     <div className="relative group my-0.5">
-      {isSelected && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full" />
-      )}
+      {/* 选中条从中心长出来，而不是凭空出现 */}
+      <div
+        className={`absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full origin-center transition-transform duration-fast ease-out-expo ${
+          isSelected ? 'scale-y-100' : 'scale-y-0'
+        }`}
+      />
       <div
         className={`
           flex items-center gap-2 px-3 py-2 cursor-pointer rounded-lg mx-1
-          transition-all duration-150 text-sm
+          transition-colors duration-fast text-sm
           ${
             isSelected
               ? 'bg-primary/10 text-primary font-medium'
@@ -232,31 +237,39 @@ const FolderItem: React.FC<TreeItemProps> = ({
         <span className="text-xs text-text-light-primary/70 dark:text-text-dark-primary/70">{getAllProjectsCount}</span>
       </div>
 
-      {isExpanded && (
-        <div>
-          {childFolders.map((childFolder) => (
-            <FolderItem
-              key={childFolder.id}
-              folder={childFolder}
-              level={level + 1}
-              onContextMenu={onContextMenu}
-              onToggle={onToggle}
-              expanded={expanded}
-              onProjectDrop={onProjectDrop}
-              onCloseAllMenus={onCloseAllMenus}
-            />
-          ))}
-          {childProjects.map((project) => (
-            <ProjectItemConnected
-              key={project.id}
-              project={project}
-              level={level + 1}
-              onCloseAllMenus={onCloseAllMenus}
-              onContextMenu={(e, item) => onContextMenu(e, item)}
-            />
-          ))}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: duration.standard, ease: ease.outExpo }}
+            className="overflow-hidden"
+          >
+            {childFolders.map((childFolder) => (
+              <FolderItem
+                key={childFolder.id}
+                folder={childFolder}
+                level={level + 1}
+                onContextMenu={onContextMenu}
+                onToggle={onToggle}
+                expanded={expanded}
+                onProjectDrop={onProjectDrop}
+                onCloseAllMenus={onCloseAllMenus}
+              />
+            ))}
+            {childProjects.map((project) => (
+              <ProjectItemConnected
+                key={project.id}
+                project={project}
+                level={level + 1}
+                onCloseAllMenus={onCloseAllMenus}
+                onContextMenu={(e, item) => onContextMenu(e, item)}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

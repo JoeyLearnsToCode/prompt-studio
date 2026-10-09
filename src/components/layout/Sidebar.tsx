@@ -1,6 +1,8 @@
 import React, { HTMLAttributes, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useProjectStore } from '@/store/projectStore';
 import { useUiStore } from '@/store/uiStore';
+import { duration, ease } from '@/styles/motion';
 import { Icons } from '@/components/icons/Icons';
 import { FolderTree } from './FolderTree';
 import { GlobalSearchBar } from './GlobalSearchBar';
@@ -91,77 +93,83 @@ export const Sidebar: React.FC = () => {
     }
   };
 
-  if (sidebarCollapsed && !sidebarTemporarilyExpanded) {
-    return null;
-  }
+  const isCollapsed = sidebarCollapsed && !sidebarTemporarilyExpanded;
 
   return (
-    <aside
-      ref={sidebarRef}
-      className="w-64 min-w-[200px] flex flex-col gap-2 shrink-0"
-      tabIndex={-1}
-      onFocus={() => setSidebarFocused(true)}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) {
-          setSidebarFocused(false);
-        }
-      }}
-    >
-      {/* Sidebar Header Card */}
-      <div className="bg-surface dark:bg-surface-dark rounded-xl px-4 shadow-card border border-border dark:border-border-dark flex items-center justify-between h-16 shrink-0">
-        <h2 className="font-bold text-surface-onSurface dark:text-surface-onSurfaceDark">
-          {t('components.sidebar.projects')}
-        </h2>
-        <SidebarToggle />
-      </div>
-
-      {/* Projects List Card */}
-      <div className="flex-1 bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark overflow-y-auto p-1 flex flex-col">
-        {/* Action Buttons */}
-        <div className="flex gap-2 mb-1 p-2">
-          <MinimalButton
-            variant="default"
-            onClick={handleCreateFolder}
-            className="flex-1 gap-2 py-2 text-sm"
-            title={t('components.sidebar.createFolder')}
-          >
-            <Icons.FolderPlus size={20} />
-          </MinimalButton>
-          <MinimalButton
-            variant="default"
-            onClick={handleCreateProject}
-            className="flex-1 gap-2 py-2 text-sm"
-            title={t('components.sidebar.createProject')}
-          >
-            <Icons.FilePlus size={20} />
-          </MinimalButton>
+    <AnimatePresence initial={false}>
+      {!isCollapsed && (
+        <motion.aside
+          ref={sidebarRef}
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: '16rem', opacity: 1 }}
+          exit={{ width: 0, opacity: 0 }}
+          transition={{ duration: duration.standard, ease: ease.outExpo }}
+          className="flex flex-col gap-2 shrink-0 overflow-hidden"
+          tabIndex={-1}
+          onFocus={() => setSidebarFocused(true)}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+              setSidebarFocused(false);
+            }
+          }}
+        >
+        {/* Sidebar Header Card */}
+        <div className="bg-surface dark:bg-surface-dark rounded-xl px-4 shadow-card border border-border dark:border-border-dark flex items-center justify-between h-16 shrink-0">
+          <h2 className="font-bold text-surface-onSurface dark:text-surface-onSurfaceDark">
+            {t('components.sidebar.projects')}
+          </h2>
+          <SidebarToggle />
         </div>
 
-        {/* Global Search Bar */}
-        {searchVisible && (
-          <div className="px-1 pb-1">
-            <GlobalSearchBar
-              ref={searchInputRef}
-              query={query}
-              currentIndex={currentIndex}
-              total={total}
-              onQueryChange={handleQueryChange}
-              onNext={handleNext}
-              onPrev={handlePrev}
-              onClear={handleClear}
-              onClose={handleCloseSearch}
-              fuzzy={globalSearchFuzzy}
-              onToggleFuzzy={handleToggleFuzzy}
-            />
+        {/* Projects List Card */}
+        <div className="flex-1 bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark overflow-y-auto p-1 flex flex-col">
+          {/* Action Buttons */}
+          <div className="flex gap-2 mb-1 p-2">
+            <MinimalButton
+              variant="default"
+              onClick={handleCreateFolder}
+              className="flex-1 gap-2 py-2 text-sm"
+              title={t('components.sidebar.createFolder')}
+            >
+              <Icons.FolderPlus size={20} />
+            </MinimalButton>
+            <MinimalButton
+              variant="default"
+              onClick={handleCreateProject}
+              className="flex-1 gap-2 py-2 text-sm"
+              title={t('components.sidebar.createProject')}
+            >
+              <Icons.FilePlus size={20} />
+            </MinimalButton>
           </div>
-        )}
 
-        {/* Tree */}
-        <div className="flex-1">
-          <FolderTree />
+          {/* Global Search Bar */}
+          {searchVisible && (
+            <div className="px-1 pb-1">
+              <GlobalSearchBar
+                ref={searchInputRef}
+                query={query}
+                currentIndex={currentIndex}
+                total={total}
+                onQueryChange={handleQueryChange}
+                onNext={handleNext}
+                onPrev={handlePrev}
+                onClear={handleClear}
+                onClose={handleCloseSearch}
+                fuzzy={globalSearchFuzzy}
+                onToggleFuzzy={handleToggleFuzzy}
+              />
+            </div>
+          )}
+
+          {/* Tree */}
+          <div className="flex-1">
+            <FolderTree />
+          </div>
         </div>
-      </div>
-    </aside>
+        </motion.aside>
+      )}
+    </AnimatePresence>
   );
 };
 

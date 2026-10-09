@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { duration, ease } from '@/styles/motion';
 import { useVersionStore } from '@/store/versionStore';
+import { ScoreRating } from './ScoreRating';
 import { Icons } from '@/components/icons/Icons';
 import { useTranslation } from '@/i18n/I18nContext';
 import { MinimalButton } from '@/components/common/MinimalButton';
@@ -28,10 +30,6 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
   const [localScore, setLocalScore] = useState(score);
   const [localNotes, setLocalNotes] = useState(notes);
   const [isSaving, setIsSaving] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-
-  // 使用 ref 追踪最新的分数，以便在闭包中使用
-  const localScoreRef = useRef(localScore);
 
   // 同步外部 props 变化
   useEffect(() => {
@@ -41,10 +39,6 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
   useEffect(() => {
     setLocalNotes(notes);
   }, [notes]);
-
-  useEffect(() => {
-    localScoreRef.current = localScore;
-  }, [localScore]);
 
   const saveScore = async (newScore: number) => {
     if (readonly) return;
@@ -61,40 +55,26 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
     }
   };
 
-  const handleMouseDown = (num: number) => {
+  // 拖动过程中只更新显示，不落库
+  const handleScrub = (newScore: number) => {
     if (readonly || isSaving) return;
-    setIsDragging(true);
-    setLocalScore(num);
+    setLocalScore(newScore);
   };
 
-  const handleMouseEnter = (num: number) => {
-    if (isDragging && !readonly && !isSaving) {
-      setLocalScore(num);
+  // 松手 / 单击 / 键盘：分数落定才保存
+  const handleCommit = (newScore: number) => {
+    if (readonly || isSaving) return;
+    setLocalScore(newScore);
+    if (newScore !== score) {
+      saveScore(newScore);
     }
   };
 
-  // 处理直接点击清除按钮的情况
   const handleClearScore = () => {
     if (readonly || isSaving) return;
     setLocalScore(0);
     saveScore(0);
   };
-
-  // 全局鼠标释放监听，用于结束拖拽并保存
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handleGlobalMouseUp = () => {
-      setIsDragging(false);
-      // 拖拽结束时保存最终的分数
-      if (localScoreRef.current !== score) {
-        saveScore(localScoreRef.current);
-      }
-    };
-
-    document.addEventListener('mouseup', handleGlobalMouseUp);
-    return () => document.removeEventListener('mouseup', handleGlobalMouseUp);
-  }, [isDragging, score]); // 依赖 score 用于比较是否变化
 
   const handleNotesBlur = async () => {
     if (readonly || localNotes === notes) return;
@@ -169,15 +149,19 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            transition={{ duration: duration.fast, ease: ease.outExpo }}
+            // 全屏 backdrop-blur 会在淡入的每一帧重算模糊，在编辑器页面上非常卡，去掉
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
             onClick={(e: React.MouseEvent) => {
               if (e.target === e.currentTarget) setIsModalOpen(false);
             }}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              // 位移代替缩放：scale 会让整块内容每帧重新栅格化
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 6, opacity: 0 }}
+              transition={{ duration: duration.standard, ease: ease.outExpo }}
               className="bg-surface dark:bg-surface-dark rounded-2xl shadow-elevation-3 w-full max-w-lg mx-4 overflow-hidden border border-border/50 dark:border-border-dark"
             >
               {/* Header */}
@@ -199,41 +183,37 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
               {/* Content */}
               <div className="p-6 space-y-6">
                 {/* 评分区域 */}
-                <div>
-                  <div className="flex items-center justify-center gap-1.5 flex-wrap sm:flex-nowrap select-none">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                      <button
-                        key={num}
-                        onMouseDown={() => handleMouseDown(num)}
-                        onMouseEnter={() => handleMouseEnter(num)}
-                        disabled={readonly || isSaving}
-                        className={`
-                          w-9 h-9 rounded-lg text-sm font-bold transition-all flex-shrink-0
-                          border border-transparent
-                          ${
-                            num <= localScore
-                              ? `bg-primary-hover/60 text-onPrimary shadow-sm transform scale-105`
-                              : 'bg-surface-containerHighest/60 dark:bg-surface-variantDark text-surface-onVariant dark:text-surface-onVariantDark hover:bg-surface-container-high dark:hover:bg-zinc-600'
-                          }
-                          ${readonly || isSaving ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-                        `}
-                        aria-label={`评分 ${num}`}
-                      >
-                        {num}
-                      </button>
-                    ))}
+                <div className="space-y-3">
+                  <ScoreRating
+                    value={localScore}
+                    onScrub={handleScrub}
+                    onCommit={handleCommit}
+                    readonly={readonly}
+                    disabled={isSaving}
+                    ariaLabel={t('components.compareModal.score')}
+                  />
 
-                    {/* 清除评分按钮 */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-baseline gap-1 text-surface-onSurface dark:text-surface-onSurfaceDark">
+                      <span className="text-2xl tabular-nums">
+                        {localScore > 0 ? (<p font-bold>{localScore}</p>) : '-'}
+                      </span>
+                      <span className="text-xs text-surface-onVariant dark:text-surface-onVariantDark">
+                        /10
+                      </span>
+                    </div>
+
                     {!readonly && (
                       <MinimalButton
                         variant="danger"
                         onClick={handleClearScore}
                         disabled={isSaving}
-                        className="w-9 h-9 p-0 flex-shrink-0 ml-2"
+                        className="px-3 py-1.5 text-sm gap-1.5"
                         title={t('components.versionMeta.clearScore')}
                         aria-label={t('components.versionMeta.clearScore')}
                       >
-                        <Icons.Trash size={16} />
+                        <Icons.Sweep size={14} />
+                        {t('components.versionMeta.clearScore')}
                       </MinimalButton>
                     )}
                   </div>

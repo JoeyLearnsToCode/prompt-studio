@@ -82,6 +82,9 @@ export const SearchMinusIcon: React.FC<IconProps> = (props) => (
 export const TrashIcon: React.FC<IconProps> = (props) => (
   <MaterialSymbol name="delete" {...props} />
 );
+export const SweepIcon: React.FC<IconProps> = (props) => (
+  <MaterialSymbol name="delete_sweep" {...props} />
+);
 
 // 编辑图标
 export const EditIcon: React.FC<IconProps> = (props) => <MaterialSymbol name="edit" {...props} />;
@@ -231,6 +234,7 @@ export const Icons = {
   SearchPlus: SearchPlusIcon,
   SearchMinus: SearchMinusIcon,
   Trash: TrashIcon,
+  Sweep: SweepIcon,
   Edit: EditIcon,
   Eye: EyeIcon,
   Note: NoteIcon,

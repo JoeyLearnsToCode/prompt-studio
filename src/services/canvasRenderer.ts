@@ -5,6 +5,7 @@
 
 import type { Version } from '@/models/Version';
 import { colors } from '@/styles/tokens';
+import { followRate, followTo, prefersReducedMotion } from '@/styles/motion';
 import { buildVersionTree, calculateTreeLayout, type VersionTreeNode } from '@/utils/tree';
 
 export interface CanvasNode {
@@ -27,9 +28,17 @@ export class CanvasRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private transform: CanvasTransform = { x: 0, y: 0, scale: 1 };
+  /** 视口的去向：拖拽直接同步两者（1:1 跟手），离散指令只改目标再滑过去 */
+  private targetTransform: CanvasTransform = { x: 0, y: 0, scale: 1 };
   private nodes: CanvasNode[] = [];
   private selectedNodeId: string | null = null;
+  private hoveredNodeId: string | null = null;
+  /** 每个节点自己的 hover 进度，逐个缓动，避免整棵树同频闪动 */
+  private hoverProgress = new Map<string, number>();
   private resizeTimer: number | null = null;
+  private rafId: number | null = null;
+  private lastFrameTime = 0;
+  private disposed = false;
 
   // 🟢 手动微调：修改此数值改变连线圆角的大小 (默认 12)
   private cornerRadius = 12;
@@ -91,6 +100,10 @@ export class CanvasRenderer {
     }
   }
 
+  /**
+   * 节流重算尺寸。尾部补一次：面板展开/收起的过渡结束后，
+   * 最后一次尺寸变化不能被节流窗口吃掉，否则画布会停在中间尺寸上。
+   */
   resizeCanvas() {
     if (this.resizeTimer !== null) {
       return;
@@ -98,6 +111,7 @@ export class CanvasRenderer {
     this.performResize();
     this.resizeTimer = window.setTimeout(() => {
       this.resizeTimer = null;
+      if (!this.disposed) this.performResize();
     }, 150);
   }
 
@@ -269,6 +283,11 @@ export class CanvasRenderer {
   private drawNode(node: CanvasNode) {
     const { ctx } = this;
     const isSelected = node.id === this.selectedNodeId;
+    const hover = this.hoverProgress.get(node.id) ?? 0;
+
+    // hover 抬升：1.5px 的位移 + 阴影加深，够看出"这是个可点的东西"就够了
+    ctx.save();
+    ctx.translate(0, -1.5 * hover);
 
     // Background
     if (isSelected) {
@@ -279,13 +298,8 @@ export class CanvasRenderer {
 
     const isDark = document.documentElement.classList.contains('dark');
     ctx.shadowColor = isDark ? colors.border.dark : colors.border.DEFAULT;
-    if (!isSelected) {
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetY = 2;
-    } else {
-      ctx.shadowBlur = 8;
-      ctx.shadowOffsetY = 4;
-    }
+    ctx.shadowBlur = (isSelected ? 8 : 4) + 8 * hover;
+    ctx.shadowOffsetY = (isSelected ? 4 : 2) + 3 * hover;
 
     this.roundRect(ctx, node.x, node.y, node.width, node.height, 8); // 8px radius
     ctx.fill();
@@ -300,6 +314,16 @@ export class CanvasRenderer {
       ctx.strokeStyle = this.themeColors.outline;
       ctx.lineWidth = 1;
       ctx.stroke();
+
+      // hover 时在描边上叠一层主色，用透明度做交叉淡入，免得手写颜色插值
+      if (hover > 0.001) {
+        ctx.save();
+        ctx.globalAlpha = hover;
+        ctx.strokeStyle = this.themeColors.primary;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+      }
     }
 
     // Text Color
@@ -405,6 +429,8 @@ export class CanvasRenderer {
         currentLineIndex++;
       }
     }
+
+    ctx.restore();
   }
 
   /**
@@ -433,27 +459,42 @@ export class CanvasRenderer {
 
   setTransform(transform: Partial<CanvasTransform>) {
     this.transform = { ...this.transform, ...transform };
+    this.targetTransform = { ...this.transform };
     this.draw();
   }
 
+  /**
+   * 缩放：目标累加、焦点保持，然后滑过去。
+   * 连续滚轮会不断抬高目标，当前值持续追随，天然形成惯性。
+   */
   zoom(delta: number, centerX: number, centerY: number) {
-    const newScale = Math.max(0.1, Math.min(3, this.transform.scale + delta));
-    const scaleDiff = newScale - this.transform.scale;
-    this.transform.x -= centerX * scaleDiff;
-    this.transform.y -= centerY * scaleDiff;
-    this.transform.scale = newScale;
-    this.draw();
+    const from = this.targetTransform.scale;
+    const to = Math.max(0.1, Math.min(3, from + delta));
+    const ratio = to / from;
+    this.targetTransform.x = centerX - (centerX - this.targetTransform.x) * ratio;
+    this.targetTransform.y = centerY - (centerY - this.targetTransform.y) * ratio;
+    this.targetTransform.scale = to;
+    this.startAnimation();
   }
 
+  /** 拖拽平移必须 1:1：当前值与目标一起走，不引入任何滞后 */
   pan(dx: number, dy: number) {
     this.transform.x += dx;
     this.transform.y += dy;
+    this.targetTransform.x = this.transform.x;
+    this.targetTransform.y = this.transform.y;
     this.draw();
   }
 
   selectNode(nodeId: string | null) {
     this.selectedNodeId = nodeId;
     this.draw();
+  }
+
+  setHoveredNode(nodeId: string | null) {
+    if (this.hoveredNodeId === nodeId) return;
+    this.hoveredNodeId = nodeId;
+    this.startAnimation();
   }
 
   hitTest(x: number, y: number): string | null {
@@ -484,18 +525,12 @@ export class CanvasRenderer {
   }
 
   resetView() {
-    this.transform = { x: 0, y: 0, scale: 1 };
-    this.draw();
+    this.targetTransform = { x: 0, y: 0, scale: 1 };
+    this.startAnimation();
   }
 
   centerNode(nodeId: string) {
-    const node = this.flattenNodes().find((n) => n.id === nodeId);
-    if (!node) return;
-    const centerX = this.canvas.width / 2;
-    const centerY = this.canvas.height / 2;
-    this.transform.x = centerX - (node.x + node.width / 2) * this.transform.scale;
-    this.transform.y = centerY - (node.y + node.height / 2) * this.transform.scale;
-    this.draw();
+    this.centerNodeAtPosition(nodeId);
   }
 
   centerNodeAtPosition(nodeId: string, xRatio: number = 0.5, yRatio: number = 0.5) {
@@ -505,10 +540,96 @@ export class CanvasRenderer {
     const width = this.canvas.width / (window.devicePixelRatio || 1);
     const height = this.canvas.height / (window.devicePixelRatio || 1);
 
-    const targetX = width * xRatio;
-    const targetY = height * yRatio;
-    this.transform.x = targetX - (node.x + node.width / 2) * this.transform.scale;
-    this.transform.y = targetY - (node.y + node.height / 2) * this.transform.scale;
+    const scale = this.targetTransform.scale;
+    this.targetTransform.x = width * xRatio - (node.x + node.width / 2) * scale;
+    this.targetTransform.y = height * yRatio - (node.y + node.height / 2) * scale;
+    this.startAnimation();
+  }
+
+  /**
+   * 帧率无关的指数跟随。视口平移/缩放走同一套 k，
+   * 缩放走对数空间，否则放大和缩小的手感不对称。
+   */
+  private startAnimation() {
+    if (prefersReducedMotion() || this.disposed) {
+      this.settle();
+      return;
+    }
+    if (this.rafId !== null) return;
+    this.lastFrameTime = performance.now();
+    this.rafId = requestAnimationFrame(this.tick);
+  }
+
+  private settle() {
+    this.transform = { ...this.targetTransform };
+    this.syncHoverProgress(1);
     this.draw();
+  }
+
+  private syncHoverProgress(step: number) {
+    this.hoverProgress.clear();
+    if (this.hoveredNodeId) {
+      this.hoverProgress.set(this.hoveredNodeId, step);
+    }
+  }
+
+  private tick = (now: number) => {
+    this.rafId = null;
+    // dt 上限 1/30s：切标签页回来时不要一帧跳完
+    const dt = Math.min(Math.max(now - this.lastFrameTime, 0) / 1000, 1 / 30);
+    this.lastFrameTime = now;
+
+    const k = followRate.viewport;
+    const from = Math.log(this.transform.scale);
+    const to = Math.log(this.targetTransform.scale);
+
+    this.transform.x = followTo(this.transform.x, this.targetTransform.x, k, dt);
+    this.transform.y = followTo(this.transform.y, this.targetTransform.y, k, dt);
+    this.transform.scale = Math.exp(followTo(from, to, k, dt));
+
+    const done =
+      Math.abs(this.transform.x - this.targetTransform.x) < 0.1 &&
+      Math.abs(this.transform.y - this.targetTransform.y) < 0.1 &&
+      Math.abs(from - to) < 0.0005;
+    if (done) {
+      this.transform.x = this.targetTransform.x;
+      this.transform.y = this.targetTransform.y;
+      this.transform.scale = this.targetTransform.scale;
+    }
+
+    let hoverSettled = true;
+    for (const node of this.flattenNodes()) {
+      const current = this.hoverProgress.get(node.id) ?? 0;
+      const target = node.id === this.hoveredNodeId ? 1 : 0;
+      if (Math.abs(current - target) < 0.002) {
+        if (target === 0) this.hoverProgress.delete(node.id);
+        else this.hoverProgress.set(node.id, target);
+        continue;
+      }
+      hoverSettled = false;
+      this.hoverProgress.set(
+        node.id,
+        followTo(current, target, followRate.hover, dt)
+      );
+    }
+
+    this.draw();
+
+    if (!done || !hoverSettled) {
+      this.rafId = requestAnimationFrame(this.tick);
+    }
+  };
+
+  /** 释放动画循环，组件卸载时必须调用 */
+  dispose() {
+    this.disposed = true;
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+    if (this.resizeTimer !== null) {
+      window.clearTimeout(this.resizeTimer);
+      this.resizeTimer = null;
+    }
   }
 }

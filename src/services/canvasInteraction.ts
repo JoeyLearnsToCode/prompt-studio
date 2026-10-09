@@ -36,7 +36,10 @@ export class CanvasInteraction {
     this.canvas.addEventListener('mousedown', this.handleMouseDown);
     this.canvas.addEventListener('mousemove', this.handleMouseMove);
     this.canvas.addEventListener('mouseup', this.handleMouseUp);
+    this.canvas.addEventListener('mouseleave', this.handleMouseLeave);
     this.canvas.addEventListener('wheel', this.handleWheel);
+    // 基础光标是 grab：画布可拖动这件事要被看见，而不是靠猜
+    this.canvas.style.cursor = 'grab';
 
     // 触摸事件（移动端）
     this.canvas.addEventListener('touchstart', this.handleTouchStart);
@@ -47,10 +50,14 @@ export class CanvasInteraction {
   /**
    * 鼠标按下
    */
-  private handleMouseDown = (e: MouseEvent) => {
+  /** 事件坐标 → 画布本地坐标 */
+  private localPoint(e: MouseEvent) {
     const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
+  private handleMouseDown = (e: MouseEvent) => {
+    const { x, y } = this.localPoint(e);
 
     // 检测节点点击
     const nodeId = this.renderer.hitTest(x, y);
@@ -76,7 +83,14 @@ export class CanvasInteraction {
    * 鼠标移动
    */
   private handleMouseMove = (e: MouseEvent) => {
-    if (!this.isDragging) return;
+    if (!this.isDragging) {
+      // 悬停反馈：节点是可点的，光标和描边要同时说出来
+      const { x, y } = this.localPoint(e);
+      const nodeId = this.renderer.hitTest(x, y);
+      this.renderer.setHoveredNode(nodeId);
+      this.canvas.style.cursor = nodeId ? 'pointer' : 'grab';
+      return;
+    }
 
     const dx = e.clientX - this.dragStartX;
     const dy = e.clientY - this.dragStartY;
@@ -85,6 +99,10 @@ export class CanvasInteraction {
 
     this.dragStartX = e.clientX;
     this.dragStartY = e.clientY;
+  };
+
+  private handleMouseLeave = () => {
+    this.renderer.setHoveredNode(null);
   };
 
   /**
@@ -116,7 +134,7 @@ export class CanvasInteraction {
     if (!this.isDragging) return;
 
     this.isDragging = false;
-    this.canvas.style.cursor = 'default';
+    this.canvas.style.cursor = 'grab';
 
     // 移除全局事件监听器
     document.removeEventListener('mousemove', this.handleGlobalMouseMove);
@@ -184,6 +202,7 @@ export class CanvasInteraction {
     this.canvas.removeEventListener('mousedown', this.handleMouseDown);
     this.canvas.removeEventListener('mousemove', this.handleMouseMove);
     this.canvas.removeEventListener('mouseup', this.handleMouseUp);
+    this.canvas.removeEventListener('mouseleave', this.handleMouseLeave);
     this.canvas.removeEventListener('wheel', this.handleWheel);
     this.canvas.removeEventListener('touchstart', this.handleTouchStart);
     this.canvas.removeEventListener('touchmove', this.handleTouchMove);

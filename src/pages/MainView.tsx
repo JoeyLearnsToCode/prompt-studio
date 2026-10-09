@@ -43,10 +43,16 @@ const MainView: React.FC = () => {
     setEditorHeightRatio,
     startDragging,
     stopDragging,
+    isDraggingSplitter,
     sidebarCollapsed,
     sidebarTemporarilyExpanded,
     setTemporarilyExpanded,
   } = useUiStore();
+
+  // 拖动分隔条时必须 1:1，过渡只在松手后的折叠/展开里出现
+  const panelMotion = isDraggingSplitter
+    ? ''
+    : 'transition-[width,height,opacity,border-width] duration-standard ease-out-expo';
 
   const [editorContent, setEditorContent] = useState('');
   const [versionName, setVersionName] = useState('');
@@ -308,7 +314,7 @@ const MainView: React.FC = () => {
         <div className="flex-1 flex overflow-hidden w-0 min-w-0" ref={mainSplitContainerRef}>
           {/* 中央编辑区 */}
           <div
-            className="flex flex-col gap-2"
+            className={`flex flex-col gap-2 ${panelMotion}`}
             style={{
               width: isRightPanelCollapsed
                 ? '100%'
@@ -408,7 +414,7 @@ const MainView: React.FC = () => {
               {currentProjectId ? (
                 <>
                   <div
-                    className="overflow-hidden bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col relative"
+                    className={`overflow-hidden bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col relative ${panelMotion}`}
                     style={{
                       height: isBottomPanelCollapsed
                         ? '100%'
@@ -447,34 +453,40 @@ const MainView: React.FC = () => {
                   {currentVersionId && (
                     <div
                       className={`
-                        bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark p-4 flex flex-col
+                        bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col overflow-hidden ${panelMotion}
                         ${isDraggingAttachments ? 'ring-2 ring-primary bg-primary/5' : ''}
                       `}
                       style={{
                         height: isBottomPanelCollapsed
                           ? '0px'
                           : `${(1 - layoutPreference.editorHeightRatio) * 100}%`,
-                        display: isBottomPanelCollapsed ? 'none' : 'flex',
+                        // 收到 0 时连边框一起收掉，否则会剩一条 2px 的线
+                        borderWidth: isBottomPanelCollapsed ? 0 : 1,
+                        opacity: isBottomPanelCollapsed ? 0 : 1,
                       }}
                       onDrop={handleAttachmentDrop}
                       onDragOver={handleAttachmentDragOver}
                       onDragLeave={handleAttachmentDragLeave}
                     >
-                      <div className="flex items-center gap-2 mb-3">
-                        <Icons.Attachment size={16} className="text-surface-onVariant" />
-                        <h3 className="text-xs tracking-wider font-bold text-surface-onVariant uppercase">
-                          {t('pages.mainView.attachments')}
-                        </h3>
-                      </div>
+                      {/* 内边距放在内层：border-box 的 height:0 撑不过 padding，
+                          留在外层会在收起后留下一条 32px 的空白 */}
+                      <div className="p-4 flex flex-col flex-1 min-h-0">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Icons.Attachment size={16} className="text-surface-onVariant" />
+                          <h3 className="text-xs tracking-wider font-bold text-surface-onVariant uppercase">
+                            {t('pages.mainView.attachments')}
+                          </h3>
+                        </div>
 
-                      <div className="flex-1 overflow-y-auto">
-                        <AttachmentGallery
-                          versionId={currentVersionId}
-                          attachments={attachments}
-                          onAttachmentsChange={() => loadAttachments(currentVersionId)}
-                          readonly={false}
-                          onUpload={handleUploadFiles}
-                        />
+                        <div className="flex-1 overflow-y-auto">
+                          <AttachmentGallery
+                            versionId={currentVersionId}
+                            attachments={attachments}
+                            onAttachmentsChange={() => loadAttachments(currentVersionId)}
+                            readonly={false}
+                            onUpload={handleUploadFiles}
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
@@ -505,12 +517,13 @@ const MainView: React.FC = () => {
 
           {/* Right Canvas Area - Card Style */}
           <div
-            className="overflow-hidden bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col relative"
+            className={`overflow-hidden bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col relative ${panelMotion}`}
             style={{
               width: isRightPanelCollapsed
                 ? '0px'
                 : `${(1 - layoutPreference.canvasPanelWidthRatio) * 100}%`,
-              display: isRightPanelCollapsed ? 'none' : 'flex',
+              borderWidth: isRightPanelCollapsed ? 0 : 1,
+              opacity: isRightPanelCollapsed ? 0 : 1,
             }}
           >
             <VersionCanvas

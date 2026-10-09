@@ -8,6 +8,30 @@
   box-sizing: border-box;
 }
 
+@layer base {
+  /*
+   * 全站默认缓动。选择器权重为 0，任何 ease-* 工具类都会覆盖它，
+   * 因此散落各处的 transition-colors duration-200 也能共享同一条曲线。
+   */
+  *,
+  *::before,
+  *::after {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* 减少动态效果：只保留状态变化，取消位移与时长 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   /* 使用 @apply 应用 Tailwind 类，支持暗色模式 */
   @apply bg-background text-surface-onSurface transition-colors duration-200;

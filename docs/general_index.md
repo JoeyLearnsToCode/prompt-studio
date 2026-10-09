@@ -60,6 +60,7 @@ src/
 |   |-- version/: 版本相关组件
 |   |   |-- AttachmentGallery.tsx: 附件画廊组件，支持图片/视频上传、预览、下载
 |   |   |-- CompareModal.tsx: 版本比较模态框组件，支持编辑
+|   |   |-- ScoreRating.tsx: 1~10 打分控件，指针横坐标驱动的单击/拖动评分，支持键盘
 |   |   |-- VersionCard.tsx: 版本卡片组件
 |   |   |-- VersionMetaCard.tsx: 版本元数据（评分、备注）卡片组件
 |-- i18n/: 国际化相关
@@ -107,7 +108,10 @@ src/
 |   |-- uiStore.ts: UI状态管理，包括布局偏好、折叠状态等
 |   |-- versionStore.ts: 版本状态管理，包含所有版本管理功能
 |-- styles/: 样式文件
-|   |-- globals.css: 全局样式文件，包含Material Design 3主题和Tailwind CSS配置
+|   |-- globals.css: 全局样式文件，包含Material Design 3主题、Tailwind CSS配置与全局动效基础（默认缓动、减少动态效果降级）
+|   |-- motion.ts: 动效 token（时长/缓动/弹簧/跟随系数）与帧率无关的指数跟随工具，是动效数值的唯一事实来源
+|   |-- tokens.js: 颜色系统的唯一事实来源，被 tailwind.config.js 与业务代码共同引用
+|   |-- tokens.d.ts: tokens.js 的类型声明
 |-- test/: 测试相关
 |   |-- setup.ts: 测试环境设置
 |-- utils/: 工具函数

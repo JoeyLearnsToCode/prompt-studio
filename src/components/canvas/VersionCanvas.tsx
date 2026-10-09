@@ -169,6 +169,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
 
     return () => {
       interaction.destroy();
+      renderer.dispose();
       window.removeEventListener('resize', handleResize);
       canvasRef.current?.removeEventListener('focus', handleCanvasFocus);
       canvasRef.current?.removeEventListener('blur', handleCanvasBlur);
@@ -267,17 +268,12 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   const handleResetView = () => {
     if (!rendererRef.current) return;
 
-    // 重置缩放和平移
+    // 重置缩放和平移。视口现在是跟随目标的，可以直接接着下一条定位指令
     rendererRef.current.resetView();
 
     // 如果有当前版本，定位到canvas正中间
     if (currentVersionId) {
-      // 使用 setTimeout 确保 resetView 完成后再定位
-      setTimeout(() => {
-        if (rendererRef.current) {
-          rendererRef.current.centerNodeAtPosition(currentVersionId, 0.5, 0.5);
-        }
-      }, 50);
+      rendererRef.current.centerNodeAtPosition(currentVersionId, 0.5, 0.5);
     }
   };
 

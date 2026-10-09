@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { duration, ease } from '@/styles/motion';
 import { Icons } from '@/components/icons/Icons';
 import { MinimalButton } from './MinimalButton';
 
@@ -53,7 +54,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.1 }}
+          transition={{ duration: duration.fast, ease: ease.outExpo }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm"
           onClick={onClose}
         >
@@ -105,9 +106,9 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
           <div className="w-full h-full flex items-center justify-center p-4 md:p-12">
             <motion.img
               key={imageUrl} // key 变化触发动画
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: duration.standard, ease: ease.outExpo }}
               src={imageUrl}
               alt={fileName || '预览'}
               className="max-w-full max-h-full object-contain shadow-2xl"

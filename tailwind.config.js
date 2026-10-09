@@ -12,6 +12,19 @@ export default {
       // 直接使用 tokens.js 中的颜色定义
       // Tailwind 会自动处理嵌套对象（如 primary.DEFAULT, surface.dark）
       colors: colors,
+      // 动效 token：数值与 src/styles/motion.ts 保持一致
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'in-expo': 'cubic-bezier(0.7, 0, 0.84, 0)',
+        'standard': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'snap': 'cubic-bezier(0, 0.55, 0.45, 1)',
+      },
+      transitionDuration: {
+        instant: '90ms',
+        fast: '160ms',
+        standard: '300ms',
+        gentle: '450ms',
+      },
       borderRadius: {
         'm3-small': '0.375rem',  // 6px
         'm3-medium': '0.5rem',   // 8px
