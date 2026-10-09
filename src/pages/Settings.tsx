@@ -127,7 +127,8 @@ const Settings: React.FC = () => {
   };
 
   const handleRestore = async (remotePath: string) => {
-    // 设置待处理的恢复路径并显示模式选择对话框
+    // 先关闭备份列表模态框，避免两个 Dialog 同时打开时点击被外层 Dialog 吞掉
+    setShowRestoreModal(false);
     setPendingRestorePath(remotePath);
     setShowImportModeDialog(true);
   };
