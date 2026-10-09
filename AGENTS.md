@@ -57,5 +57,5 @@
 
 - Playwright 检测到 `CI` 环境变量时不复用已有开发服务器
 - 自定义字体：Noto Sans SC（Google Fonts）+ Material Symbols，后备栈见 `tailwind.config.js`
-- 部署：Cloudflare Pages，`.github/workflows/deploy.yml`（pnpm 9、Node 22）
+- 部署：Cloudflare Pages，`.github/workflows/deploy.yml`（pnpm 11、Node 22）
 - 两套 ESLint 配置共存：`eslint.config.js`（扁平配置，当前使用）和 `.eslintrc.cjs`（旧版，已忽略）

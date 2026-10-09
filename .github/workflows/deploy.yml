@@ -24,7 +24,9 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          # 必须与本地大版本一致：pnpm-workspace.yaml 里的 allowBuilds 是 v10.26+ 的字段，
+          # pnpm 9 不认识它，并且会要求 workspace 文件必须带 packages 字段，导致命令直接报错
+          version: 11
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
