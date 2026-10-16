@@ -23,6 +23,7 @@ Prompt Studio 是一个AI提示词版本管理与编辑工具，以下是其代�
 | `.prettierrc` | Prettier代码格式化配置 |
 | `docs/` | 项目文档目录 |
 | `specs/` | 项目规格说明目录 |
+| `design/` | 视觉设计目录：`brief.md` 设计简报、`DESIGN-RECORD.md` 设计记录（种子、方向、评审历史、减法清单） |
 | `src/` | 源代码目录 |
 | `tests/` | 测试文件目录 |
 

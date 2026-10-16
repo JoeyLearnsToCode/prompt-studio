@@ -53,7 +53,11 @@ export function highlightMatches(text: string, query: string): string {
 
     // 添加高亮的匹配文本
     const matchedText = text.substring(index, index + query.length);
-    parts.push(`<mark class="bg-yellow-200">${escapeHtml(matchedText)}</mark>`);
+    // 命中高亮：印章色的浅底 + 细框，而不是记号笔的黄
+    parts.push(
+      // 命中走墨色（下划线 + 淡墨底），印章色留给"选中"独占，两者不抢同一通道
+      `<mark class="bg-masthead/10 dark:bg-masthead-on/15 text-surface-onSurface dark:text-surface-onSurfaceDark underline decoration-1 decoration-masthead/40 underline-offset-2 px-0.5">${escapeHtml(matchedText)}</mark>`
+    );
 
     lastIndex = index + query.length;
     index = lowerText.indexOf(lowerQuery, lastIndex);

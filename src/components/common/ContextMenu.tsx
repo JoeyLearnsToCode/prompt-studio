@@ -69,7 +69,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ isOpen, position, item
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.96 }}
           transition={{ duration: duration.instant, ease: ease.outExpo }}
-          className="fixed z-50 w-auto bg-surface-containerHighest/50 backdrop-blur-md rounded-m3-medium shadow-elevation-2 py-2"
+          // 右键菜单是浮层：纸底 + 框线 + 硬边阴影，不用 backdrop-blur
+          className="fixed z-50 w-auto paper rounded-md shadow-float border border-border dark:border-border-dark py-1"
           style={{
             left: `${adjustedPosition.x}px`,
             top: `${adjustedPosition.y}px`,

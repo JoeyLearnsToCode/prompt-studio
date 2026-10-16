@@ -109,24 +109,22 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
         title={localNotes || t('components.compareModal.score')}
         onClick={() => !readonly && setIsModalOpen(true)}
         className={`
-          relative group w-full h-full aspect-square rounded-xl overflow-hidden
+          relative group w-full h-full aspect-square rounded-md overflow-hidden
           border border-border dark:border-border-dark
-          bg-surface-container-low dark:bg-zinc-800/50
-          hover:border-primary hover:bg-primary/5
-          transition-all duration-200
+          bg-surface-container-low dark:bg-surface-container-low-dark
+          hover:border-primary dark:hover:border-primary
+          transition-colors duration-fast
           ${readonly ? 'cursor-default' : 'cursor-pointer'}
         `}
       >
         <div className="w-full h-full flex flex-col items-center justify-center p-4 gap-2">
-          {/* 图标 - 修复暗色模式下的颜色 */}
-          <div className="text-surface-onVariant dark:text-surface-onVariantDark/60 group-hover:text-primary transition-colors text-2xl sm:text-[28px]">
+          <div className="text-surface-onVariant dark:text-surface-onVariantDark group-hover:text-primary dark:group-hover:text-primary-darkAccent transition-colors text-2xl sm:text-[28px]">
             <Icons.Info size={20} />
           </div>
 
-          {/* 评分显示 - 修复暗色模式下的颜色 */}
-          <div className="text-sm font-medium text-surface-onSurface dark:text-surface-onSurfaceDark group-hover:text-primary transition-colors">
+          <div className="text-sm font-medium text-surface-onSurface dark:text-surface-onSurfaceDark group-hover:text-primary dark:group-hover:text-primary-darkAccent transition-colors">
             {localScore > 0 ? (
-              <span className="text-lg font-bold">
+              <span className="nums text-lg font-bold">
                 {localScore}
                 <span className="text-xs font-normal opacity-60">/10</span>
               </span>
@@ -151,7 +149,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: duration.fast, ease: ease.outExpo }}
             // 全屏 backdrop-blur 会在淡入的每一帧重算模糊，在编辑器页面上非常卡，去掉
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-masthead/50 dark:bg-black/70"
             onClick={(e: React.MouseEvent) => {
               if (e.target === e.currentTarget) setIsModalOpen(false);
             }}
@@ -162,12 +160,12 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 6, opacity: 0 }}
               transition={{ duration: duration.standard, ease: ease.outExpo }}
-              className="bg-surface dark:bg-surface-dark rounded-2xl shadow-elevation-3 w-full max-w-lg mx-4 overflow-hidden border border-border/50 dark:border-border-dark"
+              className="paper rounded-md shadow-float w-full max-w-lg mx-4 overflow-hidden border border-border dark:border-border-dark"
             >
               {/* Header */}
-              <div className="px-6 py-4 border-b border-border/50 dark:border-border-dark flex items-center justify-between bg-surface-container-low dark:bg-surface-container-low-dark">
-                <h3 className="text-lg font-bold text-surface-onSurface dark:text-surface-onSurfaceDark flex items-center gap-2">
-                  <Icons.Info size={20} className="text-primary" />
+              <div className="px-6 py-4 flex items-center justify-between bg-surface-container-low dark:bg-surface-container-low-dark border-b border-border dark:border-border-dark">
+                <h3 className="text-base font-semibold text-surface-onSurface dark:text-surface-onSurfaceDark flex items-center gap-2">
+                  <Icons.Info size={18} className="text-primary" />
                   {t('components.compareModal.score')}
                 </h3>
                 <MinimalButton
@@ -194,9 +192,9 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                   />
 
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-baseline gap-1 text-surface-onSurface dark:text-surface-onSurfaceDark">
-                      <span className="text-2xl tabular-nums">
-                        {localScore > 0 ? (<p font-bold>{localScore}</p>) : '-'}
+                    <div className="flex items-baseline gap-1 nums text-surface-onSurface dark:text-surface-onSurfaceDark">
+                      <span className="text-2xl">
+                        {localScore > 0 ? <span className="font-bold">{localScore}</span> : '-'}
                       </span>
                       <span className="text-xs text-surface-onVariant dark:text-surface-onVariantDark">
                         /10
@@ -223,9 +221,9 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                 <div>
                   <label
                     htmlFor={`notes-${versionId}`}
-                    className="text-sm font-semibold text-surface-onVariant dark:text-surface-onVariantDark block mb-2 flex items-center gap-2"
+                    className="label-mono mb-2 flex items-center gap-2"
                   >
-                    <Icons.Note size={16} />
+                    <Icons.Note size={14} />
                     {t('components.compareModal.notes')}
                   </label>
                   {/* 修复：暗色模式下使用 background.dark 作为输入框背景，避免过亮 */}
@@ -241,8 +239,8 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
                         : t('components.versionMeta.addNotes')
                     }
                     className={`
-                      w-full px-4 py-3 text-sm rounded-xl border
-                      bg-surface-variant dark:bg-background-dark 
+                      w-full px-4 py-3 text-sm rounded-sm border
+                      bg-surface-variant dark:bg-surface-variantDark 
                       border-border dark:border-border-dark
                       text-surface-onSurface dark:text-surface-onSurfaceDark
                       focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
@@ -255,7 +253,7 @@ export const VersionMetaCard: React.FC<VersionMetaCardProps> = ({
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 bg-surface-container-low dark:bg-surface-container-low-dark border-t border-border/50 dark:border-border-dark flex justify-end">
+              <div className="px-6 py-4 flex justify-end">
                 <MinimalButton
                   variant="default"
                   onClick={() => setIsModalOpen(false)}

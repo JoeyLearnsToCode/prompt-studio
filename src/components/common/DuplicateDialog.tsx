@@ -58,16 +58,16 @@ export function DuplicateDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-masthead/50 dark:bg-black/70"
       onClick={(e) => {
         if (e.target === e.currentTarget) onCancel();
       }}
     >
-      <div className="bg-surface dark:bg-surface-dark text-surface-onSurface dark:text-surface-onSurfaceDark rounded-3xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
+      <div className="paper text-surface-onSurface dark:text-surface-onSurfaceDark rounded-md shadow-float border border-border dark:border-border-dark p-6 max-w-md w-full mx-4">
         {/* 图标和标题 */}
         <div className="flex items-center gap-3 mb-4">
-          <Icons.Warning className="w-8 h-8 text-amber-500" />
-          <h2 className="text-xl font-bold">检测到重复内容</h2>
+          <Icons.Warning className="w-7 h-7 text-error dark:text-error-darkAccent" />
+          <h2 className="text-base font-semibold">检测到重复内容</h2>
         </div>
 
         {/* 内容 */}
@@ -76,9 +76,9 @@ export function DuplicateDialog({
             已存在相同内容的版本:
           </p>
 
-          <div className="bg-surface-variant dark:bg-surface-variantDark rounded-xl p-4 border border-border dark:border-border-dark">
+          <div className="bg-surface-variant dark:bg-surface-variantDark rounded-sm p-4 border border-border dark:border-border-dark">
             <p className="text-sm mb-1">
-              <span className="font-semibold text-surface-onSurface dark:text-surface-onSurfaceDark">
+              <span className="label-mono">
                 版本 ID:
               </span>{' '}
               <span className="text-surface-onVariant dark:text-surface-onVariantDark font-mono">
@@ -105,7 +105,7 @@ export function DuplicateDialog({
           <MinimalButton variant="default" onClick={onCancel} className="px-4 py-2">
             取消
           </MinimalButton>
-          <MinimalButton variant="default" onClick={onConfirm} className="px-4 py-2">
+          <MinimalButton variant="primary" onClick={onConfirm} className="px-4 py-2">
             仍然创建
           </MinimalButton>
         </div>

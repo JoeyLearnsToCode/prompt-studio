@@ -18,6 +18,15 @@ export interface CanvasNode {
   children: CanvasNode[];
 }
 
+/**
+ * 画布上的字体栈。Canvas 读不到 Tailwind，必须自己写。
+ * 标题走无衬线（印刷报头的字），正文走等宽（登记卡上的记录行）。
+ */
+const CANVAS_FONT_SANS =
+  '"Noto Sans SC", system-ui, -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif';
+const CANVAS_FONT_MONO =
+  'ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans SC", "Microsoft YaHei", monospace';
+
 export interface CanvasTransform {
   x: number; // 平移 X
   y: number; // 平移 Y
@@ -40,21 +49,20 @@ export class CanvasRenderer {
   private lastFrameTime = 0;
   private disposed = false;
 
-  // 🟢 手动微调：修改此数值改变连线圆角的大小 (默认 12)
-  private cornerRadius = 12;
+  // 连线圆角：几乎是直角，和卡片同一套形状语言
+  private cornerRadius = 3;
 
   // Theme Colors - initialized with defaults, updated in updateThemeColors
   private themeColors = {
-    primary: colors.primary.DEFAULT,
-    primaryContainer: colors.background.DEFAULT,
-    onPrimary: colors.primary.onPrimary,
+    /** 印章色：只画在选中节点的框线上 */
+    accent: colors.primary.DEFAULT,
     surface: colors.surface.DEFAULT,
-    surfaceVariant: colors.surface.variant,
     onSurface: colors.text.light.primary,
     onSurfaceVariant: colors.text.light.secondary,
     outline: colors.border.DEFAULT,
-    selectedNode: colors.primary.DEFAULT,
     connection: colors.text.light.muted,
+    /** 硬边阴影：油墨压进纸面，不带模糊 */
+    plate: 'rgba(35, 32, 27, 0.12)',
   };
 
   constructor(canvas: HTMLCanvasElement) {
@@ -70,34 +78,17 @@ export class CanvasRenderer {
 
   public updateThemeColors() {
     const isDark = document.documentElement.classList.contains('dark');
-    if (isDark) {
-      this.themeColors = {
-        primary: colors.primary.DEFAULT,
-        primaryContainer: colors.surface.onSurface, // Using onSurface as container-like in dark logic for text
-        onPrimary: colors.primary.onPrimary,
-        surface: colors.surface.dark,
-        surfaceVariant: colors.border.dark,
-        onSurface: colors.text.dark.primary,
-        onSurfaceVariant: colors.text.dark.muted,
-        outline: colors.border.dark,
-        selectedNode: colors.primary.DEFAULT,
-        connection: colors.text.dark.muted,
-      };
-    } else {
-      // Light mode default
-      this.themeColors = {
-        primary: colors.primary.DEFAULT,
-        primaryContainer: colors.background.DEFAULT,
-        onPrimary: colors.primary.onPrimary,
-        surface: colors.surface.DEFAULT,
-        surfaceVariant: colors.surface.variant,
-        onSurface: colors.text.light.primary,
-        onSurfaceVariant: colors.text.light.secondary,
-        outline: colors.border.DEFAULT,
-        selectedNode: colors.primary.DEFAULT,
-        connection: colors.text.light.muted,
-      };
-    }
+    this.themeColors = {
+      // 暗房里印章要提亮，压在深底上才看得见
+      accent: isDark ? colors.primary.darkAccent : colors.primary.DEFAULT,
+      surface: isDark ? colors.surface.dark : colors.surface.DEFAULT,
+      onSurface: isDark ? colors.text.dark.primary : colors.text.light.primary,
+      // 记录行要读得清：用次级墨色而不是最淡的一档
+      onSurfaceVariant: isDark ? colors.text.dark.secondary : colors.text.light.secondary,
+      outline: isDark ? colors.border.dark : colors.border.DEFAULT,
+      connection: isDark ? colors.text.dark.muted : colors.text.light.muted,
+      plate: isDark ? 'rgba(0, 0, 0, 0.55)' : 'rgba(35, 32, 27, 0.12)',
+    };
   }
 
   /**
@@ -251,7 +242,7 @@ export class CanvasRenderer {
 
       ctx.beginPath();
       ctx.strokeStyle = this.themeColors.connection;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.5;
 
       // 如果父子节点的 X 坐标几乎相同（垂直对齐），直接画直线
       if (Math.abs(parentCenterX - childCenterX) < 1) {
@@ -285,41 +276,43 @@ export class CanvasRenderer {
     const isSelected = node.id === this.selectedNodeId;
     const hover = this.hoverProgress.get(node.id) ?? 0;
 
-    // hover 抬升：1.5px 的位移 + 阴影加深，够看出"这是个可点的东西"就够了
+    // hover 抬升：2px 整像素（1.5px 在 1x 屏上会落在半像素上发糊）
     ctx.save();
-    ctx.translate(0, -1.5 * hover);
+    ctx.translate(0, -2 * hover);
 
-    // Background
-    if (isSelected) {
-      ctx.fillStyle = this.themeColors.selectedNode;
-    } else {
-      ctx.fillStyle = this.themeColors.surface;
-    }
+    // Background：永远是纸面，选中与否只体现在框线上
+    ctx.fillStyle = this.themeColors.surface;
 
-    const isDark = document.documentElement.classList.contains('dark');
-    ctx.shadowColor = isDark ? colors.border.dark : colors.border.DEFAULT;
-    ctx.shadowBlur = (isSelected ? 8 : 4) + 8 * hover;
-    ctx.shadowOffsetY = (isSelected ? 4 : 2) + 3 * hover;
+    // 硬边阴影（不带模糊）：像一张压在桌面上的登记卡
+    ctx.shadowColor = this.themeColors.plate;
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2 + hover;
 
-    this.roundRect(ctx, node.x, node.y, node.width, node.height, 8); // 8px radius
+    this.roundRect(ctx, node.x, node.y, node.width, node.height, 3); // 3px radius
     ctx.fill();
 
     // Reset shadow
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
-    // Border for unselected nodes
-    if (!isSelected) {
+    if (isSelected) {
+      // 选中：盖一道 2px 的印章色框线
+      ctx.strokeStyle = this.themeColors.accent;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else {
       ctx.strokeStyle = this.themeColors.outline;
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // hover 时在描边上叠一层主色，用透明度做交叉淡入，免得手写颜色插值
+      // hover 走墨色而不是印章色：印章色留给"选中"独占，两个状态才分得开
       if (hover > 0.001) {
         ctx.save();
         ctx.globalAlpha = hover;
-        ctx.strokeStyle = this.themeColors.primary;
+        ctx.strokeStyle = this.themeColors.onSurface;
         ctx.lineWidth = 1.5;
         ctx.stroke();
         ctx.restore();
@@ -327,13 +320,13 @@ export class CanvasRenderer {
     }
 
     // Text Color
-    const textColor = isSelected ? this.themeColors.onPrimary : this.themeColors.onSurface;
+    const textColor = this.themeColors.onSurface;
 
     // Version Name
     let currentY = node.y + 16; // Padding top
     if (node.version.name) {
       ctx.fillStyle = textColor;
-      ctx.font = 'bold 14px sans-serif';
+      ctx.font = `bold 13px ${CANVAS_FONT_SANS}`;
       ctx.textBaseline = 'top';
 
       const displayName =
@@ -345,9 +338,9 @@ export class CanvasRenderer {
       currentY += 20;
     }
 
-    // Content
-    ctx.fillStyle = textColor; // Muted if name exists
-    ctx.font = '14px sans-serif';
+    // Content：记录行用等宽淡墨，和标题的报头字拉开层次
+    ctx.fillStyle = this.themeColors.onSurfaceVariant;
+    ctx.font = `13px ${CANVAS_FONT_MONO}`;
     ctx.textBaseline = 'top';
 
     const originalLines = node.version.content.split('\n').filter((line) => line.trim() !== '');
@@ -408,7 +401,7 @@ export class CanvasRenderer {
               displayText = truncatedText + '...';
             }
 
-            ctx.fillText(displayText, node.x + 8, currentY + currentLineIndex * 18);
+            ctx.fillText(displayText, node.x + 12, currentY + currentLineIndex * 18);
             currentLineIndex++;
           }
         } else {
@@ -420,12 +413,12 @@ export class CanvasRenderer {
           ) {
             truncatedText = truncatedText.slice(0, -1);
           }
-          ctx.fillText(truncatedText + '...', node.x + 8, currentY + currentLineIndex * 18);
+          ctx.fillText(truncatedText + '...', node.x + 12, currentY + currentLineIndex * 18);
           currentLineIndex++;
         }
       } else {
         // 文本未超出宽度，直接显示
-        ctx.fillText(line, node.x + 8, currentY + currentLineIndex * 18);
+        ctx.fillText(line, node.x + 12, currentY + currentLineIndex * 18);
         currentLineIndex++;
       }
     }

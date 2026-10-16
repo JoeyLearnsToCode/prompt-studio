@@ -137,7 +137,7 @@ export const ResizableSplitter: React.FC<ResizableSplitterProps> = ({
       {/* Collapse/Expand Button */}
       {onCollapse && (
         <button
-          className={`absolute z-20 top-1/4 w-6 h-6 rounded-md bg-surface/80 dark:bg-surface-dark/80 border border-border dark:border-border-dark shadow-sm flex items-center justify-center text-surface-onSurface dark:text-surface-onSurfaceDark transition-opacity duration-200 focus:opacity-100 active:scale-95
+          className={`absolute z-20 top-1/4 w-6 h-6 rounded-sm bg-surface dark:bg-surface-dark border border-border dark:border-border-dark shadow-card flex items-center justify-center text-surface-onSurface dark:text-surface-onSurfaceDark transition-opacity duration-200 focus:opacity-100 active:scale-95
             ${isCollapsed ? 'opacity-100 mr-10' : 'opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100'}`}
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}

@@ -59,7 +59,7 @@ export const VersionCard: React.FC<VersionCardProps> = ({
           <Icons.Star
             key={star}
             data-testid={`star-${star}`}
-            className={`w-4 h-4 ${star <= score ? 'text-yellow-500' : 'text-gray-300'}`}
+            className={`w-4 h-4 ${star <= score ? 'text-primary' : 'text-surface-onVariant'}`}
           />
         ))}
       </div>
@@ -71,10 +71,10 @@ export const VersionCard: React.FC<VersionCardProps> = ({
       data-testid="version-card"
       onClick={handleClick}
       className={`
-        relative p-4 rounded-m3-medium bg-surface-container
-        border border-outline
-        transition-all duration-200
-        ${isSelected ? 'ring-2 ring-primary shadow-m3-2' : 'hover:shadow-m3-1'}
+        relative p-4 rounded-md paper
+        border border-border dark:border-border-dark
+        transition-shadow duration-fast
+        ${isSelected ? 'border-primary shadow-card-hover' : 'shadow-card hover:shadow-card-hover'}
         ${onClick ? 'cursor-pointer' : ''}
       `}
     >
@@ -82,13 +82,13 @@ export const VersionCard: React.FC<VersionCardProps> = ({
       {isLeaf && (
         <div
           data-testid="leaf-indicator"
-          className="absolute top-2 right-2 w-2 h-2 rounded-full bg-tertiary"
+          className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary"
           title={t('components.versionCard.leafNode')}
         />
       )}
 
       {/* 内容预览 */}
-      <div className="text-sm text-on-surface whitespace-pre-wrap break-words font-mono">
+      <div className="text-sm text-surface-onSurface dark:text-surface-onSurfaceDark whitespace-pre-wrap break-words font-mono">
         {getPreview(version.content)}
       </div>
 
@@ -96,11 +96,11 @@ export const VersionCard: React.FC<VersionCardProps> = ({
       {renderStars(version.score)}
 
       {/* 创建时间 */}
-      <div className="mt-3 text-xs text-on-surface-variant">{formatTime(version.createdAt)}</div>
+      <div className="mt-3 text-xs text-surface-onVariant dark:text-surface-onVariantDark">{formatTime(version.createdAt)}</div>
 
       {/* 更新时间（如果不同于创建时间） */}
       {version.updatedAt !== version.createdAt && (
-        <div className="text-xs text-on-surface-variant">
+        <div className="text-xs text-surface-onVariant dark:text-surface-onVariantDark">
           {t('components.versionCard.updatedAt')}: {formatTime(version.updatedAt)}
         </div>
       )}

@@ -36,7 +36,7 @@ export const Modal: React.FC<ModalProps> = ({
           leaveTo="opacity-0"
         >
           {/* 不用 backdrop-blur：淡入期间每帧都要重算整页模糊，在重页面上会明显掉帧 */}
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-masthead/50 dark:bg-black/70" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -51,15 +51,18 @@ export const Modal: React.FC<ModalProps> = ({
               leaveTo="opacity-0 translate-y-1"
             >
               <Dialog.Panel
-                className={`transform overflow-hidden rounded-m3-large bg-surface dark:bg-surface-dark text-surface-onSurface dark:text-surface-onSurfaceDark shadow-m3-3 transition-[opacity,transform] ${sizeClasses[size]}`}
+                className={`transform overflow-hidden rounded-md paper text-surface-onSurface dark:text-surface-onSurfaceDark shadow-float border border-border dark:border-border-dark transition-[opacity,transform] ${sizeClasses[size]}`}
               >
                 {title && (
-                  <Dialog.Title
-                    as="h3"
-                    className="text-xl font-semibold px-6 py-4 border-b border-surface-variant dark:border-border-dark"
-                  >
-                    {title}
-                  </Dialog.Title>
+                  <>
+                    {/* 齿孔撕线只在报头下沿出现一次；弹层用发丝线分隔，避免母题降级成壁纸 */}
+                    <Dialog.Title
+                      as="h3"
+                      className="text-base font-semibold px-6 py-4 border-b border-border dark:border-border-dark text-surface-onSurface dark:text-surface-onSurfaceDark"
+                    >
+                      {title}
+                    </Dialog.Title>
+                  </>
                 )}
                 <div className="p-6">{children}</div>
               </Dialog.Panel>

@@ -131,6 +131,9 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(
       const textColor = isDark ? colors.text.dark.primary : colors.text.light.primary;
       const lineNumberColor = isDark ? colors.text.dark.muted : colors.text.light.muted;
       const gutterColor = isDark ? colors.surface.variantDark : colors.surface.variant;
+      // 光标与选区要在两种底上都看得见，暗房下换成提亮后的印章色
+      const accentColor = isDark ? colors.primary.darkAccent : colors.primary.DEFAULT;
+      const selectionColor = isDark ? colors.primary.selectionDark : colors.primary.selection;
 
       monacoRef.current.editor.defineTheme('prompt-studio-theme', {
         base: isDark ? 'vs-dark' : 'vs',
@@ -145,8 +148,8 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(
         colors: {
           'editor.background': surfaceColor,
           'editor.foreground': textColor,
-          'editorCursor.foreground': colors.primary.DEFAULT,
-          'editor.selectionBackground': colors.primary.selection,
+          'editorCursor.foreground': accentColor,
+          'editor.selectionBackground': selectionColor,
           'editorLineNumber.foreground': lineNumberColor,
           'editorGutter.background': gutterColor,
           'editor.lineHighlightBackground': colors.primary.editorBackground,
@@ -201,7 +204,7 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(
     };
 
     return (
-      <div className="h-full w-full relative overflow-hidden rounded-b-xl">
+      <div className="h-full w-full relative overflow-hidden rounded-b-md">
         <Editor
           key={currentLocale}
           height="100%"
@@ -236,24 +239,24 @@ const PromptEditor = forwardRef<PromptEditorRef, PromptEditorProps>(
           }}
         />
         {isTouchDevice && (
-          <div className="absolute right-5 bottom-[10%] flex flex-col gap-3 p-2 bg-white/20 backdrop-blur-md rounded-2xl shadow-xl z-50">
+          <div className="absolute right-5 bottom-[10%] flex flex-col gap-3 p-1.5 paper rounded-md shadow-float border border-border dark:border-border-dark z-50">
             <button
               onClick={handleSelectAll}
-              className="p-3 text-gray-600 bg-white/40 rounded-xl transition-all active:scale-95 shadow-sm"
+              className="p-3 text-surface-onSurface dark:text-surface-onSurfaceDark bg-surface-variant dark:bg-surface-variantDark rounded-sm transition-colors duration-fast active:bg-surface-container-highest dark:active:bg-surface-container-highest-dark"
               title="Select All"
             >
               <Icons.TextSelect className="w-6 h-6" />
             </button>
             <button
               onClick={handleSelectLine}
-              className="p-3 text-gray-600 bg-white/40 rounded-xl transition-all active:scale-95 shadow-sm"
+              className="p-3 text-surface-onSurface dark:text-surface-onSurfaceDark bg-surface-variant dark:bg-surface-variantDark rounded-sm transition-colors duration-fast active:bg-surface-container-highest dark:active:bg-surface-container-highest-dark"
               title="Select Line"
             >
               <Icons.RowSelect />
             </button>
             <button
               onClick={handleCopy}
-              className="p-3 text-gray-600 bg-white/40 rounded-xl transition-all active:scale-95 shadow-sm"
+              className="p-3 text-surface-onSurface dark:text-surface-onSurfaceDark bg-surface-variant dark:bg-surface-variantDark rounded-sm transition-colors duration-fast active:bg-surface-container-highest dark:active:bg-surface-container-highest-dark"
               title="Copy"
             >
               <Icons.Copy className="w-6 h-6" />

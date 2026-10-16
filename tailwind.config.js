@@ -25,15 +25,39 @@ export default {
         standard: '300ms',
         gentle: '450ms',
       },
+      /**
+       * 印刷登记簿的形状语言：裁切过的纸是直角的。
+       * 面板（rounded-md）= 0，控件（sm/lg）= 2px —— 只有两档，多一档在屏上都分辨不出来。
+       * 压掉默认档位，整站一起变"硬"，不需要逐个改类名。
+       */
       borderRadius: {
-        'm3-small': '0.375rem',  // 6px
-        'm3-medium': '0.5rem',   // 8px
-        'm3-large': '0.75rem',   // 12px
-        'm3-xl': '1rem',         // 16px
+        none: '0',
+        DEFAULT: '0',
+        md: '0',
+        sm: '2px',
+        lg: '2px',
+        xl: '3px',
+        '2xl': '4px',
+        '3xl': '6px',
       },
+      /**
+       * 不用模糊阴影 —— 油墨压进纸面是硬边的。
+       * 颜色走 CSS 变量，亮/暗两套在 globals.css 里换。
+       */
       boxShadow: {
-        'card': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'card': '2px 2px 0 0 var(--plate-shadow)',
+        'card-hover': '3px 3px 0 0 var(--plate-shadow-strong)',
+        'float': '2px 2px 0 0 var(--plate-shadow-strong)',
+        'press': '0 0 0 1px var(--plate-border)',
+        'm3-1': '1px 1px 0 0 var(--plate-shadow)',
+        'm3-2': '2px 2px 0 0 var(--plate-shadow)',
+        'm3-3': '3px 3px 0 0 var(--plate-shadow-strong)',
+        'elevation-2': '2px 2px 0 0 var(--plate-shadow-strong)',
+        'elevation-3': '3px 3px 0 0 var(--plate-shadow-strong)',
+      },
+      letterSpacing: {
+        'label': '0.12em',
+        'wordmark': '0.02em',
       },
       fontFamily: {
         sans: [
@@ -51,7 +75,11 @@ export default {
           'Arial',
           'sans-serif',
         ],
-        // 编辑器专用等宽字体栈 (PromptEditor 使用)
+        /**
+         * 等宽只用于编号 / 标签 / 元数据（"技术精确"这一层）。
+         * 中文字形在等宽栈里不存在，因此把中文族放在通用 monospace 之前，
+         * 让汉字回到 Noto Sans SC，而不是掉进系统默认的等宽回退。
+         */
         mono: [
           'ui-monospace',
           'SFMono-Regular',
@@ -60,6 +88,10 @@ export default {
           'Consolas',
           '"Liberation Mono"',
           '"Courier New"',
+          '"Noto Sans SC"',
+          '"Source Han Sans SC"',
+          '"Microsoft YaHei"',
+          '"PingFang SC"',
           'monospace',
         ],
       },

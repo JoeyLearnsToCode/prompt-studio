@@ -78,7 +78,7 @@ export const GlobalSearchBar = forwardRef<HTMLInputElement, GlobalSearchBarProps
   const canNavigate = total > 1;
 
   return (
-    <div className="flex items-center gap-1.5 px-2 py-1.5 bg-surface-variant dark:bg-surface-containerHighDark rounded-lg shadow-sm">
+    <div className="flex items-center gap-1.5 px-2 py-1.5 bg-surface-variant dark:bg-surface-container-high-dark rounded-md border border-border dark:border-border-dark">
       <Icons.Search className="w-4 h-4 text-surface-onVariant dark:text-surface-onVariantDark flex-shrink-0" />
       <input
         ref={inputRef}

@@ -122,7 +122,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, re
 
   return (
     // 修复：暗色模式下使用 surface-container-high-dark 提高容器对比度
-    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-variant dark:bg-surface-containerHighDark rounded-lg shadow-sm">
+    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-variant dark:bg-surface-container-high-dark rounded-md shadow-float border border-border dark:border-border-dark">
       {/* 搜索图标 */}
       <Icons.Search className="w-5 h-5 text-surface-onVariant dark:text-surface-onVariantDark flex-shrink-0" />
 

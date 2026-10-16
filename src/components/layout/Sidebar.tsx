@@ -113,18 +113,15 @@ export const Sidebar: React.FC = () => {
             }
           }}
         >
-        {/* Sidebar Header Card */}
-        <div className="bg-surface dark:bg-surface-dark rounded-xl px-4 shadow-card border border-border dark:border-border-dark flex items-center justify-between h-16 shrink-0">
-          <h2 className="font-bold text-surface-onSurface dark:text-surface-onSurfaceDark">
-            {t('components.sidebar.projects')}
-          </h2>
-          <SidebarToggle />
-        </div>
+        {/* 一页台账：表头与目录在同一张纸里，中间只隔一条发丝线 —— 不做卡套卡 */}
+        <div className="flex-1 paper rounded-md border border-border dark:border-border-dark flex flex-col min-h-0 overflow-hidden">
+          <div className="h-14 shrink-0 px-4 flex items-center justify-between border-b border-border dark:border-border-dark">
+            <h2 className="panel-title">{t('components.sidebar.projects')}</h2>
+            <SidebarToggle />
+          </div>
 
-        {/* Projects List Card */}
-        <div className="flex-1 bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark overflow-y-auto p-1 flex flex-col">
           {/* Action Buttons */}
-          <div className="flex gap-2 mb-1 p-2">
+          <div className="flex gap-2 p-2 shrink-0">
             <MinimalButton
               variant="default"
               onClick={handleCreateFolder}
@@ -145,7 +142,7 @@ export const Sidebar: React.FC = () => {
 
           {/* Global Search Bar */}
           {searchVisible && (
-            <div className="px-1 pb-1">
+            <div className="px-2 pb-1 shrink-0">
               <GlobalSearchBar
                 ref={searchInputRef}
                 query={query}
@@ -163,7 +160,7 @@ export const Sidebar: React.FC = () => {
           )}
 
           {/* Tree */}
-          <div className="flex-1">
+          <div className="flex-1 min-h-0">
             <FolderTree />
           </div>
         </div>

@@ -140,7 +140,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
           <div
             className={`
               w-full h-full aspect-square
-              border-2 border-dashed rounded-xl
+              border-2 border-dashed rounded-md
               transition-all duration-200 cursor-pointer
               flex flex-col items-center justify-center text-center
               group
@@ -194,8 +194,8 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
               exit={{ opacity: 0, scale: 0.92 }}
               transition={{ duration: duration.standard, ease: ease.outExpo }}
               className={`
-                relative group w-full h-full aspect-square rounded-xl overflow-hidden border border-border dark:border-border-dark
-                shadow-sm hover:shadow-md transition-all bg-background dark:bg-zinc-800
+                relative group w-full h-full aspect-square rounded-md overflow-hidden border border-border dark:border-border-dark
+                hover:shadow-card transition-shadow bg-surface-variant dark:bg-surface-variantDark
                 ${attachment.isMissing ? 'border-error/50' : ''}
               `}
             >
@@ -225,7 +225,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                       />
                     )}
                     {isVideo(attachment.fileType) && (
-                      <div className="w-full h-full flex items-center justify-center bg-black/5 relative">
+                      <div className="w-full h-full flex items-center justify-center bg-masthead/5 relative">
                         <video
                           src={attachmentManager.getPreviewUrl(attachment) || ''}
                           className="w-full h-full object-cover opacity-80"
@@ -251,7 +251,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                         e.stopPropagation();
                         handlePreview(attachment);
                       }}
-                      className="p-1.5 !backdrop-blur-3xl !bg-surface-containerHighest/60 text-surface-onSurface rounded-md shadow-sm "
+                      className="p-1.5 !bg-surface-container-highest dark:!bg-surface-container-highest-dark text-surface-onSurface dark:text-surface-onSurfaceDark rounded-sm shadow-card "
                       title={t('components.attachmentGallery.preview')}
                     >
                       <Icons.Eye size={12} />
@@ -263,7 +263,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                       e.stopPropagation();
                       handleDownload(attachment);
                     }}
-                    className="p-1.5 !backdrop-blur-3xl !bg-surface-containerHighest/60 text-surface-onSurface rounded-md shadow-sm "
+                    className="p-1.5 !bg-surface-container-highest dark:!bg-surface-container-highest-dark text-surface-onSurface dark:text-surface-onSurfaceDark rounded-sm shadow-card "
                     title={t('components.attachmentGallery.download')}
                   >
                     <Icons.Download size={12} />
@@ -275,7 +275,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                         e.stopPropagation();
                         handleDelete(attachment.id);
                       }}
-                      className="p-1.5 !backdrop-blur-3xl"
+                      className="p-1.5 !bg-surface-container-highest dark:!bg-surface-container-highest-dark shadow-card"
                       title={t('common.delete')}
                     >
                       <Icons.Trash size={12} />
@@ -285,8 +285,9 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
               )}
 
               {/* File Name Footer */}
+              {/* File Name Footer —— 叠在图片上的文字需要一层压暗的衬底才能读，这是功能不是装饰 */}
               {!attachment.isMissing && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-[10px] p-2 pt-6 truncate pointer-events-none">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-masthead/85 via-masthead/45 to-transparent text-masthead-on text-[10px] p-2 pt-6 truncate pointer-events-none">
                   {attachment.fileName}
                 </div>
               )}

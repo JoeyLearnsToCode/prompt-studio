@@ -258,30 +258,35 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background dark:bg-background-dark text-surface-onSurface overflow-hidden">
-      {/* 头部 */}
-      <header className="h-12 bg-primary text-white flex items-center justify-between px-6 shrink-0 shadow-md z-20">
+    <div className="flex flex-col h-screen desk text-surface-onSurface overflow-hidden">
+      {/* 报头：与主视图同一条墨黑通栏 */}
+      <header className="h-12 bg-masthead dark:bg-masthead-dark text-masthead-on flex items-center justify-between px-6 shrink-0 z-20">
         <div className="flex items-center gap-2">
           <Icons.Settings className="text-2xl" />
-          <h1 className="text-lg font-bold tracking-wide">{t('pages.settings.title')}</h1>
+          <h1 className="font-mono text-sm font-bold uppercase tracking-label">
+            {t('pages.settings.title')}
+          </h1>
         </div>
         <MinimalButton
           variant="ghost"
           onClick={() => navigate('/')}
-          className="h-9 w-9 !text-white/90 !hover:text-white hover:bg-white/10"
+          className="h-9 w-9 !text-masthead-on/75 hover:!text-masthead-on hover:!bg-masthead-on/10"
           title={t('common.back')}
         >
           <Icons.ArrowLeft className="h-6 w-6" />
         </MinimalButton>
       </header>
 
+      {/* 齿孔撕线 */}
+      <div className="h-2 shrink-0 rule-perf" aria-hidden />
+
       {/* 主内容区 */}
       <div className="flex-1 flex overflow-hidden p-2 gap-2 justify-center">
         <main className="flex-1 flex flex-col overflow-y-auto max-w-4xl p-4 md:p-6 gap-6">
           {/* 本地导入导出卡片 */}
-          <section className="bg-surface dark:bg-surface-dark rounded-xl shadow-sm border border-border dark:border-border-dark p-6">
+          <section className="paper rounded-md border border-border dark:border-border-dark p-6">
             <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-primary/10 rounded-lg text-primary shrink-0">
+              <div className="p-3 bg-primary-container dark:bg-primary-containerDark rounded-sm text-primary dark:text-primary-darkAccent shrink-0">
                 <span className="material-symbols-outlined text-2xl">folder_zip</span>
               </div>
               <div>
@@ -321,9 +326,9 @@ const Settings: React.FC = () => {
           </section>
 
           {/* WebDAV 配置卡片 */}
-          <section className="bg-surface dark:bg-surface-dark rounded-xl shadow-sm border border-border dark:border-border-dark p-6">
+          <section className="paper rounded-md border border-border dark:border-border-dark p-6">
             <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-primary/10 rounded-lg text-primary shrink-0">
+              <div className="p-3 bg-primary-container dark:bg-primary-containerDark rounded-sm text-primary dark:text-primary-darkAccent shrink-0">
                 <span className="material-symbols-outlined text-2xl">cloud_sync</span>
               </div>
               <div>
@@ -445,7 +450,7 @@ const Settings: React.FC = () => {
                     ease: ease.outExpo,
                     delay: Math.min(index, 10) * 0.03,
                   }}
-                  className="flex items-center justify-between p-4 bg-surface-container-high dark:bg-zinc-800 rounded-lg hover:bg-surface-variant dark:hover:bg-zinc-700 transition-colors duration-fast"
+                  className="flex items-center justify-between p-4 bg-surface-container-high dark:bg-surface-container-high-dark rounded-sm border border-border dark:border-border-dark hover:bg-surface-variant dark:hover:bg-surface-variantDark transition-colors duration-fast"
                 >
                   <div className="flex-1 min-w-0 mr-4">
                     <p className="text-sm font-medium truncate text-surface-onSurface dark:text-surface-onSurfaceDark">
@@ -460,7 +465,7 @@ const Settings: React.FC = () => {
                       variant="default"
                       onClick={() => handleRestore(backup.path)}
                       disabled={loading}
-                      className="px-3 py-1.5 text-xs text-primary border-primary/30 hover:bg-primary/5"
+                      className="px-3 py-1.5 text-xs"
                     >
                       {t('pages.settings.webdav.restore')}
                     </MinimalButton>

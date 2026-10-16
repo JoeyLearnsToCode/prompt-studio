@@ -125,7 +125,7 @@ export const ScoreRating: React.FC<ScoreRatingProps> = ({
       aria-valuenow={value}
       aria-disabled={!interactive}
       className={`
-        relative flex gap-1.5 p-1.5 rounded-xl touch-none select-none outline-none
+        relative flex gap-1 p-1 rounded-md touch-none select-none outline-none
         ${interactive ? 'cursor-pointer' : 'cursor-default'}
         ${readonly ? 'opacity-60' : ''}
         focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-1
@@ -142,14 +142,14 @@ export const ScoreRating: React.FC<ScoreRatingProps> = ({
         <div
           key={n}
           className={`
-            flex-1 h-10 rounded-lg flex items-center justify-center text-sm font-bold tabular-nums
+            flex-1 h-10 rounded-sm flex items-center justify-center text-sm font-bold tabular-nums border
             ${dragging ? '' : 'transition-colors duration-fast'}
             ${
-              n === value
-                ? 'bg-primary text-primary-onPrimary shadow-sm'
-                : n < value
-                  ? 'bg-primary/20 text-primary dark:text-primary'
-                  : 'bg-surface-variant/70 dark:bg-surface-variantDark text-surface-onVariant dark:text-surface-onVariantDark'
+              n <= value
+                ? // 填到哪一格就是几分。印章色只留一线（框 + 数字），不铺底 ——
+                  // 10 格铺满淡胭脂会成为全屏最大的色块，抢走主操作的位置
+                  'bg-primary/[0.07] border-primary text-primary dark:text-primary-darkAccent'
+                : 'bg-surface-variant dark:bg-surface-variantDark border-border dark:border-border-dark text-surface-onVariant dark:text-surface-onVariantDark'
             }
           `}
         >

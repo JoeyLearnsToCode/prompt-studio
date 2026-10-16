@@ -25,7 +25,7 @@ export const ThemeToggle: React.FC = () => {
     <MinimalButton
       variant="ghost"
       onClick={toggleTheme}
-      className="relative h-9 w-9 overflow-hidden !text-white/90 !hover:text-white hover:bg-white/10"
+      className="relative h-9 w-9 overflow-hidden !text-masthead-on/75 hover:!text-masthead-on hover:!bg-masthead-on/10"
       title="Toggle Theme"
       aria-label="Toggle Theme"
     >

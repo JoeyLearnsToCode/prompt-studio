@@ -108,6 +108,8 @@ export function CompareModal({
     const textColor = isDark ? colors.text.dark.primary : colors.text.light.primary;
     const lineNumberColor = isDark ? colors.text.dark.muted : colors.text.light.muted;
     const gutterColor = isDark ? colors.surface.variantDark : colors.surface.variant;
+    const accentColor = isDark ? colors.primary.darkAccent : colors.primary.DEFAULT;
+    const selectionColor = isDark ? colors.primary.selectionDark : colors.primary.selection;
 
     monaco.editor.defineTheme('prompt-studio-diff-theme', {
       base: isDark ? 'vs-dark' : 'vs',
@@ -122,8 +124,8 @@ export function CompareModal({
       colors: {
         'editor.background': surfaceColor,
         'editor.foreground': textColor,
-        'editorCursor.foreground': colors.primary.DEFAULT,
-        'editor.selectionBackground': colors.primary.selection,
+        'editorCursor.foreground': accentColor,
+        'editor.selectionBackground': selectionColor,
         'editorLineNumber.foreground': lineNumberColor,
         'editorGutter.background': gutterColor,
         'editor.lineHighlightBackground': colors.primary.editorBackground,
@@ -170,16 +172,17 @@ export function CompareModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      // 不用 backdrop-blur：淡入期间每帧都要重算整页模糊，在重页面上会明显掉帧
+      className="fixed inset-0 z-50 flex items-center justify-center bg-masthead/50 dark:bg-black/70"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-[95vw] h-[90vh] bg-surface dark:bg-surface-dark rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="w-[95vw] h-[90vh] paper rounded-md shadow-float border border-border dark:border-border-dark flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="p-6 border-b border-border dark:border-border-dark flex-shrink-0">
+        <header className="p-6 flex-shrink-0 border-b border-border dark:border-border-dark">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-surface-onSurface dark:text-surface-onSurfaceDark">
+            <h2 className="text-lg font-semibold text-surface-onSurface dark:text-surface-onSurfaceDark">
               {modalTitle}
             </h2>
             <MinimalButton
@@ -198,10 +201,13 @@ export function CompareModal({
               <span className="text-sm text-surface-onVariant dark:text-surface-onVariantDark">
                 {t('components.compareModal.similarity')}:
               </span>
-              <span className="font-bold text-blue-600">{similarity}%</span>
-              <div className="flex-1 h-2 bg-surface-variant dark:bg-surface-variantDark rounded-full overflow-hidden ml-2">
+              {/* 相似度是数据，不是"选中"：用墨色而不是印章色 */}
+              <span className="nums font-bold text-surface-onSurface dark:text-surface-onSurfaceDark">
+                {similarity}%
+              </span>
+              <div className="flex-1 h-2 bg-surface-variant dark:bg-surface-variantDark overflow-hidden ml-2">
                 <div
-                  className="h-full bg-blue-600 transition-all duration-300"
+                  className="h-full bg-surface-onSurface dark:bg-surface-onSurfaceDark transition-all duration-standard"
                   style={{ width: `${similarity}%` }}
                 />
               </div>
@@ -237,7 +243,7 @@ export function CompareModal({
                   </div>
                   {sourceVersion.score !== undefined && sourceVersion.score > 0 && (
                     <div className="flex items-center gap-1">
-                      <Icons.Star size={14} className="text-yellow-500" />
+                      <Icons.Star size={14} className="text-primary dark:text-primary-darkAccent" />
                       <span>
                         {t('components.compareModal.score')}: {sourceVersion.score}/10
                       </span>
@@ -279,7 +285,7 @@ export function CompareModal({
                   </div>
                   {targetVersion.score !== undefined && targetVersion.score > 0 && (
                     <div className="flex items-center gap-1">
-                      <Icons.Star size={14} className="text-yellow-500" />
+                      <Icons.Star size={14} className="text-primary dark:text-primary-darkAccent" />
                       <span>
                         {t('components.compareModal.score')}: {targetVersion.score}/10
                       </span>

@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * 印刷登记簿的材质层
+ * 亮/暗两套取值：油墨是硬的，纸是暖的，暗房里的灯是冷的
+ */
+:root {
+  --plate-shadow: rgba(35, 32, 27, 0.1);
+  --plate-shadow-strong: rgba(35, 32, 27, 0.18);
+  --plate-border: #D6CEC0;
+  --perf-hole: rgba(35, 32, 27, 0.32);
+  /* 纸纹：feTurbulence 生成的灰度噪点，静态位图，不参与动画与混合 */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+.dark {
+  --plate-shadow: rgba(0, 0, 0, 0.45);
+  --plate-shadow-strong: rgba(0, 0, 0, 0.72);
+  --plate-border: #3B392F;
+  --perf-hole: rgba(237, 231, 219, 0.34);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -36,6 +57,7 @@ body {
   /* 使用 @apply 应用 Tailwind 类，支持暗色模式 */
   @apply bg-background text-surface-onSurface transition-colors duration-200;
   @apply dark:bg-background-dark dark:text-surface-onSurfaceDark;
+  background-image: var(--grain);
 }
 
 #root {
@@ -55,9 +77,50 @@ body {
     min-height: 100vh;
     min-height: 100dvh;
   }
+
+  /**
+   * 登记卡纸：裁切过的纸是干净的，不带纹理。
+   * 纹理只留在桌面上——全站铺噪点会变成底噪，而不是材质。
+   */
+  .paper {
+    @apply bg-surface dark:bg-surface-dark;
+  }
+
+  /** 桌面：最底层，比卡纸深一档，是唯一带纸纹的一层 */
+  .desk {
+    @apply bg-background dark:bg-background-dark;
+    background-image: var(--grain);
+  }
+
+  /**
+   * 等宽小标签：编号 / 字段名 / 分区标题。
+   * "技术精确"靠的是等宽 + 字距，不是加图标或色块。
+   */
+  /** 面板标题（"项目""附件"）：重字重无衬线，和等宽字段标签分成两级 */
+  .panel-title {
+    @apply text-[13px] font-semibold tracking-wordmark text-surface-onSurface dark:text-surface-onSurfaceDark;
+  }
+
+  .label-mono {
+    /* 中文不吃 0.12em 的字距，会拉出空洞；字距只给拉丁字符留一点 */
+    @apply font-mono text-xs uppercase tracking-[0.06em] text-surface-onVariant dark:text-surface-onVariantDark;
+  }
+
+  /** 齿孔撕线：取代实心分隔线，只在报头下沿、弹层头尾出现 */
+  .rule-perf {
+    background-image: radial-gradient(circle at center, var(--perf-hole) 1px, transparent 1.4px);
+    background-size: 8px 100%;
+    background-repeat: repeat-x;
+    background-position: center;
+  }
+
+  /** 表格数字对齐：分数、编号、时间戳 */
+  .nums {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
-/* Scrollbar Styles */
+/* Scrollbar Styles —— 直角，和框线同一套语言 */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -69,7 +132,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background-color: theme('colors.scrollbar.thumb');
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 .dark ::-webkit-scrollbar-thumb {
@@ -82,7 +145,7 @@ body {
 
 /* Monaco Editor Scrollbar Styles */
 .monaco-scrollable-element > .scrollbar > .slider {
-  border-radius: 4px;
+  border-radius: 0;
   background: theme('colors.scrollbar.thumb') !important;
 }
 

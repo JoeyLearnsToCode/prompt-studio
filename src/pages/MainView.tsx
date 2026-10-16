@@ -273,12 +273,14 @@ const MainView: React.FC = () => {
   };
 
   return (
-    <div className="h-dynamic-screen flex flex-col bg-background dark:bg-background-dark text-surface-onSurface transition-colors duration-200">
-      {/* 顶部标题栏 - Updated Style */}
-      <header className="h-12 bg-primary text-white px-6 shrink-0 shadow-md z-20 flex items-center justify-between">
+    <div className="h-dynamic-screen flex flex-col desk text-surface-onSurface transition-colors duration-200">
+      {/* 报头：墨黑通栏，如印刷品的报头 */}
+      <header className="h-12 bg-masthead dark:bg-masthead-dark text-masthead-on px-6 shrink-0 z-20 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src="/icon-192.svg" className="h-8 w-8" alt="logo" />
-          <h1 className="text-lg font-bold tracking-wide hidden sm:inline">Prompt Studio</h1>
+          <img src="/icon-192.svg" className="h-7 w-7" alt="logo" />
+          <h1 className="hidden sm:inline font-mono text-sm font-bold uppercase tracking-label text-masthead-on">
+            Prompt Studio
+          </h1>
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
@@ -288,7 +290,7 @@ const MainView: React.FC = () => {
             href="https://github.com/JoeyLearnsToCode/prompt-studio"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-lg transition-colors duration-200 font-medium h-9 w-9 bg-transparent text-white/90 hover:bg-white/10 hover:text-white"
+            className="inline-flex items-center justify-center rounded-sm transition-colors duration-fast font-medium h-9 w-9 bg-transparent text-masthead-on/75 hover:bg-masthead-on/10 hover:text-masthead-on"
             aria-label="GitHub Repository"
           >
             <Icons.GitHub className="h-5 w-5" />
@@ -297,13 +299,16 @@ const MainView: React.FC = () => {
           <MinimalButton
             variant="ghost"
             onClick={() => navigate('/settings')}
-            className="h-9 w-9 !text-white/90 !hover:text-white hover:bg-white/10"
+            className="h-9 w-9 !text-masthead-on/75 hover:!text-masthead-on hover:!bg-masthead-on/10"
             aria-label={t('common.settings')}
           >
             <Icons.Settings className="h-5 w-5" />
           </MinimalButton>
         </div>
       </header>
+
+      {/* 齿孔撕线：报头与工作区之间的分隔，取代阴影 */}
+      <div className="h-2 shrink-0 rule-perf" aria-hidden />
 
       {/* 主要内容区域 - Updated Layout with Gap and Padding */}
       <div className="flex-1 flex overflow-hidden p-2 gap-2">
@@ -325,7 +330,7 @@ const MainView: React.FC = () => {
             {currentProjectId && currentVersionId && (
               <div
                 ref={toolbarRef}
-                className="bg-surface dark:bg-surface-dark rounded-xl px-3 shadow-card border border-border dark:border-border-dark flex items-center justify-between flex-wrap gap-2 min-h-[4rem] shrink-0 z-10 @container"
+                className="paper rounded-md px-3 border border-border dark:border-border-dark flex items-center justify-between flex-wrap gap-2 min-h-[4rem] shrink-0 z-10 @container"
               >
                 <div className="flex items-center gap-1 flex-1 min-w-0">
                   {sidebarCollapsed && !sidebarTemporarilyExpanded && (
@@ -335,12 +340,12 @@ const MainView: React.FC = () => {
                   )}
                   <label
                     htmlFor="version-name"
-                    className="text-sm font-medium text-surface-onVariant whitespace-nowrap overflow-hidden text-ellipsis min-w-0"
+                    className="label-mono whitespace-nowrap overflow-hidden text-ellipsis min-w-0"
                     style={{ flexShrink: 3 }}
                     title={t('pages.mainView.versionName')}
                   >
                     <span className="hidden @sm:inline">
-                      {t('pages.mainView.versionName') + ':'}
+                      {t('pages.mainView.versionName')}
                     </span>
                   </label>
                   <input
@@ -375,7 +380,7 @@ const MainView: React.FC = () => {
                       }
                     }}
                     placeholder={t('pages.mainView.versionNamePlaceholder')}
-                    className="flex-1 px-2 py-2 text-sm bg-background dark:bg-background-dark border border-border dark:border-border-dark rounded-md px-3 py-1.5 text-sm text-surface-onSurface focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow min-w-[10px]"
+                    className="flex-1 px-3 py-1.5 text-sm bg-surface-variant dark:bg-surface-variantDark border border-border dark:border-border-dark rounded-sm text-surface-onSurface dark:text-surface-onSurfaceDark placeholder:text-surface-onVariant dark:placeholder:text-surface-onVariantDark focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow min-w-[10px]"
                     style={{ flexShrink: 1 }}
                   />
                 </div>
@@ -394,7 +399,7 @@ const MainView: React.FC = () => {
                     <span className="hidden @xs:inline">{t('components.toolbar.saveInPlace')}</span>
                   </MinimalButton>
                   <MinimalButton
-                    variant="default"
+                    variant="primary"
                     onClick={handleSave}
                     disabled={!currentProjectId}
                     title={`${t('components.toolbar.saveNew')} (Ctrl+Shift+S / Ctrl+Shift+Enter)`}
@@ -414,7 +419,7 @@ const MainView: React.FC = () => {
               {currentProjectId ? (
                 <>
                   <div
-                    className={`overflow-hidden bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col relative ${panelMotion}`}
+                    className={`overflow-hidden paper rounded-md border border-border dark:border-border-dark flex flex-col relative ${panelMotion}`}
                     style={{
                       height: isBottomPanelCollapsed
                         ? '100%'
@@ -453,8 +458,8 @@ const MainView: React.FC = () => {
                   {currentVersionId && (
                     <div
                       className={`
-                        bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col overflow-hidden ${panelMotion}
-                        ${isDraggingAttachments ? 'ring-2 ring-primary bg-primary/5' : ''}
+                        paper rounded-md border border-border dark:border-border-dark flex flex-col overflow-hidden ${panelMotion}
+                        ${isDraggingAttachments ? 'ring-2 ring-primary' : ''}
                       `}
                       style={{
                         height: isBottomPanelCollapsed
@@ -472,10 +477,8 @@ const MainView: React.FC = () => {
                           留在外层会在收起后留下一条 32px 的空白 */}
                       <div className="p-4 flex flex-col flex-1 min-h-0">
                         <div className="flex items-center gap-2 mb-3">
-                          <Icons.Attachment size={16} className="text-surface-onVariant" />
-                          <h3 className="text-xs tracking-wider font-bold text-surface-onVariant uppercase">
-                            {t('pages.mainView.attachments')}
-                          </h3>
+                          <Icons.Attachment size={14} className="text-surface-onVariant" />
+                          <h3 className="panel-title">{t('pages.mainView.attachments')}</h3>
                         </div>
 
                         <div className="flex-1 overflow-y-auto">
@@ -492,9 +495,11 @@ const MainView: React.FC = () => {
                   )}
                 </>
               ) : (
-                <div className="h-full flex items-center justify-center text-surface-onVariant bg-surface dark:bg-surface-dark rounded-xl border border-border dark:border-border-dark">
+                <div className="h-full flex items-center justify-center text-surface-onVariant paper rounded-md border border-border dark:border-border-dark">
                   <div className="text-center">
-                    <p className="text-xl mb-2">👈 {t('pages.mainView.noProject')}</p>
+                    <p className="text-base mb-2 text-surface-onSurface dark:text-surface-onSurfaceDark">
+                      {t('pages.mainView.noProject')}
+                    </p>
                     <p className="text-sm">{t('pages.mainView.noProjectHint')}</p>
                   </div>
                 </div>
@@ -517,7 +522,7 @@ const MainView: React.FC = () => {
 
           {/* Right Canvas Area - Card Style */}
           <div
-            className={`overflow-hidden bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-border dark:border-border-dark flex flex-col relative ${panelMotion}`}
+            className={`overflow-hidden paper rounded-md border border-border dark:border-border-dark flex flex-col relative ${panelMotion}`}
             style={{
               width: isRightPanelCollapsed
                 ? '0px'

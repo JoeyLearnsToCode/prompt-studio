@@ -7,7 +7,9 @@ declare const colors: {
     onPrimary: string;
     onContainer: string;
     onContainerDark: string;
+    darkAccent: string;
     selection: string;
+    selectionDark: string;
     editorBackground: string;
   };
   surface: {
@@ -21,16 +23,21 @@ declare const colors: {
     onVariantDark: string;
     container: string;
     containerDark: string;
-    containerLow: string;
-    containerLowDark: string;
-    containerHigh: string;
-    containerHighDark: string;
-    containerHighest: string;
-    containerHighestDark: string;
+    'container-low': string;
+    'container-low-dark': string;
+    'container-high': string;
+    'container-high-dark': string;
+    'container-highest': string;
+    'container-highest-dark': string;
   };
   background: {
     DEFAULT: string;
     dark: string;
+  };
+  masthead: {
+    DEFAULT: string;
+    dark: string;
+    on: string;
   };
   border: {
     DEFAULT: string;
@@ -38,6 +45,7 @@ declare const colors: {
   };
   error: {
     DEFAULT: string;
+    darkAccent: string;
     container: string;
     containerDark: string;
     onContainer: string;

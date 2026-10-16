@@ -313,7 +313,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
   if (!projectId) {
     return (
       <div
-        className="h-full flex items-center justify-center bg-surface dark:bg-surface-dark text-surface-onVariant"
+        className="h-full flex items-center justify-center paper text-surface-onVariant"
         data-testid="version-canvas"
       >
         <p>{t('components.canvas.selectProject')}</p>
@@ -323,7 +323,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
 
   return (
     <div
-      className="w-full h-full relative bg-surface dark:bg-surface-dark @container"
+      className="w-full h-full relative paper @container"
       data-testid="version-canvas"
     >
       {/* Canvas Layer - 铺满整个容器 */}
@@ -334,7 +334,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
       />
 
       {/* Top Left Control Overlay - 浮动层，不遮挡Canvas */}
-      <div className="absolute top-4 left-4 z-999 flex flex-col gap-3 pointer-events-none max-w-[80%]">
+      <div className="absolute top-4 left-4 z-30 flex flex-col gap-3 pointer-events-none max-w-[80%]">
         {/* Action Buttons - 仅内容响应鼠标事件 */}
         {selectedVersionId && (
           <div className="flex gap-2 pointer-events-auto">
@@ -347,7 +347,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
                   ? t('components.canvas.exitCompare')
                   : t('components.canvas.enterCompare')
               }
-              className={`px-3 py-1.5 text-sm shadow-sm flex items-center gap-1.5 transition-all duration-200 ${compareMode && '[&]:bg-primary [&]:hover:bg-primary-hover'}`}
+              className={`px-3 py-1.5 text-sm shadow-card flex items-center gap-1.5 transition-all duration-fast ${compareMode && '[&]:bg-primary [&]:hover:bg-primary-hover [&]:text-primary-onPrimary [&]:border-primary'}`}
             >
               <Icons.Compare size={16} className="inline @xs:hidden" />{' '}
               <span className="hidden @xs:inline">
@@ -358,7 +358,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
               onClick={handleDeleteVersion}
               title={t('components.canvas.deleteVersion')}
               variant="danger"
-              className="px-3 py-1.5 text-sm shadow-sm flex items-center gap-1.5"
+              className="px-3 py-1.5 text-sm shadow-card flex items-center gap-1.5"
             >
               <Icons.Trash size={16} className="inline @xs:hidden" />{' '}
               <span className="hidden @xs:inline">{t('common.delete')}</span>
@@ -368,7 +368,7 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
 
         {/* Search Bar - 仅内容响应鼠标事件 */}
         {searchVisible && (
-          <div className="pointer-events-auto shadow-lg rounded-lg">
+          <div className="pointer-events-auto shadow-float rounded-md">
             <SearchBar
               ref={searchInputRef}
               query={query}
@@ -387,9 +387,9 @@ const VersionCanvas: React.FC<VersionCanvasProps> = ({
       </div>
 
       {/* Bottom Right Control Overlay - Floating Group Style */}
-      <div className="absolute bottom-4 right-4 z-999 pointer-events-none">
-        {/* 修复：暗色模式下使用 surface-container-high-dark 以区别于画布背景 */}
-        <div className="pointer-events-auto flex flex-col @xs:flex-row gap-1 p-1 bg-surface-variant dark:bg-surface-containerHighDark rounded-xl shadow-card border border-transparent backdrop-blur-sm">
+      <div className="absolute bottom-4 right-4 z-30 pointer-events-none">
+        {/* 浮动在画布之上：硬边阴影 + 框线，不用 backdrop-blur（重页面上每帧重算） */}
+        <div className="pointer-events-auto flex flex-col @xs:flex-row gap-1 p-1 paper rounded-md shadow-float border border-border dark:border-border-dark">
           <MinimalButton
             variant="ghost"
             onClick={handleZoomIn}

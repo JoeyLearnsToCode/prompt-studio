@@ -81,25 +81,23 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
     touchStartPosRef.current = null;
   };
 
-  // Updated Styling:
-  // - Selected: Light green background, Primary text, Left border strip
-  // - Hover: Light background hover
+  // 选中态只有一个通道：左侧的胭脂印章条。底色留给 hover，避免两个通道说同一件事
   return (
     <div className="relative group my-0.5">
       {/* 选中条从中心长出来，而不是凭空出现 */}
       <div
-        className={`absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full origin-center transition-transform duration-fast ease-out-expo ${
+        className={`absolute left-0 top-0 bottom-0 w-[3px] bg-primary origin-center transition-transform duration-fast ease-out-expo ${
           isSelected ? 'scale-y-100' : 'scale-y-0'
         }`}
       />
       <div
         className={`
-          flex items-center gap-2 px-3 py-2 cursor-pointer rounded-lg mx-1
+          flex items-center gap-2 px-3 py-2 cursor-pointer rounded-sm mx-1
           transition-colors duration-fast text-sm
           ${
             isSelected
-              ? 'bg-primary/10 text-primary font-medium'
-              : 'text-surface-onVariant hover:bg-background dark:hover:bg-zinc-700/50'
+              ? 'text-surface-onSurface dark:text-surface-onSurfaceDark font-medium'
+              : 'text-surface-onVariant hover:bg-surface-container-high dark:hover:bg-surface-container-high-dark'
           }
         `}
         style={{ paddingLeft: `${level * 16 + 12}px` }}
@@ -123,9 +121,9 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
           size={16}
           className={`flex-shrink-0 ${isSelected ? 'text-primary' : 'text-surface-onVariant'}`}
         />
-        <span className="truncate flex-1 text-text-light-primary/80 dark:text-text-dark-primary/80">{project.name}</span>
+        <span className="truncate flex-1">{project.name}</span>
         {project.tags && project.tags.model && (
-          <span className="text-[10px] px-1.5 py-0.5 bg-background dark:bg-zinc-800 rounded border border-border dark:border-border-dark text-surface-onVariant opacity-70">
+          <span className="font-mono text-[10px] px-1.5 py-0.5 bg-surface-variant dark:bg-surface-variantDark rounded-sm border border-border dark:border-border-dark text-surface-onVariant">
             {project.tags.model}
           </span>
         )}
@@ -205,7 +203,7 @@ const FolderItem: React.FC<TreeItemProps> = ({
   return (
     <div className="my-0.5">
       <div
-        className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-background dark:hover:bg-zinc-700/50 transition-colors duration-150 rounded-lg mx-1 text-sm text-surface-onVariant"
+        className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-surface-container-high dark:hover:bg-surface-container-high-dark transition-colors duration-fast rounded-sm mx-1 text-sm text-surface-onSurface dark:text-surface-onSurfaceDark"
         style={{ paddingLeft: `${level * 16 + 12}px` }}
         onClick={() => onToggle(folder.id)}
         onContextMenu={(e) => {
@@ -233,8 +231,8 @@ const FolderItem: React.FC<TreeItemProps> = ({
         <span className="flex-shrink-0 text-surface-onVariant">
           {isExpanded ? <Icons.FolderOpen size={16} /> : <Icons.Folder size={16} />}
         </span>
-        <span className="flex-1 truncate text-text-light-primary dark:text-text-dark-primary">{folder.name}</span>
-        <span className="text-xs text-text-light-primary/70 dark:text-text-dark-primary/70">{getAllProjectsCount}</span>
+        <span className="flex-1 truncate">{folder.name}</span>
+        <span className="nums text-xs text-surface-onVariant dark:text-surface-onVariantDark">{getAllProjectsCount}</span>
       </div>
 
       <AnimatePresence initial={false}>
